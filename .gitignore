@@ -1,38 +1,41 @@
-node_modules/
+# ==========================================
+# 1. BẢO MẬT: KHÔNG ĐẨY FILE MÔI TRƯỜNG / MẬT KHẨU
+# ==========================================
 .env
-!.env.example
-jsconfig.json
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# REACT
-# Logs
-logs
+# ==========================================
+# 2. HIỆU NĂNG: KHÔNG ĐẨY THƯ VIỆN & FILE BUILD
+# ==========================================
+node_modules/
+dist/
+build/
+.npm
+coverage/
+
+# (TUYỆT ĐỐI KHÔNG IGNORE THƯ MỤC PRISMA MIGRATIONS)
+# Việc lưu trữ thư mục migrations giúp đồng bộ Database giữa các môi trường!
+
+# ==========================================
+# 3. HỆ ĐIỀU HÀNH, TRÌNH CODE (IDE) & LOGS
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-.env
-*.env.local
-*.env.*
-!*.env.example
-jsconfig.json
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*.pem
-*.key
-*.p12
-*.pfx
-credentials
-secrets.json
+# ==========================================
+# 4. PRISMA SPECIFIC (Tùy chọn)
+# ==========================================
+# Chỉ chặn Database SQLite ảo (nếu bạn dùng SQLite để test). 
+# Trong dự án này chúng ta dùng PostgreSQL nên cấu hình này để dự phòng cũng rất tốt.
+*.db
+*.db-journal
