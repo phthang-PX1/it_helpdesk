@@ -50,7 +50,7 @@ router.post('/login', login);
 
 /**
  * @openapi
- * /auth/login-google:
+ * /api/v1/auth/login-google:
  *   post:
  *     summary: Đăng nhập bằng tài khoản Google (OAuth2)
  *     tags: [Authentication]
@@ -79,7 +79,7 @@ router.post('/login-google', googleLogin);
 
 /**
  * @openapi
- * /auth/logout:
+ * /api/v1/auth/logout:
  *   post:
  *     summary: Đăng xuất khỏi hệ thống
  *     tags: [Authentication]
@@ -107,7 +107,7 @@ router.post('/logout', verifyToken, logout);
 
 /**
  * @openapi
- * /auth/refresh:
+ * /api/v1/auth/refresh:
  *   post:
  *     summary: Cấp lại Access Token mới
  *     tags: [Authentication]
@@ -131,7 +131,7 @@ router.post('/refresh', refreshToken);
 
 /**
  * @openapi
- * /auth/me:
+ * /api/v1/auth/me:
  *   get:
  *     summary: Lấy thông tin cá nhân của người dùng đang đăng nhập
  *     tags: [Authentication]

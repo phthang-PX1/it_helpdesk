@@ -6,6 +6,9 @@
 - [ ] **No Raw Prisma:** Không viết lệnh gọi database (`prisma.create`, `prisma.findMany`) trực tiếp trong file Service.
 - [ ] **AppError Center:** Mọi lỗi nghiệp vụ phải được ném ra qua custom class `AppError` để Middleware tổng xử lý. 
 
+- Chạy prisma: npx prisma studio
+- Chạy backend: vào trong đường dẫn folder backend, chạy npm run dev
+- mở lại docker: wsl --shutdown trong terminal laptop
 ---
 
 ## 🌟 PHASE 1: FOUNDATION – KHỞI TẠO DỰ ÁN & MÓNG (1-2 Tuần)
@@ -28,17 +31,19 @@
 - [X] Chạy lệnh `npx prisma db seed` để đẩy dữ liệu.
 
 ### Bước 1.4: Phân quyền & Đăng nhập (UC-01)
-- [ ] Viết API `POST /api/v1/auth/login`. So sánh mật khẩu bằng `bcrypt`.
-- [ ] Cấp phát Token bằng `jsonwebtoken` (JWT) chứa ID và Vai trò của user.
+- [X] Cài thư viện `bcrypt — dùng để so sánh mật khẩu người dùng nhập với mật khẩu đã được mã hóa lưu trong DB`; `jsonwebtoken — tạo ra một "thẻ đăng nhập" (JWT token) để người dùng mang theo mỗi lần gọi API, thay vì phải nhập mật khẩu lại`
+- [X] Tạo catchAsync
+- [X] Viết API `POST /api/v1/auth/login`. So sánh mật khẩu bằng `bcrypt`.
+- [X] Cấp phát Token bằng `jsonwebtoken` (JWT) chứa ID và Vai trò của user.
 
 ### Bước 1.5: Middleware Bảo vệ
-- [ ] Viết `verifyToken` để chặn request không có thẻ đăng nhập hợp lệ.
-- [ ] Viết `checkRole` để chặn quyền truy cập (VD: Khách không được vào API của IT).
-- [ ] Viết `errorHandler` để xử lý lỗi trung tâm.
+- [X] Viết `verifyToken` để chặn request không có thẻ đăng nhập hợp lệ.
+- [X] Viết `checkRole` để chặn quyền truy cập (VD: Khách không được vào API của IT).
+- [X] Viết `errorHandler` để xử lý lỗi trung tâm.
 
 ### Bước 1.6: Tài liệu API (Swagger)
-- [ ] Cài đặt `swagger-ui-express` và `swagger-jsdoc`. 
-- [ ] Khai báo Swagger cho các API nhóm Auth để test thử giao diện tự động.
+- [X] Cài đặt `swagger-ui-express` và `swagger-jsdoc`. 
+- [X] Khai báo Swagger cho các API nhóm Auth để test thử giao diện tự động.
 
 ---
 
@@ -110,3 +115,74 @@
 
 ### Bước 5.3: Hoàn thiện Error Handling & Testing
 - [ ] Dọn dẹp các dòng `console.log` thừa. Đảm bảo mọi API đều bọc qua khối Try/Catch an toàn.
+
+
+# CHECKLIST RIÊNG CHO TOÀN BỘ API
+🌟 PHASE 1: FOUNDATION & BẢO MẬT (Đang làm - 5 API)
+Mục tiêu: Hoàn thiện nền tảng móng, người dùng đăng nhập được, phân quyền chặt chẽ.
+
+[x] Setup & Cấu hình: Database, Prisma, Error Handler (Đã xong).
+
+[x] API-01: POST /api/auth/login - Đăng nhập nội bộ (Đã xong).
+
+[ ] API-02: POST /api/auth/login-google - Đăng nhập Google (Bổ sung sau nếu cần).
+
+[ ] API-03: POST /api/auth/logout - Đăng xuất & thu hồi Token.
+
+[ ] API-04: POST /api/auth/refresh - Cấp lại Access Token mới.
+
+[ ] API-05: GET /api/auth/me - Lấy thông tin user hiện tại (Dùng để Frontend giữ trạng thái đăng nhập).
+
+🎫 PHASE 2: CORE MODULE - VẬN HÀNH PHIẾU HỖ TRỢ (10 API)
+Mục tiêu: Khách hàng tạo được phiếu, IT nhận được phiếu, có trao đổi và đính kèm file.
+
+[ ] API-06: POST /api/tickets - Tạo phiếu hỗ trợ mới.
+
+[ ] API-07: GET /api/tickets - Danh sách phiếu (Kèm phân trang, lọc).
+
+[ ] API-08: GET /api/tickets/:id - Xem chi tiết 1 phiếu.
+
+[ ] API-15: POST /api/tickets/:id/assign - Gán người/nhóm xử lý (Auto-assign).
+
+[ ] API-12 & API-13: GET/POST /api/tickets/:id/comments - Xem và thêm bình luận (Public/Internal).
+
+[ ] API-26 & API-27: POST/DELETE /api/attachments... - Tải lên (Upload) và xóa file đính kèm.
+
+[ ] API-09: PATCH /api/tickets/:id/status - Cập nhật trạng thái phiếu (Đang xử lý, Chờ phản hồi...).
+
+[ ] API-14: GET /api/tickets/:id/history - Xem lịch sử (Audit Log) của phiếu.
+
+🧠 PHASE 3: ADVANCED & AUTOMATION (10 API)
+Mục tiêu: Đưa não bộ nghiệp vụ vào hệ thống (Chuyển cấp, SLA, Đánh giá).
+
+[ ] API-10: POST /api/tickets/:id/escalate - Chuyển cấp xử lý (Từ L1 lên L2).
+
+[ ] API-16: GET /api/tickets/:id/sla - Theo dõi thời gian SLA của phiếu.
+
+[ ] API-28, 29, 30: CRUD /api/sla/policies - Quản lý cấu hình các chính sách SLA.
+
+[ ] API-17, 18, 19: /api/reviews... - Gửi link đánh giá sao, khách hàng vote và xem lại vote.
+
+[ ] API-11: POST /api/tickets/:id/reopen - Mở lại phiếu nếu đánh giá < 3 sao.
+
+👥 PHASE 4: ADMIN CONTROLS & TRI THỨC (14 API)
+Mục tiêu: Màn hình cho Quản trị viên (Phần này checklist cũ chưa có, nay bắt buộc phải code).
+
+[ ] API-34, 35, 36: CRUD /api/admin/users - Quản lý danh sách nhân viên.
+
+[ ] API-37, 38: CRUD /api/admin/roles - Quản lý vai trò và phân quyền (Permissions).
+
+[ ] API-39, 40: CRUD /api/admin/teams - Quản lý các nhóm IT (L1, L2, Hạ tầng, Phần mềm...).
+
+[ ] API-41: CRUD /api/admin/departments - Quản lý phòng ban trong công ty.
+
+[ ] API-20 đến 25: CRUD /api/kb... - Quản trị cơ sở tri thức (Knowledge Base) & Full-text search.
+
+📊 PHASE 5: REALTIME & REPORTING (5 API)
+Mục tiêu: Hoàn thiện báo cáo, thống kê và thông báo chuông đỏ.
+
+[ ] API-42, 43, 44: /api/notifications... - Đẩy thông báo chuông (Realtime) & Đánh dấu đã đọc.
+
+[ ] API-31: GET /api/dashboard/stats - Lấy thông số tổng quan cho biểu đồ.
+
+[ ] API-32, 33: GET/POST /api/reports... - Trích xuất báo cáo dữ liệu và xuất file Excel.
