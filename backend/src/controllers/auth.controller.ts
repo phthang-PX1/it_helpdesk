@@ -1,13 +1,9 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
 import * as authValidator from '../validators/auth.validator';
-
-// Import catchAsync từ thư mục middlewares/utils của bạn (điều chỉnh lại đường dẫn nếu cần)
 import { catchAsync } from '../utils/catchAsync'; 
+import { AppError } from '../middlewares/errorHandler';
 
-/**
- * API-01: Đăng nhập hệ thống (Tài khoản & Mật khẩu)
- */
 export const login = catchAsync(async (req: Request, res: Response) => {
   const validatedData = authValidator.loginSchema.parse(req.body);
 
@@ -20,9 +16,6 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * API-02: Đăng nhập bằng Google OAuth
- */
 export const googleLogin = catchAsync(async (req: Request, res: Response) => {
   const validatedData = authValidator.googleLoginSchema.parse(req.body);
 
@@ -35,9 +28,6 @@ export const googleLogin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * API-03: Đăng xuất và thu hồi Refresh Token
- */
 export const logout = catchAsync(async (req: Request, res: Response) => {
   const validatedData = authValidator.logoutSchema.parse(req.body);
 
@@ -45,15 +35,11 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
 
   res.status(200).json({
     success: true,
-    // Lấy thẳng message "Đăng xuất thành công" được trả ra từ tầng Service
     message: result.message, 
-    data: null // Đăng xuất xong không cần trả data về
+    data: null 
   });
 });
 
-/**
- * API-04: Cấp lại Access Token mới (Refresh Token)
- */
 export const refreshToken = catchAsync(async (req: Request, res: Response) => {
   const validatedData = authValidator.refreshTokenSchema.parse(req.body);
 
@@ -69,11 +55,16 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
 /**
  * API-05: Lấy thông tin cá nhân của người dùng hiện tại
  */
-// Lưu ý: Request ở đây dùng kiểu any hoặc tạo interface mở rộng để TypeScript hiểu req.user
 export const getMe = catchAsync(async (req: any, res: Response) => {
-  // req.user được gán từ middleware verifyToken (đã đi qua quá trình giải mã)
-  const nhanVienId = req.user.nhan_vien_id; 
+  // 1. Lấy nhan_vien_id từ req.user (dùng dấu ? để tránh crash nếu user rỗng)
+  const nhanVienId = req.user?.nhan_vien_id; 
 
+  // 2. Kiểm tra phòng hờ nếu không tìm thấy id thì báo lỗi 401 ngay
+  if (!nhanVienId) {
+    throw new AppError('Phiên đăng nhập không hợp lệ hoặc đã hết hạn!', 401);
+  }
+
+  // 3. Lúc này nhanVienId chắc chắn là number, truyền vào service sẽ sạch lỗi 100%
   const result = await authService.getMe(nhanVienId);
 
   res.status(200).json({
