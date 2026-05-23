@@ -2,7 +2,9 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import authRoutes from './routes/auth.routes';
+import ticketRoutes from './routes/ticket.routes';
 import { errorHandler } from './middlewares/errorHandler';
+
 
 const app = express();
 
@@ -46,6 +48,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // --- ĐĂNG KÝ ROUTES ---
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/tickets', ticketRoutes);
 
 // --- MIDDLEWARE XỬ LÝ LỖI TRUNG TÂM (LUÔN ĐỂ CUỐI CÙNG) ---
 app.use(errorHandler);
