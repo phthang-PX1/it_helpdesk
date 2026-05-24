@@ -16,10 +16,16 @@ export const updateTicketStatusSchema = z.object({
 });
 
 export const getTicketsQuerySchema = z.object({
-  page: z.string().optional().transform(val => (val ? Number(val) : 1)),
-  limit: z.string().optional().transform(val => (val ? Number(val) : 10)),
+  // Kiểm soát nghiêm ngặt page: ép về Number, nếu nhỏ hơn 1 thì báo lỗi trực tiếp cho Client
+  page: z.string().optional()
+    .transform(val => (val ? Number(val) : 1))
+    .pipe(z.number().min(1, 'Số trang (page) không được nhỏ hơn 1')),
+    
+  // Kiểm soát nghiêm ngặt limit: ép về Number, giá trị nằm trong khoảng từ 1 đến 100 bản ghi
+  limit: z.string().optional()
+    .transform(val => (val ? Number(val) : 10))
+    .pipe(z.number().min(1, 'Số lượng dòng (limit) phải lớn hơn hoặc bằng 1').max(100, 'Không được lấy quá 100 dòng một lần')),
   
-  // Đồng bộ cấu hình dùng tham số message cho tầng query filter
   trang_thai: z.enum(Object.values(TrangThaiPhieu) as [string, ...string[]], {
     message: 'Trạng thái lọc dữ liệu không đúng định dạng'
   }).optional(),
@@ -29,4 +35,40 @@ export const getTicketsQuerySchema = z.object({
   }).optional(),
   
   keyword: z.string().optional(),
+});
+
+// Schema cho API-10: Chuyển cấp
+export const escalateSchema = z.object({
+  ly_do: z.string().min(10, 'Lý do chuyển cấp phải từ 10 ký tự trở lên'),
+  cac_buoc_da_thu: z.string().min(10, 'Vui lòng mô tả các bước đã thử xử lý')
+});
+
+// Schema cho API-11: Mở lại ticket
+export const reopenSchema = z.object({
+  ly_do: z.string().min(5, 'Vui lòng nhập lý do mở lại ticket')
+});
+
+// Schema cho API-12: Bình luận
+export const commentSchema = z.object({
+  noi_dung: z.string().min(1, 'Nội dung bình luận không được để trống'),
+  loai_binh_luan: z.enum(['public', 'internal'] as const, {
+    message: "Loại bình luận phải là 'public' hoặc 'internal'"
+  })
+});
+
+// Schema cho API-13: Lấy danh sách bình luận (có thể tái sử dụng page/limit)
+export const getCommentsQuerySchema = z.object({
+  page: z.string().optional()
+    .transform(val => (val ? Number(val) : 1))
+    .pipe(z.number().min(1, 'Số trang (page) không được nhỏ hơn 1')),
+  limit: z.string().optional()
+    .transform(val => (val ? Number(val) : 10))
+    .pipe(z.number().min(1, 'Số lượng dòng (limit) phải lớn hơn hoặc bằng 1').max(100)),
+});
+
+// Schema cho API-15: Quản lý gán lại Ticket
+export const assignSchema = z.object({
+  nguoi_ho_tro_id: z.number({
+    message: "ID kỹ thuật viên phải là định dạng số và không được để trống"
+  }).min(1, "ID kỹ thuật viên không hợp lệ")
 });
