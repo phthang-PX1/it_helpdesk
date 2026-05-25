@@ -4,10 +4,12 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import authRoutes from './routes/auth.routes';
 import ticketRoutes from './routes/ticket.routes';
 import { errorHandler } from './middlewares/errorHandler';
+import cors from 'cors';
+
 
 
 const app = express();
-
+app.use(cors());
 app.use(express.json());
 
 // --- CẤU HÌNH SWAGGER ---

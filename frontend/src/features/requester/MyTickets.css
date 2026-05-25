@@ -1,0 +1,285 @@
+/* MyTickets.css – Màn hình Phiếu hỗ trợ của tôi (Người yêu cầu) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.mytickets-container {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #0F172A;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+/* ── Header ────────────────────────────────── */
+.mytickets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.mytickets-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.4px;
+}
+
+.mytickets-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+}
+
+.btn-create-ticket {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.2);
+  white-space: nowrap;
+}
+
+.btn-create-ticket:hover {
+  background: #1D4ED8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+}
+
+/* ── Summary Cards Grid ─────────────────────── */
+.mytickets-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  background: #FFFFFF;
+  border: 2px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 18px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.summary-card:hover {
+  border-color: #2563EB;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(37,99,235,0.1);
+}
+
+.summary-card.active {
+  box-shadow: 0 4px 14px rgba(37,99,235,0.15);
+}
+
+.summary-count {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.summary-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ── Table Card ─────────────────────────────── */
+.mytickets-table-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.mytickets-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.mytickets-table-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mytickets-count-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #2563EB;
+  background: #EFF6FF;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.mytickets-table-wrapper {
+  overflow-x: auto;
+}
+
+.mytickets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.mytickets-table th {
+  background: #F8FAFC;
+  padding: 13px 16px;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid #E2E8F0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mytickets-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #F1F5F9;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.mytickets-row:last-child td {
+  border-bottom: none;
+}
+
+.mytickets-row:hover td {
+  background: #F8FAFC;
+}
+
+.ticket-id-badge {
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2563EB;
+  background: #EFF6FF;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.ticket-title-cell {
+  max-width: 320px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.ticket-date-cell {
+  font-size: 13px;
+  color: #64748B;
+  white-space: nowrap;
+}
+
+/* ── Priority & Status Badges ── */
+.priority-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  white-space: nowrap;
+}
+.priority-badge.high   { background: #FEF2F2; color: #DC2626; }
+.priority-badge.medium { background: #FFFBEB; color: #D97706; }
+.priority-badge.low    { background: #F0FDF4; color: #16A34A; }
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.status-badge.new        { background: #EFF6FF; color: #2563EB; }
+.status-badge.processing { background: #FFFBEB; color: #D97706; }
+.status-badge.resolved   { background: #F0FDF4; color: #16A34A; }
+.status-badge.closed     { background: #F1F5F9; color: #64748B; }
+.status-badge.reopened   { background: #FAF5FF; color: #7C3AED; }
+
+/* ── View Detail Button ── */
+.btn-view-detail {
+  background: none;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563EB;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.btn-view-detail:hover {
+  background: #EFF6FF;
+  border-color: #2563EB;
+}
+
+/* ── Empty State ── */
+.mytickets-empty {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 14px;
+}
+
+.empty-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 6px 0;
+}
+
+.empty-sub {
+  font-size: 13.5px;
+  color: #94A3B8;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .mytickets-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ticket-title-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

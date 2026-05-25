@@ -1,0 +1,546 @@
+/* Stylesheet cho Trang Đăng nhập IT Helpdesk (Vanilla CSS - Full-Screen Split Layout) */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-active: #1E40AF;
+  --color-primary-light: #EFF6FF;
+  --color-bg: #F8FAFC;
+  --color-card-bg: #FFFFFF;
+  --color-text: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+  --color-border: #E2E8F0;
+  --color-border-hover: #CBD5E1;
+  --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+  --color-error-border: #FCA5A5;
+  
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Container ngoài cùng bao phủ 100% chiều rộng và chiều cao màn hình, loại bỏ khoảng đen */
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+/* Card chính chiếm trọn màn hình, không bo góc và không đổ bóng ngoài */
+.login-card {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-card-bg);
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Cột trái: Chiếm 40% chiều rộng, full màn hình, ảnh minh họa tràn viền (full bleed) */
+.login-left {
+  width: 40%;
+  height: 100%;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Lớp phủ pattern và hiệu ứng phát sáng */
+.login-left-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.05;
+  background-image: radial-gradient(circle, #000 10%, transparent 10.5%);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.login-left-glow {
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+}
+
+.brand-logo-icon {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 10px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+
+.brand-logo-icon svg {
+  width: 28px;
+  height: 28px;
+  fill: #FFFFFF;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.brand-illustration-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0;
+  z-index: 2;
+  text-align: center;
+}
+
+.brand-illustration {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  margin-bottom: 24px;
+}
+
+.brand-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.brand-desc {
+  font-size: 14px;
+  opacity: 0.9;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.brand-footer {
+  font-size: 13px;
+  opacity: 0.7;
+  z-index: 2;
+}
+
+/* Cột phải: Chiếm 60% chiều rộng còn lại, nền xám dịu nhẹ, căn giữa tuyệt đối thẻ đăng nhập */
+.login-right {
+  width: 60%;
+  height: 100%;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-bg);
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Thẻ đăng nhập thực sự (Login Card) được căn giữa tuyệt đối */
+.form-wrapper {
+  width: 100%;
+  max-width: 440px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.form-header {
+  margin-bottom: 28px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.form-subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Khung thông báo lỗi */
+.error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.error-alert-icon {
+  color: var(--color-error);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.error-alert-text {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-error);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Form inputs */
+.form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  /* Định vị tuyệt đối, căn giữa chính xác theo chiều dọc */
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+  line-height: 0;
+}
+
+.form-input {
+  width: 100%;
+  /* padding-left: 44px đảm bảo placeholder không bị icon đè lên (icon 18px + left 13px + gap 13px = 44px) */
+  padding: 12px 16px 12px 44px;
+  font-size: 14.5px;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:hover {
+  border-color: var(--color-border-hover);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Nút ẩn hiện mật khẩu – căn giữa dọc đồng bộ với .input-icon */
+.password-toggle {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  z-index: 1;
+}
+
+.password-toggle:hover {
+  color: var(--color-text);
+}
+
+.password-strength-hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 5px;
+}
+
+/* Nút đăng nhập */
+.btn-submit {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #FFFFFF;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-submit:active:not(:disabled) {
+  background-color: var(--color-primary-active);
+}
+
+.btn-submit:disabled {
+  background-color: #93C5FD;
+  cursor: not-allowed;
+}
+
+/* Spinner loading */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Ngăn cách */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.divider:not(:empty)::before {
+  margin-right: 12px;
+}
+
+.divider:not(:empty)::after {
+  margin-left: 12px;
+}
+
+.divider-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Nút phụ - Google SSO Mock */
+.btn-sso {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-sso:hover:not(:disabled) {
+  background-color: var(--color-bg);
+  border-color: var(--color-border-hover);
+}
+
+.btn-sso:active:not(:disabled) {
+  background-color: var(--color-border);
+}
+
+.sso-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Chân trang */
+.support-link {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.support-link a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.support-link a:hover {
+  text-decoration: underline;
+}
+
+.footer-meta {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* Hiệu ứng */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive: Ẩn cột trái và hiển thị form chiếm 100% chiều rộng trên các màn hình nhỏ */
+@media (max-width: 900px) {
+  .login-left {
+    display: none; /* Ẩn cột trái */
+  }
+  
+  .login-right {
+    width: 100%; /* Chiếm toàn bộ màn hình */
+    padding: 24px;
+  }
+  
+  .form-wrapper {
+    padding: 32px 24px;
+  }
+}
+
+/* Khối tài khoản thử nghiệm nhanh */
+.mock-accounts-wrapper {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  box-sizing: border-box;
+}
+
+.mock-accounts-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mock-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.mock-badge-btn {
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.mock-badge-btn:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.mock-badge-role {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mock-badge-email {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.mock-badge-btn:hover .mock-badge-email {
+  color: var(--color-primary);
+}
