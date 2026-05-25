@@ -94,40 +94,69 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   // ─── Submit: gọi API-01 POST /auth/login ────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 1. Reset các thông báo lỗi cũ ngay lập tức
     setErrorMessage(null);
     setSuccessMessage(null);
+    setEmailValidationError('');
+    setPasswordValidationError('');
 
+    // 2. Chuyển nút Đăng nhập sang trạng thái Loading (vô hiệu hóa)
+    setIsLoading(true);
+
+    // 3. Thực hiện kiểm tra dữ liệu đầu vào
     const isEmailValid    = validateUsernameOrEmail(usernameOrEmail);
     const isPasswordValid = validatePassword(password);
-    if (!isEmailValid || !isPasswordValid) return;
+    if (!isEmailValid || !isPasswordValid) {
+      setIsLoading(false); // Reset loading nếu validation lỗi
+      return;
+    }
 
-    setIsLoading(true);
     try {
-      const response = await axiosInstance.post<LoginApiResponse>('/auth/login', {
+      const response = await axiosInstance.post<any>('/auth/login', {
         tai_khoan: usernameOrEmail,
         mat_khau:  password,
       });
 
-      const { token, refresh_token, user } = response.data;
+      const responseData = response.data;
+      const success = responseData.success !== undefined ? responseData.success : true;
+      const loginData = responseData.success && responseData.data ? responseData.data : responseData;
 
-      setSuccessMessage(`Đăng nhập thành công! Chào mừng ${user.ho_ten}. Đang vào hệ thống...`);
+      if (success || response.status === 200) {
+        const { token, refresh_token, user } = loginData;
 
-      if (onLoginSuccess) {
-        onLoginSuccess(token, refresh_token, user);
+        // Xóa hoàn toàn trạng thái lỗi
+        setErrorMessage(null);
+        setEmailValidationError('');
+        setPasswordValidationError('');
+
+        // Lưu token, refresh_token và user.vai_tro.ma_vai_tro vào localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('refresh_token', refresh_token);
+        localStorage.setItem('user.vai_tro.ma_vai_tro', user.vai_tro.ma_vai_tro);
+
+        setSuccessMessage(`Đăng nhập thành công! Chào mừng ${user.ho_ten}. Đang vào hệ thống...`);
+
+        if (onLoginSuccess) {
+          onLoginSuccess(token, refresh_token, user);
+        }
+
+        // Chuyển hướng người dùng ngay lập tức sang /dashboard
+        navigate('/dashboard');
+      } else {
+        throw new Error(responseData.message || 'Đăng nhập thất bại');
       }
-
-      setTimeout(() => navigate('/dashboard'), 500);
-
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
       const status   = axiosErr.response?.status;
+      const responseMessage = axiosErr.response?.data?.message || (err as Error).message;
 
       if (status === 400 || status === 401) {
-        setErrorMessage('Tài khoản hoặc mật khẩu không chính xác');
+        setErrorMessage(responseMessage || 'Tài khoản hoặc mật khẩu không chính xác');
       } else if (status === 403) {
-        setErrorMessage('Tài khoản chưa được phân quyền hoặc đã bị tạm khóa');
+        setErrorMessage(responseMessage || 'Tài khoản chưa được phân quyền hoặc đã bị tạm khóa');
       } else {
-        setErrorMessage('Không thể kết nối tới máy chủ. Vui lòng thử lại sau.');
+        setErrorMessage(responseMessage || 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.');
       }
     } finally {
       setIsLoading(false);

@@ -6,6 +6,8 @@ import './AppLayout.css';
 interface UserSession {
   email: string;
   role: string;
+  ho_ten?: string;
+  ma_vai_tro?: string;
 }
 
 interface AppLayoutProps {
@@ -42,8 +44,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
    * - L1 / Admin     → /tickets/queue (hàng đợi xử lý)
    */
   const ticketPath = (() => {
-    if (session.role === 'Người yêu cầu') return '/tickets/my-tickets';
-    if (session.role === 'L2')            return '/tickets/l2';
+    const role = localStorage.getItem('user.vai_tro.ma_vai_tro') || session.role;
+    if (role === 'Người yêu cầu' || role === 'NGUOI_YEU_CAU') return '/tickets/my-tickets';
+    if (role === 'L2' || role === 'IT_L2')            return '/tickets/l2';
     return '/tickets/queue';
   })();
 
@@ -109,12 +112,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
   // ── Lọc menu theo vai trò (UC-01 Role-based Routing) ──────────────────────
   const filteredMenuItems = menuItems.filter(item => {
+    const role = localStorage.getItem('user.vai_tro.ma_vai_tro') || session.role;
     // Người yêu cầu: chỉ Dashboard, Phiếu hỗ trợ, Cơ sở tri thức
-    if (session.role === 'Người yêu cầu') {
+    if (role === 'Người yêu cầu' || role === 'NGUOI_YEU_CAU') {
       return ['dashboard', 'tickets', 'kb'].includes(item.id);
     }
     // L1 / L2: ẩn Báo cáo và Cài đặt – chỉ Quản lý IT mới được xem Báo cáo
-    if (['L1', 'L2', 'IT Support L1/L2'].includes(session.role)) {
+    if (['L1', 'L2', 'IT Support L1/L2', 'IT_L1', 'IT_L2'].includes(role)) {
       return !['reports', 'settings'].includes(item.id);
     }
     // Quản lý IT: toàn quyền, hiển thị đầy đủ (bao gồm Báo cáo)
@@ -268,7 +272,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             {/* Ảnh đại diện & Nhãn vai trò người dùng */}
             <div className="topbar-profile">
               <div className="profile-info">
-                <span className="profile-name">Nguyễn Văn A</span>
+                <span className="profile-name">{session.ho_ten || 'Nguyễn Văn A'}</span>
                 <span className="profile-role-badge">
                   {session.role}
                 </span>
