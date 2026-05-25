@@ -1,0 +1,137 @@
+/* Stylesheet cho Soạn thảo bài viết tri thức (KnowledgeEditor.css) */
+
+.kb-editor-container {
+  min-height: 100vh;
+  background-color: var(--color-bg, #F8FAFC);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--color-text, #0F172A);
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.kb-editor-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Editor Form Card */
+.kb-editor-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.kb-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .kb-editor-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* MOCK RICH TEXT EDITOR TOOLBAR */
+.rich-editor-wrapper {
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+}
+
+.rich-editor-toolbar {
+  background-color: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-toolbar-mock {
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-toolbar-mock:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+}
+
+.rich-editor-textarea {
+  width: 100%;
+  min-height: 240px;
+  padding: 16px;
+  border: none;
+  font-size: 14.5px;
+  font-family: inherit;
+  resize: vertical;
+  color: #0F172A;
+  box-sizing: border-box;
+}
+
+.rich-editor-textarea:focus {
+  outline: none;
+}
+
+/* Actions footer */
+.editor-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #F1F5F9;
+  padding-top: 24px;
+  margin-top: 24px;
+}
+
+.btn-editor-draft {
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-editor-draft:hover {
+  background-color: #F8FAFC;
+  border-color: #94A3B8;
+}
+
+.btn-editor-publish {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-editor-publish:hover {
+  background-color: #1D4ED8;
+}

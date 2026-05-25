@@ -1,0 +1,292 @@
+/* Stylesheet cho Danh sách bài viết tri thức (KnowledgeList.css) */
+
+.kb-container {
+  min-height: 100vh;
+  background-color: var(--color-bg, #F8FAFC);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--color-text, #0F172A);
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.kb-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header & Search Bar */
+.kb-header-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.kb-title-area {
+  max-width: 600px;
+}
+
+.kb-main-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.kb-main-subtitle {
+  font-size: 14.5px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.kb-search-container {
+  width: 100%;
+  max-width: 680px;
+  position: relative;
+}
+
+.kb-search-input {
+  width: 100%;
+  padding: 16px 20px 16px 52px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  outline: none;
+  box-sizing: border-box;
+  color: #0F172A;
+  transition: all 0.25s ease;
+}
+
+.kb-search-input:focus {
+  border-color: #2563EB;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+}
+
+.kb-search-icon-large {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  display: flex;
+  pointer-events: none;
+}
+
+/* Filter Card */
+.kb-filters-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.kb-filters-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.kb-filters-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 1;
+}
+
+.kb-select-filter {
+  padding: 10px 14px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: #475569;
+  background-color: #FFFFFF;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.kb-select-filter:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-create-kb {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-create-kb:hover {
+  background-color: #1D4ED8;
+}
+
+/* Responsive Cards Grid */
+.kb-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .kb-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .kb-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.kb-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.kb-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  border-color: #BFDBFE;
+}
+
+.kb-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kb-category-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: #EFF6FF;
+  color: #2563EB;
+}
+
+.kb-category-badge.hardware {
+  background-color: #FEF2F2;
+  color: #DC2626;
+}
+
+.kb-category-badge.network {
+  background-color: #FFFBEB;
+  color: #D97706;
+}
+
+.kb-category-badge.system {
+  background-color: #F0FDF4;
+  color: #16A34A;
+}
+
+.kb-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kb-card-desc {
+  font-size: 13px;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kb-card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.kb-tag {
+  font-size: 11px;
+  font-weight: 600;
+  background-color: #F1F5F9;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.kb-card-footer {
+  border-top: 1px solid #F1F5F9;
+  padding-top: 14px;
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #94A3B8;
+}
+
+.kb-footer-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.kb-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Trạng thái draft tag */
+.kb-draft-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background-color: #78716C;
+  color: #FFFFFF;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
