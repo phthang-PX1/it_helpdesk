@@ -2,11 +2,8 @@
 import { Router } from 'express';
 import { ticketController } from '../controllers/ticket.controller';
 import { verifyToken, checkRole } from '../middlewares/auth.middleware';
-import multer from 'multer';
+import { uploadTicketFiles } from '../libs/multer';
 
-const upload = multer({
-  limits: { fileSize: 20 * 1024 * 1024 }
-});
 
 const router = Router();
 
@@ -56,8 +53,7 @@ const router = Router();
  *       403:
  *         description: Tài khoản không có vai trò NGUOI_YEU_CAU
  */
-router.post('/', verifyToken, checkRole(['NGUOI_YEU_CAU']), upload.array('files', 5), ticketController.create);
-
+router.post('/', verifyToken, checkRole(['NGUOI_YEU_CAU']), uploadTicketFiles.array('files', 5), ticketController.create);
 /**
  * @openapi
  * /api/v1/tickets:
@@ -166,5 +162,255 @@ router.get('/:id', verifyToken, checkRole(['NGUOI_YEU_CAU', 'IT_L1', 'IT_L2', 'Q
  *         description: Phiếu hỗ trợ này đã đóng, không thể chỉnh sửa
  */
 router.put('/:id/status', verifyToken, checkRole(['IT_L1', 'IT_L2', 'QUAN_LY']), ticketController.updateStatus);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/escalate:
+ *   post:
+ *     summary: L1 chuyển cấp ticket sang nhóm L2 (API-10)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Mã ticket cần chuyển cấp
+ *     responses:
+ *       200:
+ *         description: Chuyển cấp thành công
+ *       403:
+ *         description: Không có quyền (chỉ IT_L1)
+ *       404:
+ *         description: Không tìm thấy ticket
+ */
+router.post('/:id/escalate', verifyToken, checkRole(['IT_L1']), ticketController.escalate);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/reopen:
+ *   post:
+ *     summary: Hệ thống/Quản lý mở lại ticket sau đánh giá (API-11)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Mở lại ticket thành công
+ *       403:
+ *         description: Chỉ Quản lý mới có quyền
+ *       404:
+ *         description: Ticket không tồn tại
+ */
+router.post('/:id/reopen', verifyToken, checkRole(['QUAN_LY']), ticketController.reopen);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/comments:
+ *   post:
+ *     summary: Thêm bình luận vào ticket (API-12)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - noi_dung
+ *             properties:
+ *               noi_dung:
+ *                 type: string
+ *               files:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       201:
+ *         description: Bình luận đã được thêm
+ *       401:
+ *         description: Chưa xác thực
+ *       403:
+ *         description: Không có quyền truy cập ticket này
+ */
+router.post(
+  '/:id/comments', 
+  verifyToken, 
+  checkRole(['NGUOI_YEU_CAU', 'IT_L1', 'IT_L2', 'QUAN_LY']), 
+  uploadTicketFiles.array('files', 5), // Chặn nghiêm ngặt cấu hình 5 files / tối đa 20MB như kiến trúc
+  ticketController.createComment
+);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/comments:
+ *   get:
+ *     summary: Lấy danh sách bình luận của ticket (API-13)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Danh sách bình luận (có phân quyền xem nội bộ/công khai)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Comment'
+ *       403:
+ *         description: Không có quyền xem ticket này
+ *       404:
+ *         description: Ticket không tồn tại
+ */
+router.get('/:id/comments', verifyToken, checkRole(['NGUOI_YEU_CAU', 'IT_L1', 'IT_L2', 'QUAN_LY']), ticketController.getComments);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/history:
+ *   get:
+ *     summary: Lấy toàn bộ lịch sử thay đổi của ticket (API-14)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Mã ticket cần xem lịch sử
+ *     responses:
+ *       200:
+ *         description: Danh sách lịch sử thay đổi (trạng thái, người xử lý, ưu tiên, v.v.)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/LichSuPhieu'
+ *       403:
+ *         description: Không có quyền xem ticket này
+ *       404:
+ *         description: Không tìm thấy ticket
+ */
+router.get('/:id/history', verifyToken, checkRole(['NGUOI_YEU_CAU', 'IT_L1', 'IT_L2', 'QUAN_LY']), ticketController.getHistory);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/assign:
+ *   put:
+ *     summary: Manager chỉ định lại kỹ thuật viên phụ trách ticket (API-15)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Mã ticket cần chỉ định lại
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [nguoi_ho_tro_id]
+ *             properties:
+ *               nguoi_ho_tro_id:
+ *                 type: integer
+ *                 description: ID của kỹ thuật viên mới được chỉ định
+ *                 example: 15
+ *     responses:
+ *       200:
+ *         description: Chỉ định lại kỹ thuật viên thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PhieuHoTro'
+ *       400:
+ *         description: Dữ liệu đầu vào không hợp lệ (thiếu nguoi_ho_tro_id hoặc ID không tồn tại)
+ *       403:
+ *         description: Không có quyền (chỉ QUAN_LY)
+ *       404:
+ *         description: Không tìm thấy ticket hoặc kỹ thuật viên
+ */
+router.put('/:id/assign', verifyToken, checkRole(['QUAN_LY']), ticketController.assignManager);
+
+/**
+ * @openapi
+ * /api/v1/tickets/{id}/sla:
+ *   get:
+ *     summary: Xem trạng thái SLA hiện tại của ticket (Real-time) (API-16)
+ *     tags: [Tickets]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Mã ticket cần kiểm tra SLA
+ *     responses:
+ *       200:
+ *         description: Trạng thái SLA chi tiết (còn thời gian, đã vi phạm, deadline, v.v.)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tg_phan_hoi:
+ *                   type: object
+ *                   properties:
+ *                     han_chot:
+ *                       type: string
+ *                       format: date-time
+ *                     con_lai:
+ *                       type: string
+ *                     da_vi_pham:
+ *                       type: boolean
+ *                 tg_xu_ly:
+ *                   type: object
+ *                   properties:
+ *                     han_chot:
+ *                       type: string
+ *                       format: date-time
+ *                     con_lai:
+ *                       type: string
+ *                     da_vi_pham:
+ *                       type: boolean
+ *       403:
+ *         description: Không có quyền (chỉ IT_L1, IT_L2, QUAN_LY)
+ *       404:
+ *         description: Không tìm thấy ticket
+ */
+router.get('/:id/sla', verifyToken, checkRole(['IT_L1', 'IT_L2', 'QUAN_LY']), ticketController.getSLA);
+
 
 export default router;

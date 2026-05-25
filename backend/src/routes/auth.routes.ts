@@ -30,11 +30,11 @@ const router = Router();
  *             properties:
  *               tai_khoan:
  *                 type: string
- *                 example: "admin_it"
+ *                 example: "sales1"
  *                 description: "Tài khoản nhân viên đăng nhập"
  *               mat_khau:
  *                 type: string
- *                 example: "123456"
+ *                 example: "Mappacific@2025"
  *                 description: "Mật khẩu chưa mã hóa"
  *     responses:
  *       200:

@@ -1,17 +1,28 @@
-import 'dotenv/config';
 import express from 'express';
+import { createServer } from 'http'; // SỬA ĐỔI CHUẨN: Dùng http thay vì tls
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import authRoutes from './routes/auth.routes';
 import ticketRoutes from './routes/ticket.routes';
+import reviewRoutes from './routes/review.routes';
+import kbRoutes from './routes/kb.routes';
+import attachmentRoutes from './routes/attachment.routes';
+
+
 import { errorHandler } from './middlewares/errorHandler';
 import cors from 'cors';
-
-
+import { initSocket } from './libs/socket'; // IMPORT CHUẨN: Bộ khởi tạo socket singleton
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+// --- BỌC SERVER EXPRESS QUA HTTP SERVER ĐỂ CHẠY SOCKET.IO ---
+const httpServer = createServer(app);
+
+// Khởi tạo Socket.IO bọc quanh luồng HTTP của Express ngầm
+initSocket(httpServer);
 
 // --- CẤU HÌNH SWAGGER ---
 const swaggerOptions = {
@@ -52,16 +63,19 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // --- ĐĂNG KÝ ROUTES ---
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tickets', ticketRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/kb', kbRoutes);
+app.use('/api/v1/attachments', attachmentRoutes);
 
 // --- MIDDLEWARE XỬ LÝ LỖI TRUNG TÂM (LUÔN ĐỂ CUỐI CÙNG) ---
 app.use(errorHandler);
 
-// --- KÍCH HOẠT MỞ CỔNG SERVER ---
+// --- KÍCH HOẠT MỞ CỔNG SERVER (CHẠY QUA HTTP_SERVER CHỨ KHÔNG DÙNG APP.LISTEN) ---
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`====================================================`);
-  console.log(`SERVER ĐÃ KHỞI ĐỘNG!`);
+  console.log(`SERVER ĐÃ KHỞI ĐỘNG THÀNH CÔNG VỚI REALTIME SOCKET.IO!`);
   console.log(`🔗 Link test API Swagger: http://localhost:${PORT}/api-docs`);
   console.log(`====================================================`);
 });
