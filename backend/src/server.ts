@@ -5,6 +5,11 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import authRoutes from './routes/auth.routes';
 import ticketRoutes from './routes/ticket.routes';
+import reviewRoutes from './routes/review.routes';
+import kbRoutes from './routes/kb.routes';
+import attachmentRoutes from './routes/attachment.routes';
+
+
 import { errorHandler } from './middlewares/errorHandler';
 import cors from 'cors';
 import { initSocket } from './libs/socket'; // IMPORT CHUẨN: Bộ khởi tạo socket singleton
@@ -12,6 +17,7 @@ import { initSocket } from './libs/socket'; // IMPORT CHUẨN: Bộ khởi tạo
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // --- BỌC SERVER EXPRESS QUA HTTP SERVER ĐỂ CHẠY SOCKET.IO ---
 const httpServer = createServer(app);
@@ -58,6 +64,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // --- ĐĂNG KÝ ROUTES ---
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tickets', ticketRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/kb', kbRoutes);
+app.use('/api/v1/attachments', attachmentRoutes);
 
 // --- MIDDLEWARE XỬ LÝ LỖI TRUNG TÂM (LUÔN ĐỂ CUỐI CÙNG) ---
 app.use(errorHandler);

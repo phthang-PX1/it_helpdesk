@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';       // Nạp hằng số sinh chuỗi uui
 import crypto from 'crypto';
 import path from 'path';
 import { TrangThaiPhieu, MucDoUuTien, LoaiSla, TrangThaiMucTieu, QuyenXem, VaiTroEnum, LoaiThoiGian } from '@prisma/client';
+import { saveMemoryFileToDisk } from '../libs/multer';
 
 export const ticketService = {
   // NÂNG CẤP: Nhận thêm files từ Controller mồi xuống
@@ -282,18 +283,11 @@ export const ticketService = {
 
     const quyenXem = loaiBinhLuan === 'internal' ? QuyenXem.NOI_BO : QuyenXem.CONG_KHAI;
 
-    // Map mảng file thô từ Multer RAM sang cấu trúc lưu trữ dữ liệu cứng PostgreSQL
-    const filesPayload = expressFiles.map((f: any) => {
-      const ext = f.originalname.split('.').pop() || 'unknown';
-      return {
-        ten_tep: f.originalname,
-        duong_dan_file: `/uploads/attachments/${Date.now()}-${f.originalname}`, // Đường dẫn ảo giả định lưu trữ
-        dinh_dang: ext.toLowerCase(),
-        dung_luong_kb: Math.round(f.size / 1024)
-      };
-    });
+    // 🔥 MAP VÀ GHI FILE TỪ BUFFER RAM XUỐNG DISK BẰNG HELPER UUID MỚI
+    const filesPayload = expressFiles.map((f: any) => saveMemoryFileToDisk(f, 'attachments'));
 
-    return await ticketRepository.createCommentWithFiles(ticketId, user.nhan_vien_id, noiDung, quyenXem, filesPayload);
+    return await ticketRepository.createCommentWithFiles(ticketId, user.nhan_vien_id, 
+    noiDung, quyenXem,filesPayload);
   },
 
   // --- API-13 ---
