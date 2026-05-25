@@ -39,3 +39,7 @@ pnpm-debug.log*
 # Trong dự án này chúng ta dùng PostgreSQL nên cấu hình này để dự phòng cũng rất tốt.
 *.db
 *.db-journal
+
+# Tránh push cấu hình Agent và Plugins của Stitch lên GitHub
+.agents/
+plugins/
