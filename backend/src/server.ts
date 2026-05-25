@@ -1,4 +1,3 @@
-// src/server.ts
 import express from 'express';
 import { createServer } from 'http'; // SỬA ĐỔI CHUẨN: Dùng http thay vì tls
 import swaggerUi from 'swagger-ui-express';
