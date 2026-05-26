@@ -14,8 +14,8 @@ export const ticketService = {
   createTicket: async (data: any, userId: number, files: Express.Multer.File[] = []) => {
     const today = new Date();
     const count = await ticketRepository.countTicketsToday(
-      new Date(today.setHours(0,0,0,0)), 
-      new Date(today.setHours(23,59,59,999))
+      new Date(today.setHours(0, 0, 0, 0)),
+      new Date(today.setHours(23, 59, 59, 999))
     );
     const ma_phieu = `SW-${today.getFullYear()}-${String(count + 1).padStart(4, '0')}`;
 
@@ -106,8 +106,8 @@ export const ticketService = {
       tieu_de: data.tieu_de,
       mo_ta_chi_tiet: data.mo_ta_chi_tiet,
       nguoi_tao_id: userId,
-      nhom_xu_ly_id: groupXulyId, 
-      nguoi_ho_tro_id: supporterId, 
+      nhom_xu_ly_id: groupXulyId,
+      nguoi_ho_tro_id: supporterId,
       muc_do_uu_tien,
       trang_thai: TrangThaiPhieu.MOI_TAO
     };
@@ -129,17 +129,26 @@ export const ticketService = {
   },
 
   getTickets: async (query: any, user: any) => {
-    const { page, limit, trang_thai, muc_do_uu_tien } = query;
+    const { page, limit, trang_thai, muc_do_uu_tien, keyword } = query;
     const skip = (page - 1) * limit;
     let whereClause: any = {};
     if (trang_thai) whereClause.trang_thai = trang_thai;
     if (muc_do_uu_tien) whereClause.muc_do_uu_tien = muc_do_uu_tien;
 
-    if (user.vai_tro === 'NGUOI_YEU_CAU' || user.vai_tro?.ma_vai_tro === 'NGUOI_YEU_CAU') {
+    // Fix #3: NGUOI_YEU_CAU chỉ thấy phiếu của mình.
+    // IT_L1, IT_L2, QUAN_LY: xem toàn bộ ticket (không filter theo nhóm)
+    const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
+    if (userRole === 'NGUOI_YEU_CAU') {
       whereClause.nguoi_tao_id = user.nhan_vien_id;
-    } else if (['IT_L1', 'IT_L2'].includes(user.vai_tro) || ['IT_L1', 'IT_L2'].includes(user.vai_tro?.ma_vai_tro)) {
-      whereClause.nhom_xu_ly_id = user.nhom_ho_tro_id;
-    } 
+    }
+    // Fix #5: Thêm xử lý tìm kiếm theo từ khóa tiêu đề
+    if (keyword) {
+      whereClause.OR = [
+        { tieu_de: { contains: keyword, mode: 'insensitive' } },
+        { ma_phieu: { contains: keyword, mode: 'insensitive' } }
+      ];
+    }
+
     return await ticketRepository.findTickets(whereClause, skip, limit);
   },
 
@@ -162,7 +171,7 @@ export const ticketService = {
       where: { phieu_ho_tro_id: id },
       include: { nguoi_tao: { select: { email: true, ho_ten: true } } }
     });
-    
+
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
     if (ticket.trang_thai === TrangThaiPhieu.DA_DONG) {
       throw new AppError('Hành động bị từ chối: Phiếu hỗ trợ này đã được Đóng hoàn toàn', 409);
@@ -180,8 +189,9 @@ export const ticketService = {
     }
 
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
-    if (['IT_L1', 'IT_L2'].includes(userRole) && ticket.nhom_xu_ly_id !== user.nhom_ho_tro_id) {
-      throw new AppError('Bạn không có quyền thay đổi trạng thái phiếu thuộc nhóm xử lý khác', 403);
+    // Fix #4 (revised): IT chỉ được cập nhật trạng thái phiếu mà mình đang trực tiếp hỗ trợ
+    if (['IT_L1', 'IT_L2'].includes(userRole) && ticket.nguoi_ho_tro_id !== user.nhan_vien_id) {
+      throw new AppError('Bạn chỉ có thể cập nhật trạng thái phiếu mà bạn đang trực tiếp phụ trách', 403);
     }
 
     const updated = await ticketRepository.updateStatus(id, newStatus, user.nhan_vien_id, ghi_chu);
@@ -209,7 +219,8 @@ export const ticketService = {
       });
 
       // 3. Tiến hành cấu hình HTML Content và gọi Nodemailer chạy ngầm ẩn
-      const evaluationLink = `http://localhost:3000/api/reviews/evaluate?token=${reviewToken}`;
+      // Fix #2: Sửa đúng URL endpoint validate token
+      const evaluationLink = `http://localhost:3000/api/v1/reviews/validate-token?token=${reviewToken}`;
       const subject = `[IT Helpdesk] Sự cố ${ticket.ma_phieu} đã xử lý xong - Vui lòng đánh giá dịch vụ`;
       const htmlContent = `
         <h3>Chào ${ticket.nguoi_tao.ho_ten},</h3>
@@ -236,6 +247,11 @@ export const ticketService = {
       throw new AppError('Chỉ có thể chuyển cấp Ticket đang ở trạng thái Đang giải quyết', 409);
     }
 
+    // escalateTicket Hướng A: IT_L1 chỉ được chuyển cấp phiếu mình đang trực tiếp phụ trách
+    if (ticket.nguoi_ho_tro_id !== userId) {
+      throw new AppError('Bạn chỉ có thể chuyển cấp phiếu mà bạn đang trực tiếp phụ trách', 403);
+    }
+
     // Tìm nhóm hỗ trợ L2 (Giả định nhóm có tên chứa "L2" hoặc ID = 2)
     const nhomL2 = await prisma.nhomHoTro.findFirst({
       where: { ten_nhom: { contains: 'L2' } }
@@ -244,6 +260,7 @@ export const ticketService = {
 
     return await ticketRepository.escalateTicket(ticketId, userId, nhomL2Id, lyDo, cacBuocDaThu);
   },
+
 
   // --- API-11 ---
   reopenTicket: async (ticketId: number, userId: number, lyDo: string) => {
@@ -262,7 +279,7 @@ export const ticketService = {
     // Tìm nhóm L2 để chuyển nếu mở lại > 2 lần
     const nhomL2 = await prisma.nhomHoTro.findFirst({ where: { ten_nhom: { contains: 'L2' } } });
     const nhomL2Id = nhomL2 ? nhomL2.nhom_ho_tro_id : 2;
-    
+
     const newGroupId = newSoLanMoLai > 2 ? nhomL2Id : ticket.nhom_xu_ly_id;
 
     return await ticketRepository.reopenTicket(ticketId, userId, newSoLanMoLai, newGroupId, lyDo);
@@ -273,7 +290,8 @@ export const ticketService = {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại trên hệ thống Map Pacific', 404);
     if (ticket.trang_thai === TrangThaiPhieu.DA_DONG) {
-      throw new AppError('Không thể bình luận trên Phiếu hỗ trợ đã đóng dứt điểm', 403);
+      // Fix #8: 409 Conflict thay vì 403 Forbidden khi ticket đã đóng
+      throw new AppError('Không thể bình luận trên Phiếu hỗ trợ đã đóng dứt điểm', 409);
     }
 
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
@@ -286,8 +304,8 @@ export const ticketService = {
     // 🔥 MAP VÀ GHI FILE TỪ BUFFER RAM XUỐNG DISK BẰNG HELPER UUID MỚI
     const filesPayload = expressFiles.map((f: any) => saveMemoryFileToDisk(f, 'attachments'));
 
-    return await ticketRepository.createCommentWithFiles(ticketId, user.nhan_vien_id, 
-    noiDung, quyenXem,filesPayload);
+    return await ticketRepository.createCommentWithFiles(ticketId, user.nhan_vien_id,
+      noiDung, quyenXem, filesPayload);
   },
 
   // --- API-13 ---
@@ -295,11 +313,18 @@ export const ticketService = {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
 
+    const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
+
+    // Fix #6: NGUOI_YEU_CAU chỉ được xem bình luận của ticket do mình tạo
+    if (userRole === 'NGUOI_YEU_CAU' && ticket.nguoi_tao_id !== user.nhan_vien_id) {
+      throw new AppError('Bạn không có quyền xem bình luận của phiếu này', 403);
+    }
+
     const { page, limit } = query;
     const skip = (page - 1) * limit;
-    
-    const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
-    const restrictInternal = userRole === 'NGUOI_YEU_CAU'; 
+
+    // restrictInternal = true → tự động lọc bỏ bình luận NOI_BO với NGUOI_YEU_CAU
+    const restrictInternal = userRole === 'NGUOI_YEU_CAU';
 
     return await ticketRepository.findComments(ticketId, restrictInternal, skip, limit);
   },
@@ -333,9 +358,9 @@ export const ticketService = {
     }
 
     const updatedTicket = await ticketRepository.assignTicketTransaction(
-      ticketId, 
-      managerId, 
-      ticket.nguoi_ho_tro_id, 
+      ticketId,
+      managerId,
+      ticket.nguoi_ho_tro_id,
       newAssigneeId
     );
 
@@ -360,7 +385,7 @@ export const ticketService = {
 
     slas.forEach(sla => {
       let thoi_gian_con_lai_giay = 0;
-      
+
       // Nếu chưa đạt SLA (thoi_diem_dat = null) thì tính realtime
       if (!sla.thoi_diem_dat) {
         const hanChotTime = new Date(sla.han_chot).getTime();

@@ -1,61 +1,54 @@
 // src/services/review.service.ts
-import jwt from 'jsonwebtoken';
 import { prisma } from '../libs/prisma';
 import { reviewRepository } from '../repositories/review.repository';
 import { AppError } from '../middlewares/errorHandler';
-import { TrangThaiPhieu } from '@prisma/client';
 
 export const reviewService = {
-  verifyReviewToken: (token: string) => {
-    try {
-      // Xác thực JWT (Bắt buộc phải set REVIEW_JWT_SECRET trong .env)
-      const secret = process.env.REVIEW_JWT_SECRET || 'fallback_review_secret';
-      return jwt.verify(token, secret) as any;
-    } catch (error) {
-      throw new AppError('Token đánh giá không hợp lệ hoặc đã hết hạn (>48h)', 401);
-    }
-  },
-
+  // Fix #1: Đổi sang DB lookup thay vì JWT verify
+  // Lý do: ticket.service.ts tạo token bằng crypto.randomBytes(hex), không phải JWT.
+  // Bản ghi PhieuDanhGia được tạo sẵn (pending) với so_sao=0 khi ticket → DA_GIAI_QUYET.
   validateTokenAPI: async (token: string) => {
-    const decoded = reviewService.verifyReviewToken(token);
-    const ticketId = decoded.phieu_ho_tro_id;
+    // Bước 1: Tìm bản ghi pending trong DB bằng token hex
+    const pendingReview = await reviewRepository.findPendingReviewByToken(token);
+    if (!pendingReview) {
+      throw new AppError('Token đánh giá không hợp lệ, đã hết hạn hoặc phiếu đã được đánh giá rồi', 404);
+    }
 
-    const ticket = await reviewRepository.getTicketForReview(ticketId);
+    // Bước 2: Lấy thông tin ticket gốc
+    const ticket = await reviewRepository.getTicketForReview(pendingReview.phieu_ho_tro_id);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
-
-    const existingReview = await reviewRepository.checkExistingReview(ticketId);
-    if (existingReview) throw new AppError('Phiếu hỗ trợ này đã được đánh giá rồi', 409);
 
     return ticket;
   },
 
   submitReview: async (data: any) => {
-    const decoded = reviewService.verifyReviewToken(data.token);
-    const ticketId = decoded.phieu_ho_tro_id;
+    // Bước 1: Tìm bản ghi pending bằng token hex
+    const pendingReview = await reviewRepository.findPendingReviewByToken(data.token);
+    if (!pendingReview) {
+      throw new AppError('Token đánh giá không hợp lệ, đã hết hạn hoặc phiếu đã được đánh giá rồi', 404);
+    }
 
+    const ticketId = pendingReview.phieu_ho_tro_id;
     const ticket = await reviewRepository.getTicketForReview(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
-
-    const existingReview = await reviewRepository.checkExistingReview(ticketId);
-    if (existingReview) throw new AppError('Phiếu hỗ trợ này đã được đánh giá rồi', 409);
 
     let result;
     let ket_qua = '';
 
     if (data.hai_long) {
-      // Hài lòng -> Đóng Ticket
-      result = await reviewRepository.createReviewAndCloseTicket(ticketId, ticket.nguoi_tao_id, data);
+      // Hài lòng → Cập nhật bản ghi pending + Đóng Ticket
+      result = await reviewRepository.updateReviewAndCloseTicket(pendingReview.danh_gia_id, ticketId, ticket.nguoi_tao_id, data);
       ket_qua = 'CLOSED';
     } else {
-      // Không hài lòng -> Tự động mở lại Ticket (Nghiệp vụ API-11 nội bộ)
+      // Không hài lòng → Cập nhật bản ghi pending + Tự động mở lại Ticket
       const newSoLanMoLai = ticket.so_lan_mo_lai + 1;
-      
+
       // Auto-assign: Nếu mở lại > 2 lần, ép chuyển lên L2
       const nhomL2 = await prisma.nhomHoTro.findFirst({ where: { ten_nhom: { contains: 'L2' } } });
       const nhomL2Id = nhomL2 ? nhomL2.nhom_ho_tro_id : 2;
       const newGroupId = newSoLanMoLai > 2 ? nhomL2Id : ticket.nhom_xu_ly_id;
 
-      result = await reviewRepository.createReviewAndReopenTicket(ticketId, ticket.nguoi_tao_id, data, newSoLanMoLai, newGroupId);
+      result = await reviewRepository.updateReviewAndReopenTicket(pendingReview.danh_gia_id, ticketId, ticket.nguoi_tao_id, data, newSoLanMoLai, newGroupId);
       ket_qua = 'REOPENED';
     }
 
@@ -67,4 +60,4 @@ export const reviewService = {
     if (!review) throw new AppError('Chưa có đánh giá cho ticket này', 404);
     return review;
   }
-};
+};

@@ -127,6 +127,7 @@ model NhanVien {
   lich_su_lam    LichSuPhieu[]
   danh_gia_gui   PhieuDanhGia[]
   bai_viet_tri_thuc CoSoTriThuc[]
+  danh_sach_thong_bao ThongBao[]
 
   @@index([phong_ban_id])
   @@index([vai_tro_id])
@@ -315,4 +316,21 @@ model CoSoTriThuc {
   @@index([phieu_ho_tro_id])
   @@index([tieu_de, loai_su_co, the_tags])
   @@map("co_so_tri_thuc")
+}
+
+model ThongBao {
+  thong_bao_id    Int      @id @default(autoincrement())
+  nguoi_nhan_id   Int
+  phieu_ho_tro_id Int?
+  loai            String   @db.VarChar(50) // VD: TICKET_CREATED, SLA_WARNING...
+  tieu_de         String   @db.VarChar(255)
+  noi_dung        String   @db.Text
+  da_doc          Boolean  @default(false)
+  ngay_tao        DateTime @default(now()) @db.Timestamptz
+
+  nguoi_nhan      NhanVien @relation(fields: [nguoi_nhan_id], references: [nhan_vien_id], onDelete: Cascade)
+  
+  @@index([nguoi_nhan_id])
+  @@index([da_doc])
+  @@map("thong_bao")
 }
