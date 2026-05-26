@@ -7,41 +7,43 @@ import { AxiosError } from 'axios';
 
 // ─── Kiểu dữ liệu Response từ API-01 ─────────────────────────────────────────
 interface LoginApiResponse {
-  token:         string;
-  refresh_token: string;
-  user: {
-    nhan_vien_id: number;
-    ho_ten:       string;
-    email:        string;
-    vai_tro: {
-      ma_vai_tro:  string;
-      ten_vai_tro: string;
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    refresh_token: string;
+    user: {
+      nhan_vien_id: number;
+      ho_ten: string;
+      email: string;
+      vai_tro: {
+        ma_vai_tro: string;
+        ten_vai_tro: string;
+      };
+      nhom_ho_tro_id?: number | null;
     };
-    nhom_ho_tro_id?: number | null;
   };
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
 interface LoginProps {
   onLoginSuccess?: (
-    token:        string,
+    token: string,
     refreshToken: string,
-    user:         LoginApiResponse['user'],
+    user: LoginApiResponse['data']['user'],
   ) => void;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
 
-  const [usernameOrEmail,       setUsernameOrEmail]       = useState('');
-  const [password,              setPassword]              = useState('');
-  const [showPassword,          setShowPassword]          = useState(false);
-  const [isLoading,             setIsLoading]             = useState(false);
-  const [errorMessage,          setErrorMessage]          = useState<string | null>(null);
-  const [successMessage,        setSuccessMessage]        = useState<string | null>(null);
-  const [emailValidationError,  setEmailValidationError]  = useState('');
-  const [passwordValidationError,setPasswordValidationError] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [emailValidationError, setEmailValidationError] = useState('');
+  const [passwordValidationError, setPasswordValidationError] = useState('');
 
   // ─── Validation helpers ─────────────────────────────────────────────────────
   const validateUsernameOrEmail = (val: string): boolean => {
@@ -78,7 +80,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     return true;
   };
 
-  // ─── Event Handlers ─────────────────────────────────────────────────────────
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setUsernameOrEmail(val);
@@ -95,75 +96,74 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Reset các thông báo lỗi cũ ngay lập tức
+    // 1. Dọn dẹp sạch sẽ các thông báo lỗi cũ trên UI
     setErrorMessage(null);
     setSuccessMessage(null);
     setEmailValidationError('');
     setPasswordValidationError('');
 
-    // 2. Chuyển nút Đăng nhập sang trạng thái Loading (vô hiệu hóa)
-    setIsLoading(true);
-
-    // 3. Thực hiện kiểm tra dữ liệu đầu vào
-    const isEmailValid    = validateUsernameOrEmail(usernameOrEmail);
+    const isEmailValid = validateUsernameOrEmail(usernameOrEmail);
     const isPasswordValid = validatePassword(password);
     if (!isEmailValid || !isPasswordValid) {
-      setIsLoading(false); // Reset loading nếu validation lỗi
       return;
     }
 
+    // 2. Khóa nút bấm sang trạng thái chờ
+    setIsLoading(true);
+
     try {
-      const response = await axiosInstance.post<any>('/auth/login', {
+      const response = await axiosInstance.post<LoginApiResponse>('/auth/login', {
         tai_khoan: usernameOrEmail,
-        mat_khau:  password,
+        mat_khau: password,
       });
 
       const responseData = response.data;
-      const success = responseData.success !== undefined ? responseData.success : true;
-      const loginData = responseData.success && responseData.data ? responseData.data : responseData;
 
-      if (success || response.status === 200) {
-        const { token, refresh_token, user } = loginData;
+      // 3. Xử lý khi Backend xác thực thành công dữ liệu
+      if (responseData.success && responseData.data) {
+        const { token, refresh_token, user } = responseData.data;
 
-        // Xóa hoàn toàn trạng thái lỗi
+        // Xóa hoàn toàn vết lỗi cũ
         setErrorMessage(null);
-        setEmailValidationError('');
-        setPasswordValidationError('');
 
-        // Lưu token, refresh_token và user.vai_tro.ma_vai_tro vào localStorage
+        // Lưu đồng bộ vào localStorage phục vụ cho AppLayout phân quyền
         localStorage.setItem('token', token);
         localStorage.setItem('refresh_token', refresh_token);
-        localStorage.setItem('user.vai_tro.ma_vai_tro', user.vai_tro.ma_vai_tro);
+        localStorage.setItem('userRole', user.vai_tro.ma_vai_tro);
+        localStorage.setItem('userName', user.ho_ten);
 
-        setSuccessMessage(`Đăng nhập thành công! Chào mừng ${user.ho_ten}. Đang vào hệ thống...`);
+        setSuccessMessage(`Đăng nhập thành công! Chào mừng ${user.ho_ten}.`);
 
         if (onLoginSuccess) {
           onLoginSuccess(token, refresh_token, user);
         }
 
-        // Chuyển hướng người dùng ngay lập tức sang /dashboard
-        navigate('/dashboard');
+        // 4. Điều hướng lập tức sang trang Dashboard mà không reload trang công ty
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 500);
+
       } else {
-        throw new Error(responseData.message || 'Đăng nhập thất bại');
+        setErrorMessage(responseData.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
       }
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
-      const status   = axiosErr.response?.status;
-      const responseMessage = axiosErr.response?.data?.message || (err as Error).message;
+      const status = axiosErr.response?.status;
+      const responseMessage = axiosErr.response?.data?.message;
 
+      // 5. Khớp cấu trúc mã lỗi nghiệp vụ để in thông báo chuẩn Flat Style
       if (status === 400 || status === 401) {
-        setErrorMessage(responseMessage || 'Tài khoản hoặc mật khẩu không chính xác');
+        setErrorMessage(responseMessage || 'Tài khoản hoặc mật khẩu không chính xác.');
       } else if (status === 403) {
-        setErrorMessage(responseMessage || 'Tài khoản chưa được phân quyền hoặc đã bị tạm khóa');
+        setErrorMessage(responseMessage || 'Tài khoản chưa được phân quyền hoặc đã bị tạm khóa.');
       } else {
-        setErrorMessage(responseMessage || 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.');
+        setErrorMessage('Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại Docker/PostgreSQL.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="login-container">
       <div className="login-card">
@@ -235,7 +235,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             )}
 
             <form onSubmit={handleSubmit} noValidate>
-
               {/* Username or Email Input */}
               <div className="form-group">
                 <label htmlFor="usernameOrEmail" className="form-label">Tên tài khoản hoặc Email công ty</label>
@@ -250,7 +249,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                     type="text"
                     id="usernameOrEmail"
                     className="form-input"
-                    placeholder="Tên tài khoản hoặc email công ty"
+                    placeholder="thangpq23406"
                     value={usernameOrEmail}
                     onChange={handleEmailChange}
                     onBlur={() => validateUsernameOrEmail(usernameOrEmail)}
@@ -336,7 +335,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </button>
             </form>
 
-            {/* Chân trang thông tin bổ sung */}
             <div className="support-link">
               Liên hệ bộ phận IT khi không thể đăng nhập
             </div>
@@ -344,7 +342,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             <div className="footer-meta">
               Bảo mật | Hỗ trợ nội bộ
             </div>
-
           </div>
         </div>
 
