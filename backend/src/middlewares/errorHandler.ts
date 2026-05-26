@@ -61,7 +61,15 @@ export const errorHandler = (
     });
   }
 
-  // Trường hợp 4: Lỗi không xác định (Lỗi sập nguồn, mất kết nối DB, code logic bị crash...)
+  // Trường hợp 4: Lỗi Prisma vi phạm khóa ngoại (P2003)
+  if (err.code === 'P2003') {
+    return res.status(400).json({
+      success: false,
+      message: 'Một số ID tham chiếu (ví dụ: ID phòng ban, ID nhóm hỗ trợ, ID vai trò) không tồn tại trong hệ thống.',
+    });
+  }
+
+  // Trường hợp 5: Lỗi không xác định (Lỗi sập nguồn, mất kết nối DB, code logic bị crash...)
   // Không bao giờ trả chi tiết lỗi hệ thống này ra cho Client ở Production để đảm bảo bảo mật
   return res.status(500).json({
     success: false,

@@ -1,4 +1,7 @@
-# IT Helpdesk System — Map Pacific Singapore
+const fs = require('fs');
+const path = require('path');
+
+const content = `# IT Helpdesk System — Map Pacific Singapore
 
 He thong quan ly phieu ho tro ky thuat noi bo cho cong ty Map Pacific Singapore.
 
@@ -6,7 +9,7 @@ He thong quan ly phieu ho tro ky thuat noi bo cho cong ty Map Pacific Singapore.
 
 ## Cau truc thu muc (Backend)
 
-```
+\`\`\`
 backend/
 ├── prisma/
 │   ├── schema.prisma           # Dinh nghia 12 models, 7 enums, toan bo quan he DB
@@ -30,7 +33,7 @@ backend/
 ├── seed_noti.js                # Script tao thong bao mau cho IT_L1 (dung khi testing)
 ├── package.json
 └── tsconfig.json
-```
+\`\`\`
 
 ---
 
@@ -59,7 +62,7 @@ backend/
 
 ### Cai dat & Khoi dong
 
-```bash
+\`\`\`bash
 cd backend
 
 # 1. Cai dependencies
@@ -76,14 +79,14 @@ node prisma/seed.js
 
 # 5. Khoi dong dev server (port 3000, hot-reload)
 npm run dev
-```
+\`\`\`
 
 API Docs: http://localhost:3000/api-docs
 Prisma Studio: npx prisma studio
 
 ### Scripts huu ich
 
-```bash
+\`\`\`bash
 # Xoa toan bo data (giu cau truc bang), dung khi reset testing
 node prisma/clear.js
 
@@ -92,7 +95,7 @@ node prisma/seed.js
 
 # Them thong bao gia cho tai khoan IT_L1 (dung khi test Folder 3 Postman)
 node seed_noti.js
-```
+\`\`\`
 
 ---
 
@@ -247,3 +250,8 @@ Database (PostgreSQL) / Cache (Redis)
 | Service      | Logic nghiep vu (SLA, workflow, email, Redis, phan quyen mem)   |
 | Repository   | Truy van DB thuan tuy qua Prisma - khong chua business logic    |
 | errorHandler | Bat & chuan hoa loi thanh JSON: ZodError, AppError, P2002, P2003|
+`;
+
+const outPath = path.join(__dirname, '..', 'README.md');
+fs.writeFileSync(outPath, content, 'utf8');
+console.log('README.md written successfully to: ' + outPath);
