@@ -175,7 +175,7 @@ export const ticketRepository = {
   },
 
   // --- API 11: MỞ LẠI TICKET ---
-  reopenTicket: async (ticketId: number, userId: number, newSoLanMoLai: number, newGroupId: number, lyDo: string, traceId?: string) => {
+  reopenTicket: async (ticketId: number, userId: number, newSoLanMoLai: number, newGroupId: number, supporterId: number | null, lyDo: string, traceId?: string) => {
     return prisma.$transaction(async (tx) => {
       const ticket = await tx.phieuHoTro.update({
         where: { phieu_ho_tro_id: ticketId },
@@ -183,7 +183,7 @@ export const ticketRepository = {
           trang_thai: TrangThaiPhieu.DANG_GIAI_QUYET,
           so_lan_mo_lai: newSoLanMoLai,
           nhom_xu_ly_id: newGroupId,
-          nguoi_ho_tro_id: null
+          nguoi_ho_tro_id: supporterId
         }
       });
 

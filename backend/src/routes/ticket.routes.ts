@@ -216,7 +216,7 @@ router.post('/:id/escalate', verifyToken, checkRole(['IT_L1']), ticketController
  * @openapi
  * /api/v1/tickets/{id}/reopen:
  *   post:
- *     summary: Hệ thống/Quản lý mở lại ticket sau đánh giá (API-11)
+ *     summary: Hệ thống/Quản lý/Người yêu cầu mở lại ticket sau đánh giá (API-11)
  *     tags: [Tickets]
  *     security:
  *       - BearerAuth: []
@@ -228,13 +228,13 @@ router.post('/:id/escalate', verifyToken, checkRole(['IT_L1']), ticketController
  *           type: string
  *     responses:
  *       200:
- *         description: Mở lại ticket thành công
+ *         description: Mở lại ticket thành công hoặc tạo ticket mới nếu mở lại quá 2 lần
  *       403:
- *         description: Chỉ Quản lý mới có quyền
+ *         description: Chỉ Quản lý hoặc Người tạo mới có quyền
  *       404:
  *         description: Ticket không tồn tại
  */
-router.post('/:id/reopen', verifyToken, checkRole(['QUAN_LY']), ticketController.reopen);
+router.post('/:id/reopen', verifyToken, checkRole(['NGUOI_YEU_CAU', 'QUAN_LY']), ticketController.reopen);
 
 /**
  * @openapi

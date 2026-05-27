@@ -371,11 +371,15 @@ export const ticketService = {
     return result;
   },
 
-  reopenTicket: async (ticketId: number, userId: number, lyDo: string) => {
+  reopenTicket: async (ticketId: number, userId: number, userRole: string, lyDo: string) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
     if (ticket.trang_thai !== TrangThaiPhieu.DA_GIAI_QUYET) {
       throw new AppError('Chỉ có thể mở lại Ticket ở trạng thái Đã giải quyết', 400);
+    }
+
+    if (ticket.nguoi_tao_id !== userId && userRole !== 'QUAN_LY') {
+      throw new AppError('Bạn không có quyền mở lại phiếu này', 403);
     }
 
     const resolvedLog = await prisma.lichSuPhieu.findFirst({
@@ -391,13 +395,69 @@ export const ticketService = {
     }
 
     const newSoLanMoLai = ticket.so_lan_mo_lai + 1;
-    const nhomL2 = await prisma.nhomHoTro.findFirst({ where: { ten_nhom: { contains: 'L2' } } });
-    const nhomL2Id = nhomL2 ? nhomL2.nhom_ho_tro_id : 2;
-
-    const newGroupId = newSoLanMoLai > 2 ? nhomL2Id : ticket.nhom_xu_ly_id;
-
     const traceId = crypto.randomUUID();
-    const reopenedTicket = await ticketRepository.reopenTicket(ticketId, userId, newSoLanMoLai, newGroupId, lyDo, traceId);
+
+    if (newSoLanMoLai >= 2) {
+      // Bắt buộc tạo ticket mới
+      const newTicketData = {
+        tieu_de: `[Mở lại] ${ticket.tieu_de}`,
+        mo_ta_chi_tiet: `Phiếu này được hệ thống tạo tự động do phiếu gốc ${ticket.ma_phieu} đã được mở lại quá số lần quy định.\n\nLý do mở lại: ${lyDo}\n\nMô tả gốc:\n${ticket.mo_ta_chi_tiet}`,
+        muc_do_anh_huong: ticket.muc_do_anh_huong,
+        muc_do_khan_cap: ticket.muc_do_khan_cap,
+      };
+      
+      await ticketRepository.updateStatus(ticketId, TrangThaiPhieu.DA_DONG, userId, `Hệ thống tự động đóng phiếu do yêu cầu mở lại vượt quá số lần. Đã chuyển sang tạo phiếu mới.`, traceId);
+      
+      const newTicketResult = await ticketService.createTicket(newTicketData, ticket.nguoi_tao_id, []);
+      
+      return { 
+        action: 'CREATED_NEW', 
+        message: 'Do số lần mở lại quá giới hạn, hệ thống đã tạo một phiếu mới và đưa vào hàng chờ L1.',
+        ticket: newTicketResult.ticket,
+        sla: newTicketResult.sla
+      };
+    }
+
+    // Mở lại bình thường -> Phân bổ lại cho L1 rảnh nhất
+    const candidates = await prisma.nhanVien.findMany({
+      where: {
+        vai_tro: { ma_vai_tro: VaiTroEnum.IT_L1 },
+        trang_thai: true,
+        nhom_ho_tro_id: { not: null }
+      },
+      include: {
+        _count: { select: { tickets_ho_tro: { where: { trang_thai: { in: [TrangThaiPhieu.MOI_TAO, TrangThaiPhieu.DANG_GIAI_QUYET] } } } } },
+        tickets_ho_tro: {
+          orderBy: { ngay_cap_nhat: 'desc' },
+          take: 1,
+          select: { ngay_cap_nhat: true }
+        }
+      }
+    });
+
+    let supporterId: number | null = null;
+    let groupXulyId: number | null = null;
+    let supporterEmail: string | null = null;
+
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => {
+        const countA = a._count.tickets_ho_tro;
+        const countB = b._count.tickets_ho_tro;
+        if (countA !== countB) return countA - countB;
+        const timeA = a.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
+        const timeB = b.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
+        return timeA - timeB;
+      });
+      supporterId = candidates[0].nhan_vien_id;
+      groupXulyId = candidates[0].nhom_ho_tro_id;
+      supporterEmail = candidates[0].email;
+    } else {
+      const defaultGroup = await prisma.nhomHoTro.findFirst();
+      if (!defaultGroup) throw new AppError('Hệ thống lỗi: Bảng nhom_ho_tro đang trống.', 400);
+      groupXulyId = defaultGroup.nhom_ho_tro_id;
+    }
+
+    const reopenedTicket = await ticketRepository.reopenTicket(ticketId, userId, newSoLanMoLai, groupXulyId as number, supporterId, lyDo, traceId);
     
     const policy = await ticketRepository.findActiveSlaPolicy(ticket.muc_do_uu_tien);
     if (policy) {
@@ -432,29 +492,37 @@ export const ticketService = {
       });
     }
 
-    let notifyUserIds: number[] = [];
-    if (ticket.nguoi_ho_tro_id) {
-      notifyUserIds.push(ticket.nguoi_ho_tro_id);
-    } else {
-      const groupMembers = await prisma.nhanVien.findMany({
-        where: { nhom_ho_tro_id: newGroupId, trang_thai: true },
-        select: { nhan_vien_id: true }
-      });
-      notifyUserIds = groupMembers.map(m => m.nhan_vien_id);
-    }
+    const notifyUserIds = supporterId ? [supporterId] : (await prisma.nhanVien.findMany({ where: { nhom_ho_tro_id: groupXulyId as number, trang_thai: true }, select: { nhan_vien_id: true } })).map(m => m.nhan_vien_id);
     
     if (notifyUserIds.length > 0) {
       const thongBaoData = notifyUserIds.map(uid => ({
         nguoi_nhan_id: uid,
         phieu_ho_tro_id: ticketId,
         loai: 'TICKET_REOPENED',
-        tieu_de: `Phiếu ${ticket.ma_phieu} vừa được mở lại`,
-        noi_dung: `Phiếu hỗ trợ ${ticket.ma_phieu} đã bị mở lại với lý do: ${lyDo}`
+        tieu_de: `Phiếu ${ticket.ma_phieu} đã được mở lại`,
+        noi_dung: `Người dùng đã yêu cầu mở lại phiếu ${ticket.ma_phieu} với lý do: ${lyDo}. Bạn đã được phân công xử lý.`
       }));
       await prisma.thongBao.createMany({ data: thongBaoData });
     }
 
-    return reopenedTicket;
+    if (supporterEmail) {
+      await sendEmail(
+        supporterEmail,
+        `[IT Helpdesk] Phiếu ${ticket.ma_phieu} đã được mở lại và giao cho bạn`,
+        `<h3>Chào bạn,</h3><p>Phiếu hỗ trợ <b>${ticket.ma_phieu}</b> đã được người dùng yêu cầu mở lại và hệ thống đã giao cho bạn tiếp tục xử lý.</p><p><b>Lý do:</b> ${lyDo}</p><br/><p>Vui lòng kiểm tra hệ thống và phản hồi trong thời gian sớm nhất.</p>`
+      );
+    } else if (groupXulyId) {
+      const l1Emails = (await prisma.nhanVien.findMany({ where: { nhom_ho_tro_id: groupXulyId, trang_thai: true }, select: { email: true } })).map(m => m.email);
+      await Promise.all(l1Emails.map(email => 
+        sendEmail(
+          email,
+          `[IT Helpdesk] Phiếu ${ticket.ma_phieu} đã được mở lại`,
+          `<h3>Chào bạn,</h3><p>Phiếu hỗ trợ <b>${ticket.ma_phieu}</b> thuộc nhóm của bạn đã được mở lại.</p><p><b>Lý do:</b> ${lyDo}</p><br/><p>Vui lòng kiểm tra hệ thống.</p>`
+        )
+      ));
+    }
+
+    return { action: 'REOPENED', ...reopenedTicket };
   },
 
   addCommentWithUpload: async (ticketId: number, user: any, noiDung: string, loaiBinhLuan: string, expressFiles: any[]) => {
