@@ -3,47 +3,58 @@ import { prisma } from '../libs/prisma';
 import { ticketRepository } from '../repositories/ticket.repository';
 import { AppError } from '../middlewares/errorHandler';
 import { sendEmail } from '../libs/email'; // Nạp tiện ích email
-import { v4 as uuidv4 } from 'uuid';       // Nạp hằng số sinh chuỗi uuid
 import crypto from 'crypto';
 import path from 'path';
-import { TrangThaiPhieu, MucDoUuTien, LoaiSla, TrangThaiMucTieu, QuyenXem, VaiTroEnum, LoaiThoiGian } from '@prisma/client';
+import { TrangThaiPhieu, MucDoUuTien, MucDoAnhHuong, MucDoKhanCap, LoaiSla, TrangThaiMucTieu, QuyenXem, VaiTroEnum, LoaiThoiGian } from '@prisma/client';
 import { saveMemoryFileToDisk } from '../libs/multer';
+import { addBusinessMinutes, calculatePriority } from '../utils/ticket.utils';
+
+// addBusinessMinutes đã được chuyển sang src/utils/ticket.utils.ts
 
 export const ticketService = {
   // NÂNG CẤP: Nhận thêm files từ Controller mồi xuống
-  createTicket: async (data: any, userId: number, files: Express.Multer.File[] = []) => {
+  createTicket: async (data: any, userId: number, expressFiles: Express.Multer.File[] = []) => {
     const today = new Date();
-    const count = await ticketRepository.countTicketsToday(
-      new Date(today.setHours(0, 0, 0, 0)),
-      new Date(today.setHours(23, 59, 59, 999))
-    );
-    const ma_phieu = `SW-${today.getFullYear()}-${String(count + 1).padStart(4, '0')}`;
-
-    // Thuật toán Phân tích Regex
-    let muc_do_uu_tien: MucDoUuTien = MucDoUuTien.TRUNG_BINH;
-    const contentToAnalyze = `${data.tieu_de} ${data.mo_ta_chi_tiet}`.toLowerCase();
-    const highPriorityKeywords = /sập|khẩn|gấp|chết|ngay lập tức|không thể|liệt|đứng máy|vip|virus|hack/i;
-    const lowPriorityKeywords = /từ từ|thong thả|rảnh|hỏi|góp ý|nâng cấp|xin cấp/i;
-
-    if (highPriorityKeywords.test(contentToAnalyze)) {
-      muc_do_uu_tien = MucDoUuTien.CAO;
-    } else if (lowPriorityKeywords.test(contentToAnalyze)) {
-      muc_do_uu_tien = MucDoUuTien.THAP;
-    }
+    const traceId = crypto.randomUUID();
+    
+    // Tính Priority dựa trên Ma trận Impact x Urgency
+    const i = data.muc_do_anh_huong as MucDoAnhHuong;
+    const u = data.muc_do_khan_cap as MucDoKhanCap;
+    let muc_do_uu_tien: MucDoUuTien = calculatePriority(i, u);
 
     // Định tuyến nhân viên
     let supporterId: number | null = null;
     let groupXulyId: number | null = null;
 
-    const optimalSupporter = await prisma.nhanVien.findFirst({
+    const candidates = await prisma.nhanVien.findMany({
       where: {
         vai_tro: { ma_vai_tro: VaiTroEnum.IT_L1 },
         trang_thai: true,
         nhom_ho_tro_id: { not: null }
       },
-      orderBy: { tickets_ho_tro: { _count: 'asc' } },
-      select: { nhan_vien_id: true, nhom_ho_tro_id: true }
+      include: {
+        _count: { select: { tickets_ho_tro: { where: { trang_thai: { in: [TrangThaiPhieu.MOI_TAO, TrangThaiPhieu.DANG_GIAI_QUYET] } } } } },
+        tickets_ho_tro: {
+          orderBy: { ngay_cap_nhat: 'desc' },
+          take: 1,
+          select: { ngay_cap_nhat: true }
+        }
+      }
     });
+
+    let optimalSupporter = null;
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => {
+        const countA = a._count.tickets_ho_tro;
+        const countB = b._count.tickets_ho_tro;
+        if (countA !== countB) return countA - countB;
+        // Tie-breaker: người "rảnh" lâu hơn (ticket cuối cập nhật cách đây lâu nhất) lên đầu
+        const timeA = a.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
+        const timeB = b.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
+        return timeA - timeB;
+      });
+      optimalSupporter = candidates[0];
+    }
 
     if (optimalSupporter && optimalSupporter.nhom_ho_tro_id) {
       supporterId = optimalSupporter.nhan_vien_id;
@@ -65,34 +76,42 @@ export const ticketService = {
           ten_chinh_sach: `Chính sách SLA tự động cấp cho độ ưu tiên ${muc_do_uu_tien}`,
           loai_thoi_gian: LoaiThoiGian.GIO_HANH_CHINH,
           muc_do_uu_tien: muc_do_uu_tien,
-          tg_phan_hoi: muc_do_uu_tien === MucDoUuTien.CAO ? 15 : (muc_do_uu_tien === MucDoUuTien.TRUNG_BINH ? 30 : 60),
-          tg_xu_ly: muc_do_uu_tien === MucDoUuTien.CAO ? 120 : (muc_do_uu_tien === MucDoUuTien.TRUNG_BINH ? 240 : 480),
+          tg_phan_hoi: muc_do_uu_tien === MucDoUuTien.CAO ? 15 : (muc_do_uu_tien === MucDoUuTien.TRUNG_BINH ? 60 : 240),
+          tg_xu_ly: muc_do_uu_tien === MucDoUuTien.CAO ? 240 : (muc_do_uu_tien === MucDoUuTien.TRUNG_BINH ? 480 : 1440),
           trang_thai: true
         }
       });
     }
 
     const now = new Date();
+    const hanChotPhanHoi = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
+      ? addBusinessMinutes(now, policy.tg_phan_hoi) 
+      : new Date(now.getTime() + policy.tg_phan_hoi * 60 * 1000);
+      
+    const hanChotXuLy = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
+      ? addBusinessMinutes(now, policy.tg_xu_ly) 
+      : new Date(now.getTime() + policy.tg_xu_ly * 60 * 1000);
+
     const slaData = [
       {
         chinh_sach_sla_id: policy.chinh_sach_sla_id,
         loai_sla: LoaiSla.PHAN_HOI,
         trang_thai_muc_tieu: TrangThaiMucTieu.TIEP_NHAN,
         thoi_diem_bat_dau: now,
-        han_chot: new Date(now.getTime() + policy.tg_phan_hoi * 60 * 1000)
+        han_chot: hanChotPhanHoi
       },
       {
         chinh_sach_sla_id: policy.chinh_sach_sla_id,
         loai_sla: LoaiSla.XU_LY,
         trang_thai_muc_tieu: TrangThaiMucTieu.DA_GIAI_QUYET,
         thoi_diem_bat_dau: now,
-        han_chot: new Date(now.getTime() + policy.tg_xu_ly * 60 * 1000)
+        han_chot: hanChotXuLy
       }
     ];
 
     // MẢNH GHÉP UUID: Xử lý đóng gói mảng file vật lý đổi tên bằng UUID hằng số
-    const processedFiles = files.map(file => {
-      const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
+    const processedFiles = expressFiles.map(file => {
+      const uniqueName = `${crypto.randomUUID()}${path.extname(file.originalname)}`;
       return {
         ten_tep: file.originalname,
         duong_dan_file: `/uploads/tickets/${uniqueName}`,
@@ -102,17 +121,39 @@ export const ticketService = {
     });
 
     const ticketData = {
-      ma_phieu,
       tieu_de: data.tieu_de,
       mo_ta_chi_tiet: data.mo_ta_chi_tiet,
       nguoi_tao_id: userId,
       nhom_xu_ly_id: groupXulyId,
       nguoi_ho_tro_id: supporterId,
+      muc_do_anh_huong: data.muc_do_anh_huong,
+      muc_do_khan_cap: data.muc_do_khan_cap,
       muc_do_uu_tien,
       trang_thai: TrangThaiPhieu.MOI_TAO
     };
 
-    const result = await ticketRepository.createTicketWithSla(ticketData, slaData, processedFiles);
+    const creator = await prisma.nhanVien.findUnique({
+      where: { nhan_vien_id: userId },
+      select: { ho_ten: true, email: true }
+    });
+
+    const result = await ticketRepository.createTicketWithSla(ticketData, slaData, processedFiles, traceId);
+
+    if (creator) {
+      const subject = `[IT Helpdesk] Xác nhận tạo phiếu hỗ trợ mới - ${result.ma_phieu}`;
+      const htmlContent = `
+        <h3>Chào ${creator.ho_ten},</h3>
+        <p>Hệ thống IT Helpdesk đã ghi nhận phiếu yêu cầu hỗ trợ của bạn.</p>
+        <p><b>Mã phiếu:</b> ${result.ma_phieu}</p>
+        <p><b>Tiêu đề:</b> ${data.tieu_de}</p>
+        <p><b>Mức độ ưu tiên:</b> ${muc_do_uu_tien}</p>
+        <p>Đội ngũ IT sẽ tiến hành kiểm tra và phản hồi trong thời gian sớm nhất theo SLA đã cam kết.</p>
+        <br/>
+        <p>Trân trọng,</p>
+        <p><b>Map Pacific Singapore IT Operations Team</b></p>
+      `;
+      sendEmail(creator.email, subject, htmlContent);
+    }
 
     const phanHoiSla = slaData.find((s) => s.loai_sla === LoaiSla.PHAN_HOI);
     const xuLySla = slaData.find((s) => s.loai_sla === LoaiSla.XU_LY);
@@ -135,18 +176,31 @@ export const ticketService = {
     if (trang_thai) whereClause.trang_thai = trang_thai;
     if (muc_do_uu_tien) whereClause.muc_do_uu_tien = muc_do_uu_tien;
 
-    // Fix #3: NGUOI_YEU_CAU chỉ thấy phiếu của mình.
-    // IT_L1, IT_L2, QUAN_LY: xem toàn bộ ticket (không filter theo nhóm)
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
     if (userRole === 'NGUOI_YEU_CAU') {
       whereClause.nguoi_tao_id = user.nhan_vien_id;
-    }
-    // Fix #5: Thêm xử lý tìm kiếm theo từ khóa tiêu đề
-    if (keyword) {
+    } else if (userRole === 'IT_L1' || userRole === 'IT_L2') {
+      const itUserId = user.nhan_vien_id;
+      const itGroupId = user.nhom_ho_tro_id;
       whereClause.OR = [
-        { tieu_de: { contains: keyword, mode: 'insensitive' } },
-        { ma_phieu: { contains: keyword, mode: 'insensitive' } }
+        { nguoi_ho_tro_id: itUserId },
+        { nguoi_tao_id: itUserId },
+        { nguoi_ho_tro_id: null, nhom_xu_ly_id: itGroupId }
       ];
+    }
+    if (keyword) {
+      const keywordFilter = {
+        OR: [
+          { tieu_de: { contains: keyword, mode: 'insensitive' as any } },
+          { ma_phieu: { contains: keyword, mode: 'insensitive' as any } }
+        ]
+      };
+      if (whereClause.OR) {
+        whereClause.AND = [{ OR: whereClause.OR }, keywordFilter];
+        delete whereClause.OR;
+      } else {
+        whereClause.OR = keywordFilter.OR;
+      }
     }
 
     return await ticketRepository.findTickets(whereClause, skip, limit);
@@ -165,8 +219,7 @@ export const ticketService = {
     return ticket;
   },
 
-  // NÂNG CẤP API-09: Tích hợp Stop SLA + Sinh Token Khảo sát + Gửi email thông báo tự động
-  updateStatus: async (id: number, newStatus: TrangThaiPhieu, ghi_chu: string, user: any) => {
+  updateStatus: async (id: number, newStatus: TrangThaiPhieu, ghiChu: string, user: any) => {
     const ticket = await prisma.phieuHoTro.findUnique({
       where: { phieu_ho_tro_id: id },
       include: { nguoi_tao: { select: { email: true, ho_ten: true } } }
@@ -179,7 +232,8 @@ export const ticketService = {
 
     const validTransitions: Record<TrangThaiPhieu, TrangThaiPhieu[]> = {
       [TrangThaiPhieu.MOI_TAO]: [TrangThaiPhieu.DANG_GIAI_QUYET],
-      [TrangThaiPhieu.DANG_GIAI_QUYET]: [TrangThaiPhieu.DA_GIAI_QUYET],
+      [TrangThaiPhieu.DANG_GIAI_QUYET]: [TrangThaiPhieu.DA_GIAI_QUYET, TrangThaiPhieu.CHO_PHAN_HOI],
+      [TrangThaiPhieu.CHO_PHAN_HOI]: [TrangThaiPhieu.DANG_GIAI_QUYET],
       [TrangThaiPhieu.DA_GIAI_QUYET]: [TrangThaiPhieu.DA_DONG],
       [TrangThaiPhieu.DA_DONG]: []
     };
@@ -189,27 +243,69 @@ export const ticketService = {
     }
 
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
-    // Fix #4 (revised): IT chỉ được cập nhật trạng thái phiếu mà mình đang trực tiếp hỗ trợ
     if (['IT_L1', 'IT_L2'].includes(userRole) && ticket.nguoi_ho_tro_id !== user.nhan_vien_id) {
       throw new AppError('Bạn chỉ có thể cập nhật trạng thái phiếu mà bạn đang trực tiếp phụ trách', 403);
     }
 
-    const updated = await ticketRepository.updateStatus(id, newStatus, user.nhan_vien_id, ghi_chu);
+    const traceId = crypto.randomUUID();
+    const updatedTicket = await ticketRepository.updateStatus(id, newStatus, user.nhan_vien_id, ghiChu, traceId);
 
-    // MẢNH GHÉP NODEMAILER: Luồng tự động khi trạng thái chuyển dịch sang DA_GIAI_QUYET
+    await prisma.thongBao.create({
+      data: {
+        nguoi_nhan_id: ticket.nguoi_tao_id,
+        phieu_ho_tro_id: id,
+        loai: 'STATUS_CHANGED',
+        tieu_de: `Cập nhật trạng thái phiếu ${ticket.ma_phieu}`,
+        noi_dung: `Phiếu hỗ trợ của bạn đã chuyển sang trạng thái: ${newStatus}.`
+      }
+    });
+
+    if (ticket.trang_thai === TrangThaiPhieu.MOI_TAO && newStatus === TrangThaiPhieu.DANG_GIAI_QUYET) {
+      await prisma.slaTheoDoi.updateMany({
+        where: { phieu_ho_tro_id: id, loai_sla: LoaiSla.PHAN_HOI },
+        data: { thoi_diem_dat: new Date() }
+      });
+    }
+
+    if (newStatus === TrangThaiPhieu.CHO_PHAN_HOI) {
+      await prisma.slaTheoDoi.updateMany({
+        where: { phieu_ho_tro_id: id, thoi_diem_dat: null },
+        data: { thoi_diem_tam_dung: new Date() }
+      });
+    }
+
+    if (ticket.trang_thai === TrangThaiPhieu.CHO_PHAN_HOI && newStatus === TrangThaiPhieu.DANG_GIAI_QUYET) {
+      const slas = await prisma.slaTheoDoi.findMany({ 
+        where: { phieu_ho_tro_id: id, thoi_diem_dat: null, thoi_diem_tam_dung: { not: null } } 
+      });
+      const now = new Date();
+      for (const sla of slas) {
+        const pauseDurationMs = now.getTime() - sla.thoi_diem_tam_dung!.getTime();
+        const pauseMinutes = Math.floor(pauseDurationMs / 60000);
+        await prisma.slaTheoDoi.update({
+          where: { sla_id: sla.sla_id },
+          data: {
+            thoi_diem_tam_dung: null,
+            tong_thoi_gian_tam_dung: sla.tong_thoi_gian_tam_dung + pauseMinutes,
+            han_chot: new Date(sla.han_chot.getTime() + pauseDurationMs)
+          }
+        });
+      }
+    }
+
     if (newStatus === TrangThaiPhieu.DA_GIAI_QUYET) {
       const now = new Date();
 
-      // 1. Chặn đứng đồng hồ tính giờ SLA (Stop SLA)
       await prisma.slaTheoDoi.updateMany({
         where: { phieu_ho_tro_id: id, loai_sla: LoaiSla.XU_LY },
         data: { thoi_diem_dat: now }
       });
 
-      // 2. Dùng thư viện crypto sinh mã xác thực độc bản đính kèm vào link khảo sát
       const reviewToken = crypto.randomBytes(32).toString('hex');
-      await prisma.phieuDanhGia.create({
-        data: {
+      await prisma.phieuDanhGia.upsert({
+        where: { phieu_ho_tro_id: id },
+        update: { token_xac_thuc: reviewToken, hai_long: false, so_sao: 0, nhan_xet: null },
+        create: {
           phieu_ho_tro_id: id,
           nguoi_danh_gia_id: ticket.nguoi_tao_id,
           token_xac_thuc: reviewToken,
@@ -218,14 +314,12 @@ export const ticketService = {
         }
       });
 
-      // 3. Tiến hành cấu hình HTML Content và gọi Nodemailer chạy ngầm ẩn
-      // Fix #2: Sửa đúng URL endpoint validate token
       const evaluationLink = `http://localhost:3000/api/v1/reviews/validate-token?token=${reviewToken}`;
       const subject = `[IT Helpdesk] Sự cố ${ticket.ma_phieu} đã xử lý xong - Vui lòng đánh giá dịch vụ`;
       const htmlContent = `
         <h3>Chào ${ticket.nguoi_tao.ho_ten},</h3>
         <p>Bộ phận IT Helpdesk của Map Pacific Singapore thông báo: Phiếu yêu cầu hỗ trợ mã số <b>${ticket.ma_phieu}</b> của bạn đã giải quyết xong.</p>
-        <p><b>Phương án xử lý:</b> ${ghi_chu || 'Kỹ thuật viên đã khắc phục hoàn tất.'}</p>
+        <p><b>Phương án xử lý:</b> ${ghiChu || 'Kỹ thuật viên đã khắc phục hoàn tất.'}</p>
         <p>Vui lòng nhấn vào đường link màu xanh dưới đây để thực hiện chấm sao đánh giá mức độ hài lòng:</p>
         <p><a href="${evaluationLink}" style="background-color: #008CBA; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 4px;">Bấm vào đây để Khảo sát dịch vụ</a></p>
         <br/>
@@ -233,13 +327,12 @@ export const ticketService = {
         <p><b>Map Pacific Singapore IT Operations Team</b></p>
       `;
 
-      // Không dùng từ khóa await để gửi mail chạy song song dạng nền, tối ưu tốc độ response cho IT
       sendEmail(ticket.nguoi_tao.email, subject, htmlContent);
     }
 
-    return updated;
+    return updatedTicket;
   },
-  // --- API-10 ---
+
   escalateTicket: async (ticketId: number, userId: number, lyDo: string, cacBuocDaThu: string) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
@@ -247,22 +340,37 @@ export const ticketService = {
       throw new AppError('Chỉ có thể chuyển cấp Ticket đang ở trạng thái Đang giải quyết', 409);
     }
 
-    // escalateTicket Hướng A: IT_L1 chỉ được chuyển cấp phiếu mình đang trực tiếp phụ trách
     if (ticket.nguoi_ho_tro_id !== userId) {
       throw new AppError('Bạn chỉ có thể chuyển cấp phiếu mà bạn đang trực tiếp phụ trách', 403);
     }
 
-    // Tìm nhóm hỗ trợ L2 (Giả định nhóm có tên chứa "L2" hoặc ID = 2)
     const nhomL2 = await prisma.nhomHoTro.findFirst({
       where: { ten_nhom: { contains: 'L2' } }
     });
-    const nhomL2Id = nhomL2 ? nhomL2.nhom_ho_tro_id : 2; // Fail-safe
+    const nhomL2Id = nhomL2 ? nhomL2.nhom_ho_tro_id : 2;
 
-    return await ticketRepository.escalateTicket(ticketId, userId, nhomL2Id, lyDo, cacBuocDaThu);
+    const traceId = crypto.randomUUID();
+    const result = await ticketRepository.escalateTicket(ticketId, userId, nhomL2Id, lyDo, cacBuocDaThu, traceId);
+
+    const l2Members = await prisma.nhanVien.findMany({
+      where: { nhom_ho_tro_id: nhomL2Id, trang_thai: true },
+      select: { nhan_vien_id: true }
+    });
+    
+    if (l2Members.length > 0) {
+      const thongBaoData = l2Members.map(m => ({
+        nguoi_nhan_id: m.nhan_vien_id,
+        phieu_ho_tro_id: ticketId,
+        loai: 'TICKET_ESCALATED',
+        tieu_de: `Phiếu ${ticket.ma_phieu} được chuyển cấp lên nhóm của bạn`,
+        noi_dung: `Phiếu hỗ trợ ${ticket.ma_phieu} đã chuyển cấp với lý do: ${lyDo}`
+      }));
+      await prisma.thongBao.createMany({ data: thongBaoData });
+    }
+
+    return result;
   },
 
-
-  // --- API-11 ---
   reopenTicket: async (ticketId: number, userId: number, lyDo: string) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
@@ -270,52 +378,115 @@ export const ticketService = {
       throw new AppError('Chỉ có thể mở lại Ticket ở trạng thái Đã giải quyết', 400);
     }
 
-    const hoursSinceResolved = Math.abs(new Date().getTime() - ticket.ngay_cap_nhat.getTime()) / 36e5;
+    const resolvedLog = await prisma.lichSuPhieu.findFirst({
+      where: { phieu_ho_tro_id: ticketId, gia_tri_moi: TrangThaiPhieu.DA_GIAI_QUYET },
+      orderBy: { ngay_thuc_hien: 'desc' }
+    });
+    
+    const resolveTime = resolvedLog ? resolvedLog.ngay_thuc_hien.getTime() : ticket.ngay_cap_nhat.getTime();
+    const hoursSinceResolved = Math.abs(new Date().getTime() - resolveTime) / 36e5;
+    
     if (hoursSinceResolved > 48) {
       throw new AppError('Quá 48h kể từ lúc giải quyết, không thể mở lại. Vui lòng tạo ticket mới.', 409);
     }
 
     const newSoLanMoLai = ticket.so_lan_mo_lai + 1;
-    // Tìm nhóm L2 để chuyển nếu mở lại > 2 lần
     const nhomL2 = await prisma.nhomHoTro.findFirst({ where: { ten_nhom: { contains: 'L2' } } });
     const nhomL2Id = nhomL2 ? nhomL2.nhom_ho_tro_id : 2;
 
     const newGroupId = newSoLanMoLai > 2 ? nhomL2Id : ticket.nhom_xu_ly_id;
 
-    return await ticketRepository.reopenTicket(ticketId, userId, newSoLanMoLai, newGroupId, lyDo);
+    const traceId = crypto.randomUUID();
+    const reopenedTicket = await ticketRepository.reopenTicket(ticketId, userId, newSoLanMoLai, newGroupId, lyDo, traceId);
+    
+    const policy = await ticketRepository.findActiveSlaPolicy(ticket.muc_do_uu_tien);
+    if (policy) {
+      const now = new Date();
+      const hanChotPhanHoi = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
+        ? addBusinessMinutes(now, policy.tg_phan_hoi) 
+        : new Date(now.getTime() + policy.tg_phan_hoi * 60 * 1000);
+        
+      const hanChotXuLy = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
+        ? addBusinessMinutes(now, policy.tg_xu_ly) 
+        : new Date(now.getTime() + policy.tg_xu_ly * 60 * 1000);
+
+      await prisma.slaTheoDoi.createMany({
+        data: [
+          {
+            phieu_ho_tro_id: ticketId,
+            chinh_sach_sla_id: policy.chinh_sach_sla_id,
+            loai_sla: LoaiSla.PHAN_HOI,
+            trang_thai_muc_tieu: TrangThaiMucTieu.TIEP_NHAN,
+            thoi_diem_bat_dau: now,
+            han_chot: hanChotPhanHoi
+          },
+          {
+            phieu_ho_tro_id: ticketId,
+            chinh_sach_sla_id: policy.chinh_sach_sla_id,
+            loai_sla: LoaiSla.XU_LY,
+            trang_thai_muc_tieu: TrangThaiMucTieu.DA_GIAI_QUYET,
+            thoi_diem_bat_dau: now,
+            han_chot: hanChotXuLy
+          }
+        ]
+      });
+    }
+
+    let notifyUserIds: number[] = [];
+    if (ticket.nguoi_ho_tro_id) {
+      notifyUserIds.push(ticket.nguoi_ho_tro_id);
+    } else {
+      const groupMembers = await prisma.nhanVien.findMany({
+        where: { nhom_ho_tro_id: newGroupId, trang_thai: true },
+        select: { nhan_vien_id: true }
+      });
+      notifyUserIds = groupMembers.map(m => m.nhan_vien_id);
+    }
+    
+    if (notifyUserIds.length > 0) {
+      const thongBaoData = notifyUserIds.map(uid => ({
+        nguoi_nhan_id: uid,
+        phieu_ho_tro_id: ticketId,
+        loai: 'TICKET_REOPENED',
+        tieu_de: `Phiếu ${ticket.ma_phieu} vừa được mở lại`,
+        noi_dung: `Phiếu hỗ trợ ${ticket.ma_phieu} đã bị mở lại với lý do: ${lyDo}`
+      }));
+      await prisma.thongBao.createMany({ data: thongBaoData });
+    }
+
+    return reopenedTicket;
   },
 
-  // --- API-12 ---
   addCommentWithUpload: async (ticketId: number, user: any, noiDung: string, loaiBinhLuan: string, expressFiles: any[]) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại trên hệ thống Map Pacific', 404);
     if (ticket.trang_thai === TrangThaiPhieu.DA_DONG) {
-      // Fix #8: 409 Conflict thay vì 403 Forbidden khi ticket đã đóng
       throw new AppError('Không thể bình luận trên Phiếu hỗ trợ đã đóng dứt điểm', 409);
     }
 
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
+    if (userRole === 'NGUOI_YEU_CAU' && ticket.nguoi_tao_id !== user.nhan_vien_id) {
+      throw new AppError('Bạn không có quyền bình luận vào phiếu hỗ trợ này', 403);
+    }
     if (userRole === 'NGUOI_YEU_CAU' && loaiBinhLuan === 'internal') {
       throw new AppError('Tài khoản Người yêu cầu không được phép tạo ghi chú nội bộ', 403);
     }
 
     const quyenXem = loaiBinhLuan === 'internal' ? QuyenXem.NOI_BO : QuyenXem.CONG_KHAI;
 
-    // 🔥 MAP VÀ GHI FILE TỪ BUFFER RAM XUỐNG DISK BẰNG HELPER UUID MỚI
     const filesPayload = expressFiles.map((f: any) => saveMemoryFileToDisk(f, 'attachments'));
+    const traceId = crypto.randomUUID();
 
     return await ticketRepository.createCommentWithFiles(ticketId, user.nhan_vien_id,
-      noiDung, quyenXem, filesPayload);
+      noiDung, quyenXem, filesPayload, undefined, traceId);
   },
 
-  // --- API-13 ---
   getComments: async (ticketId: number, query: any, user: any) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
 
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
 
-    // Fix #6: NGUOI_YEU_CAU chỉ được xem bình luận của ticket do mình tạo
     if (userRole === 'NGUOI_YEU_CAU' && ticket.nguoi_tao_id !== user.nhan_vien_id) {
       throw new AppError('Bạn không có quyền xem bình luận của phiếu này', 403);
     }
@@ -323,17 +494,15 @@ export const ticketService = {
     const { page, limit } = query;
     const skip = (page - 1) * limit;
 
-    // restrictInternal = true → tự động lọc bỏ bình luận NOI_BO với NGUOI_YEU_CAU
     const restrictInternal = userRole === 'NGUOI_YEU_CAU';
 
     return await ticketRepository.findComments(ticketId, restrictInternal, skip, limit);
   },
-  // --- API-14 ---
+
   getHistory: async (ticketId: number, user: any) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
 
-    // Xác thực quyền truy cập của NGUOI_YEU_CAU
     const userRole = user.vai_tro?.ma_vai_tro || user.vai_tro;
     if (userRole === 'NGUOI_YEU_CAU' && ticket.nguoi_tao_id !== user.nhan_vien_id) {
       throw new AppError('Bạn không có quyền xem lịch sử của phiếu này', 403);
@@ -342,7 +511,6 @@ export const ticketService = {
     return await ticketRepository.getHistoryByTicketId(ticketId);
   },
 
-  // --- API-15 ---
   assignTicket: async (ticketId: number, managerId: number, newAssigneeId: number) => {
     const ticket = await ticketRepository.findById(ticketId);
     if (!ticket) throw new AppError('Ticket không tồn tại', 404);
@@ -352,17 +520,28 @@ export const ticketService = {
       throw new AppError('Kỹ thuật viên không tồn tại hoặc đã bị khóa tài khoản', 400);
     }
 
-    // Kiểm tra tính toàn vẹn luồng nghiệp vụ: IT phải cùng nhóm xử lý
     if (technician.nhom_ho_tro_id !== ticket.nhom_xu_ly_id) {
       throw new AppError('Kỹ thuật viên này không thuộc nhóm đang phụ trách ticket hiện tại', 400);
     }
 
+    const traceId = crypto.randomUUID();
     const updatedTicket = await ticketRepository.assignTicketTransaction(
       ticketId,
       managerId,
       ticket.nguoi_ho_tro_id,
-      newAssigneeId
+      newAssigneeId,
+      traceId
     );
+
+    await prisma.thongBao.create({
+      data: {
+        nguoi_nhan_id: newAssigneeId,
+        phieu_ho_tro_id: ticketId,
+        loai: 'TICKET_ASSIGNED',
+        tieu_de: `Bạn được phân công xử lý phiếu ${ticket.ma_phieu}`,
+        noi_dung: `Bạn vừa được quản lý phân công xử lý phiếu hỗ trợ ${ticket.ma_phieu}.`
+      }
+    });
 
     return {
       ticket: updatedTicket,

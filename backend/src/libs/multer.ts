@@ -2,7 +2,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { AppError } from '../middlewares/errorHandler';
 
 // Sử dụng Memory Storage để hứng buffer tệp trước khi ghi nhận vào DB (GIỮ NGUYÊN 100% GỐC CỦA BẠN)
@@ -56,7 +56,7 @@ export const saveMemoryFileToDisk = (file: any, subFolder: 'attachments' | 'kb' 
 
   // 2. Thuật toán băm tên file độc bản bằng UUIDv4 tránh trùng lặp tệp
   const ext = path.extname(file.originalname).toLowerCase();
-  const uniqueFileName = `${uuidv4()}${ext}`;
+  const uniqueFileName = `${Date.now() + '-' + Math.round(Math.random() * 1E9) + '-' + crypto.randomUUID()}${ext}`;
   const fullPath = path.join(targetDir, uniqueFileName);
 
   // 3. Thực hiện ghi luồng dữ liệu Buffer nhị phân trực tiếp từ RAM Cache xuống Disk

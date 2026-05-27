@@ -38,6 +38,14 @@ const router = Router();
  *               mo_ta_chi_tiet:
  *                 type: string
  *                 example: "Máy in HP không kéo được giấy, liên tục báo lỗi kẹt cơ."
+ *               muc_do_anh_huong:
+ *                 type: string
+ *                 enum: [THAP, TRUNG_BINH, CAO]
+ *                 example: "CAO"
+ *               muc_do_khan_cap:
+ *                 type: string
+ *                 enum: [THAP, TRUNG_BINH, CAO]
+ *                 example: "TRUNG_BINH"
  *               files:
  *                 type: array
  *                 items:
@@ -146,7 +154,7 @@ router.get('/:id', verifyToken, checkRole(['NGUOI_YEU_CAU', 'IT_L1', 'IT_L2', 'Q
  *             properties:
  *               trang_thai:
  *                 type: string
- *                 enum: [MOI_TAO, DANG_GIAI_QUYET, DA_GIAI_QUYET, DA_DONG]
+ *                 enum: [MOI_TAO, DANG_GIAI_QUYET, CHO_PHAN_HOI, DA_GIAI_QUYET, DA_DONG]
  *                 example: "DANG_GIAI_QUYET"
  *               ghi_chu:
  *                 type: string
@@ -178,6 +186,22 @@ router.put('/:id/status', verifyToken, checkRole(['IT_L1', 'IT_L2', 'QUAN_LY']),
  *         schema:
  *           type: string
  *         description: Mã ticket cần chuyển cấp
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ly_do
+ *               - cac_buoc_da_thu
+ *             properties:
+ *               ly_do:
+ *                 type: string
+ *                 example: "Vấn đề ngoài khả năng xử lý của L1"
+ *               cac_buoc_da_thu:
+ *                 type: string
+ *                 example: "Đã restart máy in và cài lại driver nhưng không được"
  *     responses:
  *       200:
  *         description: Chuyển cấp thành công
@@ -237,6 +261,10 @@ router.post('/:id/reopen', verifyToken, checkRole(['QUAN_LY']), ticketController
  *             properties:
  *               noi_dung:
  *                 type: string
+ *               loai_binh_luan:
+ *                 type: string
+ *                 enum: [public, internal]
+ *                 example: "public"
  *               files:
  *                 type: array
  *                 items:

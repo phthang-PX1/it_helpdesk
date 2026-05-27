@@ -18,6 +18,18 @@ enum VaiTroEnum {
   QUAN_LY
 }
 
+enum MucDoAnhHuong {
+  THAP
+  TRUNG_BINH
+  CAO
+}
+
+enum MucDoKhanCap {
+  THAP
+  TRUNG_BINH
+  CAO
+}
+
 enum MucDoUuTien {
   THAP
   TRUNG_BINH
@@ -27,6 +39,7 @@ enum MucDoUuTien {
 enum TrangThaiPhieu {
   MOI_TAO
   DANG_GIAI_QUYET
+  CHO_PHAN_HOI
   DA_GIAI_QUYET
   DA_DONG
 }
@@ -140,6 +153,8 @@ model PhieuHoTro {
   ma_phieu            String         @unique @db.VarChar(50)
   tieu_de             String         @db.VarChar(255)
   mo_ta_chi_tiet      String         @db.Text
+  muc_do_anh_huong    MucDoAnhHuong  @default(TRUNG_BINH)
+  muc_do_khan_cap     MucDoKhanCap   @default(TRUNG_BINH)
   muc_do_uu_tien      MucDoUuTien
   trang_thai          TrangThaiPhieu @default(MOI_TAO)
   nguoi_tao_id        Int
@@ -171,6 +186,7 @@ model PhieuHoTro {
   @@index([nguoi_ho_tro_id])
   @@index([nhom_xu_ly_id])
   @@index([phieu_lien_quan_id])
+  @@index([trang_thai, muc_do_uu_tien])
   @@map("phieu_ho_tro")
 }
 
@@ -224,6 +240,7 @@ model LichSuPhieu {
   gia_tri_moi        String?    @db.Text
   ngay_thuc_hien     DateTime   @default(now()) @db.Timestamptz
   ghi_chu            String?    @db.Text
+  trace_id           String?    @db.VarChar(100)
 
   // Mối quan hệ
   phieu_ho_tro       PhieuHoTro @relation(fields: [phieu_ho_tro_id], references: [phieu_ho_tro_id], onDelete: Cascade)
@@ -232,6 +249,14 @@ model LichSuPhieu {
   @@index([phieu_ho_tro_id])
   @@index([nguoi_thuc_hien_id])
   @@map("lich_su_phieu")
+}
+
+model MaPhieuSequence {
+  id      Int @id @default(1)
+  year    Int @unique
+  last_id Int @default(0)
+
+  @@map("ma_phieu_sequence")
 }
 
 model PhieuDanhGia {
@@ -277,6 +302,8 @@ model SlaTheoDoi {
   thoi_diem_bat_dau   DateTime         @db.Timestamptz
   han_chot            DateTime         @db.Timestamptz
   thoi_diem_dat       DateTime?        @db.Timestamptz
+  thoi_diem_tam_dung  DateTime?        @db.Timestamptz
+  tong_thoi_gian_tam_dung Int          @default(0)
   da_vi_pham          Boolean          @default(false)
   duoc_mien_tru       Boolean          @default(false)
   ly_do_mien_tru      String?          @db.Text
