@@ -69,6 +69,21 @@ export const errorHandler = (
     });
   }
 
+  // Trường hợp 4.5: Lỗi upload file từ Multer
+  if (err.name === 'MulterError') {
+    const msgMap: Record<string, string> = {
+      LIMIT_FILE_SIZE: 'File quá lớn! Hệ thống chỉ chấp nhận file tối đa 20MB.',
+      LIMIT_UNEXPECTED_FILE: "Field upload không hợp lệ. Vui lòng dùng field tên 'files'.",
+      LIMIT_FILE_COUNT: 'Vượt quá số lượng file cho phép. Tối đa 5 file mỗi lần.',
+    };
+    return res.status(400).json({ success: false, message: msgMap[err.code] || `Lỗi upload file: ${err.message}` });
+  }
+
+  // Trường hợp 4.6: Lỗi Prisma vi phạm ràng buộc NOT NULL (P2011)
+  if (err.code === 'P2011') {
+    return res.status(400).json({ success: false, message: 'Thiếu dữ liệu bắt buộc khi lưu vào cơ sở dữ liệu.' });
+  }
+
   // Trường hợp 5: Lỗi không xác định (Lỗi sập nguồn, mất kết nối DB, code logic bị crash...)
   // Không bao giờ trả chi tiết lỗi hệ thống này ra cho Client ở Production để đảm bảo bảo mật
   return res.status(500).json({

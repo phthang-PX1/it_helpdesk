@@ -50,49 +50,115 @@ backend/
 
 ---
 
-## Huong dan chay
+## Hướng dẫn Chạy Dự án (End-to-End Setup Guide)
 
-### Yeu cau
-- Node.js >= 18
-- PostgreSQL (port 5434)
-- Redis (port 6379)
+Dự án bao gồm 2 phần chính: **Backend** (Node.js/Express + Prisma + PostgreSQL + Redis) và **Frontend** (React + Vite + TypeScript). 
 
-### Cai dat & Khoi dong
+Dưới đây là hướng dẫn từng bước để cài đặt và chạy dự án từ đầu sau khi clone về máy.
 
+---
+
+### 1. Yêu cầu Hệ thống (Prerequisites)
+Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đặt các công cụ sau:
+- **Node.js** (Phiên bản `>= 18.x`)
+- **Docker & Docker Desktop** (Khuyên dùng - để khởi chạy PostgreSQL và Redis nhanh chóng chỉ bằng 1 lệnh, không cần cài đặt trực tiếp lên hệ điều hành)
+- **Git**
+
+---
+
+### 2. Bước 1: Clone Mã nguồn (Clone Repository)
+Mở terminal và chạy lệnh sau để tải mã nguồn về máy:
+```bash
+git clone <URL_CỦA_REPOSITORY>
+cd project_code
+```
+
+---
+
+### 3. Bước 2: Khởi chạy Database & Redis bằng Docker
+Tại thư mục gốc của dự án (nơi có tệp `docker-compose.yml` vừa được thiết lập), chạy lệnh sau để khởi động PostgreSQL (cổng `5434`) và Redis (cổng `6379`) chạy ngầm:
+```bash
+docker compose up -d
+```
+*Lưu ý: Đảm bảo Docker Desktop đã được mở trước khi chạy lệnh này.*
+
+---
+
+### 4. Bước 3: Thiết lập Backend
+Di chuyển vào thư mục backend và cài đặt thư viện:
 ```bash
 cd backend
-
-# 1. Cai dependencies
 npm install
+```
 
-# 2. Cau hinh moi truong
-# Tao file .env tu mau .env.example va dien cac gia tri
+#### Cấu hình biến môi trường (`.env`)
+1. Trong thư mục `backend`, tạo file `.env` bằng cách copy từ file mẫu [backend/.env.example](file:///g:/UEL/nam3/kientap/project_code/backend/.env.example):
+   - **Windows (PowerShell):** `copy .env.example .env`
+   - **Linux/macOS:** `cp .env.example .env`
+2. Mở file `.env` vừa tạo. Do ta dùng Docker Compose, các cấu hình mặc định (Database port `5434`, mật khẩu `admin123` và Redis port `6379`) đã được thiết lập khớp hoàn hảo với Docker. Bạn **không cần phải chỉnh sửa gì thêm** trong file `.env` trừ khi muốn cấu hình Google OAuth hay gửi mail thực tế.
 
-# 3. Chay migration va tao bang
-npx prisma migrate dev
 
-# 4. Seed du lieu mau (50+ nhan vien, 4 vai tro, SLA mac dinh)
-node prisma/seed.js
+#### Khởi tạo Cơ sở dữ liệu & Seed dữ liệu mẫu
+Khi chạy lần đầu, bạn cần khởi tạo cấu trúc bảng và nạp dữ liệu mẫu (70 nhân viên, 8 tickets demo, SLA, Cơ sở tri thức):
+```bash
+# 1. Chạy Prisma Migration để tạo bảng trong PostgreSQL
+npx prisma migrate dev --name init
 
-# 5. Khoi dong dev server (port 3000, hot-reload)
+# 2. Seed dữ liệu mẫu vào Database
+npx prisma db seed
+```
+*(Nếu muốn xóa sạch cơ sở dữ liệu để làm mới lại từ đầu, chạy: `node prisma/clear.js` rồi chạy lại lệnh `npx prisma db seed`).*
+
+#### Khởi chạy Backend
+Khởi động máy chủ backend ở chế độ phát triển (Development mode):
+```bash
 npm run dev
 ```
+- Máy chủ Backend sẽ chạy tại: **`http://localhost:3000`**
+- Trang tài liệu API Swagger tích hợp tại: **`http://localhost:3000/api-docs`**
+- Mở giao diện quản lý DB trực quan (Prisma Studio): **`npx prisma studio`**
 
-API Docs: http://localhost:3000/api-docs
-Prisma Studio: npx prisma studio
+---
 
-### Scripts huu ich
-
+### 5. Bước 4: Thiết lập Frontend
+Mở một cửa sổ terminal mới (song song với terminal chạy backend), di chuyển vào thư mục frontend và cài đặt thư viện:
 ```bash
-# Xoa toan bo data (giu cau truc bang), dung khi reset testing
-node prisma/clear.js
-
-# Seed lai data mau sau khi clear
-node prisma/seed.js
-
-# Them thong bao gia cho tai khoan IT_L1 (dung khi test Folder 3 Postman)
-node seed_noti.js
+cd frontend
+npm install
 ```
+
+#### Cấu hình biến môi trường (`.env`)
+1. Tạo file `.env` bằng cách copy từ file mẫu [frontend/.env.example](file:///g:/UEL/nam3/kientap/project_code/frontend/.env.example):
+   - **Windows (PowerShell):** `copy .env.example .env`
+   - **Linux/macOS:** `cp .env.example .env`
+2. Mặc định file chứa `VITE_API_URL=http://localhost:3000/api/v1` kết nối tới Backend ở cổng 3000 của bạn. Bạn có thể giữ nguyên giá trị này.
+
+#### Khởi chạy Frontend
+Chạy lệnh sau để khởi động dự án React ở môi trường local:
+```bash
+npm run dev
+```
+- Giao diện người dùng (Frontend) sẽ chạy tại: **`http://localhost:5173`** (hoặc cổng được hiển thị trong terminal). Mở địa chỉ này trên trình duyệt để sử dụng ứng dụng.
+
+---
+
+### 6. Danh sách Tài khoản Kiểm thử (Demo Accounts)
+Sau khi chạy script seed dữ liệu mẫu, hệ thống sẽ được cấu hình sẵn **70 tài khoản** thuộc 4 vai trò khác nhau. Tất cả tài khoản demo sử dụng chung một mật khẩu mặc định:
+
+> [!IMPORTANT]
+> **Mật khẩu mặc định cho toàn bộ tài khoản:** `Mappacific@2025`
+
+| Vai trò (Role) | Tài khoản / Email | Mô tả |
+| :--- | :--- | :--- |
+| **QUẢN LÝ (Manager)** | `thangpq23406@st.uel.edu.vn` (hoặc username `thangpq23406`) | Quản lý IT - Có toàn quyền cấu hình SLA, phân công công việc, duyệt bài viết KB và xem báo cáo dashboard. |
+| **IT Tuyến 1 (IT_L1)** | `huyentld23406@st.uel.edu.vn` (username `huyentld23406`) <br> `ravi.kumar@mappacific.com` (username `ravi.kumar`) | Hỗ trợ cấp 1 - Tiếp nhận phiếu, xử lý nhanh, chuyển cấp lên L2 nếu cần thiết. |
+| **IT Tuyến 2 (IT_L2)** | `vanbtt23406@st.uel.edu.vn` (username `vanbtt23406`) <br> `siti.rahimah@mappacific.com` (username `siti.rahimah`) | Hỗ trợ chuyên sâu - Nhận phiếu chuyển cấp từ L1, viết bài viết Cơ sở tri thức (KB). |
+| **NGƯỜI YÊU CẦU (Requester)** | `sales1@mappacific.com` (username `sales1`) <br> `fin1@mappacific.com` (username `fin1`) <br> `ops1@mappacific.com` (username `ops1`) | Nhân viên nghiệp vụ - Tạo phiểu yêu cầu hỗ trợ sự cố, xem bình luận và đánh giá chất lượng (khảo sát SLA). |
+
+### Các Scripts hữu ích khác
+Trong thư mục `backend`, bạn có thể chạy các script sau để phục vụ kiểm thử nhanh:
+- `node prisma/clear.js`: Xóa sạch dữ liệu trong các bảng (giữ nguyên cấu trúc database).
+- `node seed_noti.js`: Tạo thông báo giả lập cho IT_L1 để test luồng thông báo trong Postman/Frontend.
 
 ---
 
