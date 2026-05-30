@@ -68,6 +68,10 @@ export const ticketService = {
       supporterId = null;
     }
 
+    if (!groupXulyId) {
+      throw new AppError('Không thể xác định nhóm xử lý. Vui lòng liên hệ quản trị viên.', 500);
+    }
+
     // Áp dụng SLA
     let policy = await ticketRepository.findActiveSlaPolicy(muc_do_uu_tien);
     if (!policy) {
@@ -110,15 +114,7 @@ export const ticketService = {
     ];
 
     // MẢNH GHÉP UUID: Xử lý đóng gói mảng file vật lý đổi tên bằng UUID hằng số
-    const processedFiles = expressFiles.map(file => {
-      const uniqueName = `${crypto.randomUUID()}${path.extname(file.originalname)}`;
-      return {
-        ten_tep: file.originalname,
-        duong_dan_file: `/uploads/tickets/${uniqueName}`,
-        dinh_dang: path.extname(file.originalname).replace('.', '').toUpperCase(),
-        dung_luong_kb: Math.round(file.size / 1024)
-      };
-    });
+    const processedFiles = expressFiles.map(file => saveMemoryFileToDisk(file, 'attachments'));
 
     const ticketData = {
       tieu_de: data.tieu_de,
