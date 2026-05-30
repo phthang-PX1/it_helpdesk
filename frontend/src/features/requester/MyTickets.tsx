@@ -5,11 +5,11 @@
  *
  * ⚠️  STUB – Đang chờ tích hợp dữ liệu API thực tế.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MyTickets.css';
+import { ticketService } from '../../services/ticket.service';
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
 interface Ticket {
   id: string;
   title: string;
@@ -19,13 +19,32 @@ interface Ticket {
   sla: string;
 }
 
-const MOCK_TICKETS: Ticket[] = [
-  { id: 'SW-2026-0142', title: 'Không mở được phần mềm kế toán MISA sau khi cập nhật', priority: 'high', status: 'processing', created: '24/05/2026 09:15', sla: '25/05/2026 13:00' },
-  { id: 'HW-2026-0110', title: 'Màn hình máy tính bị sọc ngang, không sử dụng được', priority: 'medium', status: 'new', created: '24/05/2026 14:32', sla: '26/05/2026 08:00' },
-  { id: 'NW-2026-0088', title: 'Wifi văn phòng tầng 2 kết nối chập chờn', priority: 'low', status: 'resolved', created: '22/05/2026 10:00', sla: '23/05/2026 10:00' },
-  { id: 'SW-2026-0097', title: 'Lỗi không gửi được email qua Outlook', priority: 'medium', status: 'closed', created: '20/05/2026 16:05', sla: '21/05/2026 16:00' },
-  { id: 'HW-2026-0055', title: 'Bàn phím laptop không nhận một số phím', priority: 'low', status: 'new', created: '25/05/2026 08:00', sla: '27/05/2026 08:00' },
-];
+const mapBackendTicket = (t: any): Ticket => {
+  let priorityMapped: 'high' | 'medium' | 'low' = 'medium';
+  if (t.muc_do_uu_tien === 'CAO') priorityMapped = 'high';
+  else if (t.muc_do_uu_tien === 'THAP') priorityMapped = 'low';
+
+  let statusMapped: 'new' | 'processing' | 'resolved' | 'closed' | 'reopened' = 'new';
+  if (t.trang_thai === 'DANG_GIAI_QUYET') statusMapped = 'processing';
+  else if (t.trang_thai === 'DA_GIAI_QUYET') statusMapped = 'resolved';
+  else if (t.trang_thai === 'DA_DONG') statusMapped = 'closed';
+
+  const creationTime = new Date(t.ngay_tao).getTime();
+  let slaDurationHours = 24;
+  if (t.muc_do_uu_tien === 'CAO') slaDurationHours = 4;
+  else if (t.muc_do_uu_tien === 'THAP') slaDurationHours = 40;
+
+  const slaDeadline = creationTime + slaDurationHours * 60 * 60 * 1000;
+
+  return {
+    id: String(t.phieu_ho_tro_id),
+    title: t.tieu_de,
+    priority: priorityMapped,
+    status: statusMapped,
+    created: new Date(t.ngay_tao).toLocaleString('vi-VN'),
+    sla: new Date(slaDeadline).toLocaleString('vi-VN'),
+  };
+};
 
 const STATUS_META: Record<Ticket['status'], { label: string; cls: string; icon: string }> = {
   new:        { label: 'Mới tạo',        cls: 'new',        icon: '🆕' },
@@ -41,20 +60,37 @@ const PRIORITY_META: Record<Ticket['priority'], { label: string; cls: string }> 
   low:    { label: 'Thấp',      cls: 'low'    },
 };
 
-// ─── Summary card count ──────────────────────────────────────────────────────
-const countByStatus = (s: Ticket['status']) => MOCK_TICKETS.filter(t => t.status === s).length;
-
-// ─── Component ───────────────────────────────────────────────────────────────
 export const MyTickets: React.FC = () => {
   const navigate = useNavigate();
-  const [filter, setFilter] = React.useState<Ticket['status'] | 'all'>('all');
+  const [filter, setFilter] = useState<Ticket['status'] | 'all'>('all');
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadTickets = async () => {
+      setIsLoading(true);
+      try {
+        const response = await ticketService.getTickets();
+        if (response.success && Array.isArray(response.data)) {
+          setTickets(response.data.map(mapBackendTicket));
+        }
+      } catch (err) {
+        console.error('Failed to load tickets:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadTickets();
+  }, []);
+
+  const countByStatus = (s: Ticket['status']) => tickets.filter(t => t.status === s).length;
 
   const visible = filter === 'all'
-    ? MOCK_TICKETS
-    : MOCK_TICKETS.filter(t => t.status === filter);
+    ? tickets
+    : tickets.filter(t => t.status === filter);
 
   const summaryCards: Array<{ status: Ticket['status'] | 'all'; label: string; count: number; color: string; bg: string }> = [
-    { status: 'all',        label: 'Tất cả',         count: MOCK_TICKETS.length, color: '#2563EB', bg: '#EFF6FF' },
+    { status: 'all',        label: 'Tất cả',         count: tickets.length, color: '#2563EB', bg: '#EFF6FF' },
     { status: 'new',        label: 'Mới tạo',        count: countByStatus('new'),        color: '#2563EB', bg: '#EFF6FF' },
     { status: 'processing', label: 'Đang xử lý',     count: countByStatus('processing'), color: '#D97706', bg: '#FFFBEB' },
     { status: 'resolved',   label: 'Đã giải quyết', count: countByStatus('resolved'),   color: '#16A34A', bg: '#F0FDF4' },
@@ -107,7 +143,12 @@ export const MyTickets: React.FC = () => {
           </span>
         </div>
 
-        {visible.length === 0 ? (
+        {isLoading ? (
+          <div className="mytickets-empty">
+            <span className="spinner-inline" style={{ width: '32px', height: '32px', borderWidth: '3px', display: 'inline-block' }}></span>
+            <p className="empty-title" style={{ marginTop: '12px' }}>Đang tải danh sách phiếu...</p>
+          </div>
+        ) : visible.length === 0 ? (
           <div className="mytickets-empty">
             <div className="empty-icon">📭</div>
             <p className="empty-title">Không có phiếu nào trong danh mục này</p>

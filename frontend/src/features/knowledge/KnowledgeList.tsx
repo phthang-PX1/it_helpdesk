@@ -113,7 +113,7 @@ export const KnowledgeList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedTag, setSelectedTag] = useState<string>('All');
-  const [selectedStatus, setSelectedStatus] = useState<string>('Published'); // Mặc định chỉ xem bài viết xuất bản
+  const [activeTab, setActiveTab] = useState<'Published' | 'Draft'>('Published');
 
   // Gom tất cả các thẻ tag độc nhất trong danh sách bài viết
   const allTags = Array.from(
@@ -139,13 +139,8 @@ export const KnowledgeList: React.FC = () => {
     // 4. Lọc theo thẻ tag
     if (selectedTag !== 'All' && !article.tags.includes(selectedTag)) return false;
 
-    // 5. Lọc theo trạng thái bài viết (Lưu nháp / Đã xuất bản) - Chỉ IT được chọn bộ lọc này
-    if (userRole === 'L2' || userRole === 'Quản lý IT') {
-      if (selectedStatus !== 'All' && article.status !== selectedStatus) return false;
-    } else {
-      // Người dùng thường chỉ được xem bài đã xuất bản
-      if (article.status !== 'Published') return false;
-    }
+    // 5. Lọc theo trạng thái bài viết (Lưu nháp / Đã xuất bản) thông qua activeTab
+    if (article.status !== activeTab) return false;
 
     return true;
   });
@@ -201,8 +196,6 @@ export const KnowledgeList: React.FC = () => {
                 <option value="All">Tất cả chuyên mục</option>
                 <option value="Phần cứng">Hỗ trợ Phần cứng</option>
                 <option value="Phần mềm">Hỗ trợ Phần mềm</option>
-                <option value="Mạng">Hỗ trợ Mạng</option>
-                <option value="Hệ thống">Hệ thống Cloud/DB</option>
               </select>
 
               <select
@@ -215,19 +208,6 @@ export const KnowledgeList: React.FC = () => {
                   <option key={tag} value={tag}>{tag}</option>
                 ))}
               </select>
-
-              {/* Lọc trạng thái (Chỉ hiển thị cho IT L2/Quản lý) */}
-              {(userRole === 'L2' || userRole === 'Quản lý IT') && (
-                <select
-                  className="kb-select-filter"
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                >
-                  <option value="All">Tất cả trạng thái</option>
-                  <option value="Published">Đã xuất bản</option>
-                  <option value="Draft">Bản nháp</option>
-                </select>
-              )}
             </div>
 
             {/* Chỉ L2 mới được hiển thị nút Tạo bài viết mới */}
@@ -247,7 +227,25 @@ export const KnowledgeList: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. Lưới card bài viết */}
+        {/* 3. Thanh chuyển đổi Tab ngang */}
+        <div className="kb-tabs-container">
+          <button
+            type="button"
+            className={`kb-tab-item ${activeTab === 'Published' ? 'active' : ''}`}
+            onClick={() => setActiveTab('Published')}
+          >
+            Đã xuất bản
+          </button>
+          <button
+            type="button"
+            className={`kb-tab-item ${activeTab === 'Draft' ? 'active' : ''}`}
+            onClick={() => setActiveTab('Draft')}
+          >
+            Bản nháp
+          </button>
+        </div>
+
+        {/* 4. Lưới card bài viết */}
         {filteredArticles.length > 0 ? (
           <div className="kb-cards-grid">
             {filteredArticles.map((article) => (

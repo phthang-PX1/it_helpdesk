@@ -184,6 +184,15 @@ export const KnowledgeDetail: React.FC = () => {
               <span>Lượt xem: {article.views}</span>
             </div>
             <h1 className="kb-detail-title">{article.title}</h1>
+            {article.tags && article.tags.length > 0 && (
+              <div className="kb-detail-tags">
+                {article.tags.map((tag, index) => (
+                  <span key={index} className="kb-tag">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="kb-detail-body">

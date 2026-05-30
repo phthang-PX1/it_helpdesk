@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+import { ticketService } from '../../services/ticket.service';
+import { kbService } from '../../services/kb.service';
 
 interface DashboardProps {
   triggerQuickCreate?: number;
@@ -8,12 +10,17 @@ interface DashboardProps {
 
 interface Ticket {
   id: string;
+  maPhieu: string;
   title: string;
   priority: 'Low' | 'Medium' | 'High';
   status: 'New' | 'Pending' | 'Resolved' | 'Closed';
-  slaDeadline: number; // timestamp
+  trang_thai: 'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG';
+  slaPhanHoi?: any;
+  slaXuLy?: any;
   assignee: string;
   updatedAt: string;
+  sla_theo_doi?: any[];
+  danh_sach_sla?: any[];
 }
 
 interface KnowledgeArticle {
@@ -24,77 +31,85 @@ interface KnowledgeArticle {
   content: string;
 }
 
+const mapBackendTicket = (t: any): Ticket => {
+  let priorityMapped: 'Low' | 'Medium' | 'High' = 'Medium';
+  if (t.muc_do_uu_tien === 'CAO') priorityMapped = 'High';
+  else if (t.muc_do_uu_tien === 'THAP') priorityMapped = 'Low';
+
+  let statusMapped: 'New' | 'Pending' | 'Resolved' | 'Closed' = 'New';
+  if (t.trang_thai === 'DANG_GIAI_QUYET') statusMapped = 'Pending';
+  else if (t.trang_thai === 'DA_GIAI_QUYET') statusMapped = 'Resolved';
+  else if (t.trang_thai === 'DA_DONG') statusMapped = 'Closed';
+
+  const slaPhanHoi = t.danh_sach_sla?.find((s: any) => s.loai_sla === 'PHAN_HOI');
+  const slaXuLy = t.danh_sach_sla?.find((s: any) => s.loai_sla === 'XU_LY');
+
+  return {
+    id: String(t.phieu_ho_tro_id),
+    maPhieu: t.ma_phieu,
+    title: t.tieu_de,
+    priority: priorityMapped,
+    status: statusMapped,
+    trang_thai: t.trang_thai,
+    slaPhanHoi,
+    slaXuLy,
+    assignee: t.nguoi_ho_tro?.ho_ten || 'Chưa phân công',
+    updatedAt: new Date(t.ngay_cap_nhat).toLocaleDateString('vi-VN'),
+    sla_theo_doi: t.sla_theo_doi || t.danh_sach_sla,
+    danh_sach_sla: t.danh_sach_sla
+  };
+};
+
 export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
   const navigate = useNavigate();
-  // --- MOCK DATA ---
-  const [tickets, setTickets] = useState<Ticket[]>([
-    {
-      id: 'HW-2026-0042',
-      title: 'Hỗ trợ lỗi màn hình xanh (BSOD) khi đang họp Zoom',
-      priority: 'High',
-      status: 'Pending',
-      slaDeadline: Date.now() + 2 * 3600 * 1000 + 14 * 60 * 1000 + 35 * 1000, // 2h 14m 35s
-      assignee: 'Nguyễn Văn Hỗ Trợ (L1)',
-      updatedAt: '10 phút trước',
-    },
-    {
-      id: 'SW-2026-0045',
-      title: 'Yêu cầu cấp phát bản quyền phần mềm Figma Design Pro',
-      priority: 'Medium',
-      status: 'New',
-      slaDeadline: Date.now() + 15 * 3600 * 1000, // 15h
-      assignee: 'Chưa phân công (L1 nhận)',
-      updatedAt: '30 phút trước',
-    },
-    {
-      id: 'NW-2026-0041',
-      title: 'Không kết nối được vào mạng Wifi Office_HCM_5G',
-      priority: 'High',
-      status: 'Pending',
-      slaDeadline: Date.now() + 4 * 60 * 1000 + 12 * 1000, // 4m 12s
-      assignee: 'Phạm Văn Mạng (L2)',
-      updatedAt: '5 phút trước',
-    },
-    {
-      id: 'HW-2026-0038',
-      title: 'Thay pin máy tính xách tay Dell Latitude 7420 bị chai',
-      priority: 'Low',
-      status: 'Resolved',
-      slaDeadline: Date.now() - 2 * 3600 * 1000, // đã hoàn thành
-      assignee: 'Nguyễn Văn Hỗ Trợ (L1)',
-      updatedAt: 'Hôm qua',
-    },
-  ]);
-
-  const [articles] = useState<KnowledgeArticle[]>([
-    {
-      id: 'KB-001',
-      category: 'Mạng & Kết nối',
-      title: 'Hướng dẫn cấu hình VPN công ty để làm việc từ xa (WFA) trên macOS và Windows',
-      helpfulCount: 142,
-      content: 'Để kết nối VPN, trước tiên bạn cần tải phần mềm FortiClient... Sau đó nhập cổng kết nối vpn.company.com và thông tin tài khoản AD được cấp.',
-    },
-    {
-      id: 'KB-002',
-      category: 'Tài khoản & Bảo mật',
-      title: 'Quy trình tự thiết lập xác thực đa yếu tố (MFA) Microsoft Authenticator cho người mới',
-      helpfulCount: 98,
-      content: 'Tải ứng dụng Microsoft Authenticator trên thiết bị di động... Vào trang security.company.com quét mã QR để kích hoạt xác thực hai lớp.',
-    },
-    {
-      id: 'KB-003',
-      category: 'Thiết bị & Phần cứng',
-      title: 'Mẹo khắc phục nhanh khi máy in kẹt giấy hoặc không nhận lệnh in từ mạng LAN nội bộ',
-      helpfulCount: 67,
-      content: 'Tắt nguồn máy in, rút giắc mạng LAN và cắm lại. Mở khay giấy kiểm tra xem có mẩu giấy thừa nào bị kẹt không. Clear queue in Spooler trên máy tính.',
-    },
-  ]);
-
-  // --- STATE FOR INTERACTIVITY ---
+  
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showHotlineModal, setShowHotlineModal] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
-  
+
+  // Fetch tickets and KB articles from backend
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [tResponse, kResponse] = await Promise.all([
+          ticketService.getTickets({ limit: 100 }),
+          kbService.getAll({ limit: 5 })
+        ]);
+
+        if (tResponse.success && Array.isArray(tResponse.data)) {
+          setTickets(tResponse.data.map(mapBackendTicket));
+        }
+
+        if (kResponse && Array.isArray(kResponse.data)) {
+          setArticles(kResponse.data.map((art: any) => {
+            let cat = 'Mạng & Kết nối';
+            if (art.loai_su_co === 'security') cat = 'Tài khoản & Bảo mật';
+            else if (art.loai_su_co === 'hardware') cat = 'Thiết bị & Phần cứng';
+            else if (art.loai_su_co === 'software') cat = 'Phần mềm & Dịch vụ';
+
+            return {
+              id: String(art.tri_thuc_id),
+              category: cat,
+              title: art.tieu_de,
+              helpfulCount: art.luot_huu_ich,
+              content: art.noi_dung
+            };
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to load Dashboard data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
   // Form input states
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
@@ -117,62 +132,65 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const formatSLA = (ticket: Ticket) => {
-    if (ticket.status === 'Resolved' || ticket.status === 'Closed') {
-      return <span className="sla-timer sla-ok">Đạt SLA ✓</span>;
+  const renderSlaColumn = (ticket: any, loaiSla: 'PHAN_HOI' | 'XU_LY') => {
+    const slaList = ticket.sla_theo_doi || ticket.danh_sach_sla || [];
+    const sla = slaList.find((s: any) => s.loai_sla === loaiSla);
+    
+    if (!sla) {
+      return <span className="sla-timer" style={{ color: '#64748B' }}>N/A</span>;
     }
 
-    const diff = ticket.slaDeadline - timeNow;
-    if (diff <= 0) {
-      return <span className="sla-timer sla-danger">Quá hạn! (Vi phạm)</span>;
+    if (sla.thoi_diem_dat) {
+      return <span className="sla-timer sla-ok">Đạt</span>;
+    }
+
+    const deadline = Date.parse(sla.han_chot);
+    const diff = deadline - timeNow;
+
+    if (diff <= 0 || sla.da_vi_pham) {
+      return <span className="sla-timer sla-danger">Vi phạm</span>;
     }
 
     const hours = Math.floor(diff / (3600 * 1000));
     const mins = Math.floor((diff % (3600 * 1000)) / (60 * 1000));
-    const secs = Math.floor((diff % (60 * 1000)) / 1000);
-
     const pad = (num: number) => String(num).padStart(2, '0');
-    const displayStr = `${pad(hours)}g ${pad(mins)}p ${pad(secs)}s`;
 
-    if (diff < 15 * 60 * 1000) {
-      // dưới 15 phút hiển thị đỏ cảnh báo nguy cơ
-      return <span className="sla-timer sla-danger">Hạn: {displayStr} ⚠</span>;
-    } else if (diff < 120 * 60 * 1000) {
-      // dưới 2 tiếng hiển thị vàng
-      return <span className="sla-timer sla-warning">Hạn: {displayStr}</span>;
-    }
-    return <span className="sla-timer sla-ok">Hạn: {displayStr}</span>;
+    return <span className="sla-timer" style={{ color: diff < 2 * 3600 * 1000 ? '#D97706' : '#0F172A', fontWeight: 600 }}>
+      {pad(hours)}h {pad(mins)}m
+    </span>;
   };
 
   // --- ACTIONS HANDLERS ---
-  const handleCreateTicket = (e: React.FormEvent) => {
+  const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim() || !newDesc.trim()) return;
 
-    const newTicket: Ticket = {
-      id: `SW-2026-0${Math.floor(100 + Math.random() * 900)}`,
-      title: newTitle,
-      priority: newPriority,
-      status: 'New',
-      slaDeadline: Date.now() + (newPriority === 'High' ? 4 : newPriority === 'Medium' ? 12 : 24) * 3600 * 1000,
-      assignee: 'Chưa phân công (L1 nhận)',
-      updatedAt: 'Vừa xong',
-    };
-
-    setTickets([newTicket, ...tickets]);
-    setShowCreateForm(false);
-    
-    // Reset form
-    setNewTitle('');
-    setNewPriority('Medium');
-    setNewDesc('');
-    
-    alert(`Tạo phiếu thành công! Mã phiếu mới: ${newTicket.id}`);
+    setIsLoading(true);
+    try {
+      const response = await ticketService.createTicket(newTitle, newDesc);
+      if (response.success && response.data) {
+        const addedTicket = mapBackendTicket(response.data);
+        setTickets(prev => [addedTicket, ...prev]);
+        setShowCreateForm(false);
+        // Reset form
+        setNewTitle('');
+        setNewPriority('Medium');
+        setNewDesc('');
+        alert(`Tạo phiếu thành công! Mã phiếu mới: ${addedTicket.maPhieu}`);
+      } else {
+        alert(response.message || 'Tạo phiếu thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Không thể tạo phiếu hỗ trợ.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Đếm số lượng ticket theo trạng thái
-  const countByStatus = (status: Ticket['status']) => {
-    return tickets.filter(t => t.status === status).length;
+  const countByStatus = (status: 'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG') => {
+    return tickets.filter(t => t.trang_thai === status).length;
   };
 
   return (
@@ -270,8 +288,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
             
             <div className="summary-card">
               <div className="summary-info">
-                <span className="summary-count">{countByStatus('New')}</span>
-                <span className="summary-label">Mới tạo</span>
+                <span className="summary-count">{countByStatus('MOI_TAO')}</span>
+                <span className="summary-label">Mới tiếp nhận</span>
               </div>
               <div className="summary-icon-wrapper state-new">
                 <svg viewBox="0 0 24 24">
@@ -282,8 +300,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
 
             <div className="summary-card">
               <div className="summary-info">
-                <span className="summary-count">{countByStatus('Pending')}</span>
-                <span className="summary-label">Đang giải quyết</span>
+                <span className="summary-count">{countByStatus('DANG_GIAI_QUYET')}</span>
+                <span className="summary-label">Đang xử lý</span>
               </div>
               <div className="summary-icon-wrapper state-pending">
                 <svg viewBox="0 0 24 24">
@@ -294,7 +312,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
 
             <div className="summary-card">
               <div className="summary-info">
-                <span className="summary-count">{countByStatus('Resolved')}</span>
+                <span className="summary-count">{countByStatus('DA_GIAI_QUYET')}</span>
                 <span className="summary-label">Đã giải quyết</span>
               </div>
               <div className="summary-icon-wrapper state-resolved">
@@ -306,7 +324,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
 
             <div className="summary-card">
               <div className="summary-info">
-                <span className="summary-count">{countByStatus('Closed')}</span>
+                <span className="summary-count">{countByStatus('DA_DONG')}</span>
                 <span className="summary-label">Đã đóng</span>
               </div>
               <div className="summary-icon-wrapper state-closed">
@@ -325,15 +343,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
             <h2 className="section-title">Danh sách phiếu hỗ trợ gần đây</h2>
           </div>
           <div className="table-card">
-            <div className="table-responsive-container">
-              <table className="antigravity-table">
-                <thead>
+            {isLoading ? (
+              <div style={{ padding: '24px', textAlign: 'center', color: '#64748B' }}>
+                <span className="spinner-inline" style={{ width: '24px', height: '24px', borderWidth: '3px', display: 'inline-block' }}></span>
+                <p style={{ marginTop: '8px' }}>Đang tải dữ liệu...</p>
+              </div>
+            ) : (
+              <div className="table-responsive-container">
+                <table className="antigravity-table">
+                  <thead>
                   <tr>
                     <th>Mã Phiếu</th>
                     <th>Tiêu đề</th>
                     <th>Độ ưu tiên</th>
                     <th>Trạng thái</th>
-                    <th>Hạn SLA (Đếm ngược)</th>
+                    <th>SLA Phản hồi</th>
+                    <th>SLA Xử lý</th>
                     <th>Kỹ thuật viên phụ trách</th>
                     <th>Cập nhật cuối</th>
                   </tr>
@@ -342,10 +367,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
                   {tickets.map(ticket => (
                     <tr key={ticket.id}>
                       <td>
-                        <span className="ticket-id-link" onClick={() => navigate(`/tickets/detail/${ticket.id}`)}>{ticket.id}</span>
+                        <span className="ticket-id-link" onClick={() => navigate(`/dashboard/tickets/${ticket.id}`)}>{ticket.maPhieu}</span>
                       </td>
                       <td>
-                        <div className="ticket-title-cell" title={ticket.title}>
+                        <div 
+                          className="ticket-title-cell" 
+                          title={ticket.title} 
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => navigate(`/dashboard/tickets/${ticket.id}`)}
+                        >
                           {ticket.title}
                         </div>
                       </td>
@@ -355,14 +385,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
                         {ticket.priority === 'Low' && <span className="badge-priority priority-low">Thấp</span>}
                       </td>
                       <td>
-                        {ticket.status === 'New' && <span className="badge-status status-new">Mới tạo</span>}
-                        {ticket.status === 'Pending' && <span className="badge-status status-pending">Đang giải quyết</span>}
-                        {ticket.status === 'Resolved' && <span className="badge-status status-resolved">Đã giải quyết</span>}
-                        {ticket.status === 'Closed' && <span className="badge-status status-closed">Đã đóng</span>}
+                        {ticket.trang_thai === 'MOI_TAO' && <span className="badge-status status-new">Mới tiếp nhận</span>}
+                        {ticket.trang_thai === 'DANG_GIAI_QUYET' && <span className="badge-status status-pending">Đang xử lý</span>}
+                        {ticket.trang_thai === 'DA_GIAI_QUYET' && <span className="badge-status status-resolved">Đã giải quyết</span>}
+                        {ticket.trang_thai === 'DA_DONG' && <span className="badge-status status-closed" style={{ backgroundColor: '#F1F5F9', color: '#475569' }}>Đã đóng</span>}
                       </td>
-                      <td>
-                        {formatSLA(ticket)}
-                      </td>
+                      <td>{renderSlaColumn(ticket, 'PHAN_HOI')}</td>
+                      <td>{renderSlaColumn(ticket, 'XU_LY')}</td>
                       <td>
                         <span style={{ fontSize: '13.5px', color: '#334155', fontWeight: 500 }}>
                           {ticket.assignee}
@@ -378,6 +407,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
                 </tbody>
               </table>
             </div>
+            )}
           </div>
         </section>
 
@@ -528,7 +558,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
             <p style={{ fontSize: '13.5px', color: '#64748B', margin: '0 0 24px 0', lineHeight: 1.5 }}>
               Đối với sự cố chặn đứng hoạt động của toàn văn phòng hoặc các lỗi bảo mật nghiêm trọng.
             </p>
-
             <div style={{
               backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px',
               padding: '16px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '8px'
@@ -546,7 +575,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
                 <strong style={{ color: '#10B981' }}>MS Teams / Slack: @IT-Helpdesk</strong>
               </div>
             </div>
-
             <button 
               type="button" 
               onClick={() => setShowHotlineModal(false)}

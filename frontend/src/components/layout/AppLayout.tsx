@@ -44,7 +44,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
    * - L1 / Admin     → /tickets/queue (hàng đợi xử lý)
    */
   const ticketPath = (() => {
-    const role = localStorage.getItem('user.vai_tro.ma_vai_tro') || session.role;
+    const role = session.ma_vai_tro || session.role;
     if (role === 'Người yêu cầu' || role === 'NGUOI_YEU_CAU') return '/tickets/my-tickets';
     if (role === 'L2' || role === 'IT_L2')            return '/tickets/l2';
     return '/tickets/queue';
@@ -112,7 +112,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
   // ── Lọc menu theo vai trò (UC-01 Role-based Routing) ──────────────────────
   const filteredMenuItems = menuItems.filter(item => {
-    const role = localStorage.getItem('user.vai_tro.ma_vai_tro') || session.role;
+    const role = session.ma_vai_tro || session.role;
     // Người yêu cầu: chỉ Dashboard, Phiếu hỗ trợ, Cơ sở tri thức
     if (role === 'Người yêu cầu' || role === 'NGUOI_YEU_CAU') {
       return ['dashboard', 'tickets', 'kb'].includes(item.id);

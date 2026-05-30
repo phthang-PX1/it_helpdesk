@@ -13,12 +13,10 @@ const REPORT_TEMPLATES = [
   { id: 'sla-breach',   icon: '⚠️', name: 'Vi phạm SLA',           desc: 'Danh sách và thống kê chi tiết các phiếu đã vượt thời gian cam kết SLA.' },
   { id: 'ticket-trend', icon: '📈', name: 'Xu hướng Ticket',        desc: 'Biểu đồ lượng phiếu tạo mới, giải quyết và tồn đọng theo tuần / tháng / quý.' },
   { id: 'category',     icon: '🗂️', name: 'Phân loại sự cố',       desc: 'Phân bố ticket theo danh mục (Phần cứng, Phần mềm, Mạng, Khác) và mức độ ưu tiên.' },
-  { id: 'satisfaction', icon: '⭐', name: 'Đánh giá hài lòng',      desc: 'Tổng hợp điểm sao khảo sát của Người yêu cầu sau khi phiếu được giải quyết.' },
-  { id: 'first-contact', icon: '🎯', name: 'Tỷ lệ giải quyết L1',  desc: 'Tỷ lệ phiếu L1 tự xử lý thành công mà không cần chuyển cấp lên L2.' },
 ];
 
 export const Reports: React.FC = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>('kpi-staff');
   const [dateFrom, setDateFrom] = useState('2026-05-01');
   const [dateTo,   setDateTo]   = useState('2026-05-31');
   const [team,     setTeam]     = useState('all');

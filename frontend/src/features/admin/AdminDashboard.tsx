@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
+import { slaService, type SLAPolicy as BackendSLAPolicy } from '../../services/sla.service';
+import { ticketService, type Ticket as BackendTicket } from '../../services/ticket.service';
 
 // ─────────────────────────────────────────────
 //  Types
@@ -16,106 +19,40 @@ interface SLAPolicy {
   high_resolve: number;
   remind_before: number;
   active: boolean;
+  backendIds: number[];
 }
 
 interface UrgentTicket {
   id: string;
+  dbId: number;
   title: string;
   priority: 'high' | 'medium' | 'low';
   status: 'overdue' | 'near_due' | 'critical';
+  trang_thai: 'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG';
   assignee: string;
-  sla_deadline: string;
-  remaining: string;
+  slaPhanHoi: any;
+  slaXuLy: any;
+  danh_sach_sla?: any[];
 }
-
-// ─────────────────────────────────────────────
-//  Mock Data
-// ─────────────────────────────────────────────
-const INITIAL_SLA_POLICIES: SLAPolicy[] = [
-  {
-    id: 1,
-    name: 'Chính sách SLA Chuẩn',
-    schedule: 'business',
-    low_response: 8,
-    low_resolve: 72,
-    medium_response: 4,
-    medium_resolve: 24,
-    high_response: 1,
-    high_resolve: 8,
-    remind_before: 60,
-    active: true,
-  },
-  {
-    id: 2,
-    name: 'Chính sách SLA Khẩn 24/7',
-    schedule: '24x7',
-    low_response: 4,
-    low_resolve: 48,
-    medium_response: 2,
-    medium_resolve: 12,
-    high_response: 0.5,
-    high_resolve: 4,
-    remind_before: 30,
-    active: false,
-  },
-];
-
-const URGENT_TICKETS: UrgentTicket[] = [
-  {
-    id: 'HW-2026-0041',
-    title: 'Máy chủ Production ngừng hoạt động đột ngột',
-    priority: 'high',
-    status: 'overdue',
-    assignee: 'Trần Văn B',
-    sla_deadline: '2026-05-25 08:00',
-    remaining: 'Quá hạn 4h 20m',
-  },
-  {
-    id: 'SW-2026-0078',
-    title: 'Lỗi xác thực người dùng trên hệ thống CRM',
-    priority: 'high',
-    status: 'critical',
-    assignee: 'Lê Thị C',
-    sla_deadline: '2026-05-25 13:00',
-    remaining: 'Còn 0h 25m',
-  },
-  {
-    id: 'NW-2026-0055',
-    title: 'Đứt kết nối mạng nội bộ tầng 3',
-    priority: 'high',
-    status: 'near_due',
-    assignee: 'Phạm Đình D',
-    sla_deadline: '2026-05-25 14:30',
-    remaining: 'Còn 2h 05m',
-  },
-  {
-    id: 'SW-2026-0089',
-    title: 'Không in được tài liệu từ phần mềm kế toán',
-    priority: 'medium',
-    status: 'near_due',
-    assignee: 'Nguyễn Thị E',
-    sla_deadline: '2026-05-25 16:00',
-    remaining: 'Còn 3h 35m',
-  },
-  {
-    id: 'HW-2026-0062',
-    title: 'Máy tính giám đốc không khởi động được',
-    priority: 'high',
-    status: 'critical',
-    assignee: 'Hoàng Văn F',
-    sla_deadline: '2026-05-25 13:30',
-    remaining: 'Còn 0h 55m',
-  },
-];
 
 // ─────────────────────────────────────────────
 //  Line Chart (SVG – Ticket Trend)
 // ─────────────────────────────────────────────
-const LineChart: React.FC = () => {
-  const data = [42, 55, 38, 67, 80, 72, 58, 91, 76, 84, 63, 95];
+const LineChart: React.FC<{ tickets: BackendTicket[] }> = ({ tickets }) => {
+  const currentYear = 2026;
+  const data = Array(12).fill(0);
+  tickets.forEach(t => {
+    if (t.ngay_tao) {
+      const date = new Date(t.ngay_tao);
+      if (date.getFullYear() === currentYear) {
+        data[date.getMonth()] += 1;
+      }
+    }
+  });
+
   const labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
   const W = 440, H = 160, PAD = 20;
-  const maxVal = Math.max(...data);
+  const maxVal = Math.max(...data, 1);
   const xs = data.map((_, i) => PAD + (i / (data.length - 1)) * (W - PAD * 2));
   const ys = data.map(v => H - PAD - ((v / maxVal) * (H - PAD * 2)));
 
@@ -125,7 +62,6 @@ const LineChart: React.FC = () => {
   return (
     <div className="chart-wrapper" style={{ height: 220 }}>
       <svg viewBox={`0 0 ${W} ${H + 20}`} style={{ width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid meet">
-        {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
           <line
             key={i}
@@ -134,7 +70,6 @@ const LineChart: React.FC = () => {
             stroke="#E2E8F0" strokeWidth="1"
           />
         ))}
-        {/* Fill area */}
         <defs>
           <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#2563EB" stopOpacity="0.18" />
@@ -142,15 +77,12 @@ const LineChart: React.FC = () => {
           </linearGradient>
         </defs>
         <path d={fillD} fill="url(#lineGrad)" />
-        {/* Line */}
         <path d={pathD} fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        {/* Dots */}
         {xs.map((x, i) => (
           <circle key={i} cx={x} cy={ys[i]} r="4" fill="#2563EB" stroke="#fff" strokeWidth="2">
             <title>{`Tháng ${labels[i]}: ${data[i]} phiếu`}</title>
           </circle>
         ))}
-        {/* X Labels */}
         {xs.map((x, i) => (
           <text key={i} x={x} y={H + 16} textAnchor="middle" fontSize="9" fill="#94A3B8" fontWeight="600">
             {labels[i]}
@@ -164,18 +96,25 @@ const LineChart: React.FC = () => {
 // ─────────────────────────────────────────────
 //  Donut Chart (SVG – Priority Breakdown)
 // ─────────────────────────────────────────────
-const DonutChart: React.FC = () => {
+const DonutChart: React.FC<{ tickets: BackendTicket[] }> = ({ tickets }) => {
+  let high = 0, medium = 0, low = 0;
+  tickets.forEach(t => {
+    if (t.muc_do_uu_tien === 'CAO') high++;
+    else if (t.muc_do_uu_tien === 'TRUNG_BINH') medium++;
+    else low++;
+  });
+
   const segments = [
-    { label: 'Cao', value: 38, color: '#EF4444' },
-    { label: 'Trung bình', value: 45, color: '#F59E0B' },
-    { label: 'Thấp', value: 30, color: '#10B981' },
+    { label: 'Cao', value: high, color: '#EF4444' },
+    { label: 'Trung bình', value: medium, color: '#F59E0B' },
+    { label: 'Thấp', value: low, color: '#10B981' },
   ];
   const total = segments.reduce((s, x) => s + x.value, 0);
   const R = 60, cx = 80, cy = 80, stroke = 28;
   let cumAngle = -Math.PI / 2;
 
   const arcs = segments.map(seg => {
-    const angle = (seg.value / total) * 2 * Math.PI;
+    const angle = total > 0 ? (seg.value / total) * 2 * Math.PI : 0;
     const x1 = cx + R * Math.cos(cumAngle);
     const y1 = cy + R * Math.sin(cumAngle);
     cumAngle += angle;
@@ -188,11 +127,15 @@ const DonutChart: React.FC = () => {
   return (
     <div className="chart-wrapper" style={{ height: 220, flexDirection: 'column', gap: 0 }}>
       <svg viewBox="0 0 160 160" style={{ width: 160, height: 160, flexShrink: 0 }}>
-        {arcs.map((arc, i) => (
-          <path key={i} d={arc.path} fill="none" stroke={arc.color} strokeWidth={stroke} strokeLinecap="butt">
-            <title>{`${arc.label}: ${arc.value} phiếu`}</title>
-          </path>
-        ))}
+        {total > 0 ? (
+          arcs.map((arc, i) => (
+            <path key={i} d={arc.path} fill="none" stroke={arc.color} strokeWidth={stroke} strokeLinecap="butt">
+              <title>{`${arc.label}: ${arc.value} phiếu`}</title>
+            </path>
+          ))
+        ) : (
+          <circle cx={cx} cy={cy} r={R} fill="none" stroke="#E2E8F0" strokeWidth={stroke} />
+        )}
         <text x={cx} y={cy - 6} textAnchor="middle" fontSize="20" fontWeight="800" fill="#0F172A">{total}</text>
         <text x={cx} y={cy + 12} textAnchor="middle" fontSize="9" fontWeight="600" fill="#64748B">tổng phiếu</text>
       </svg>
@@ -211,11 +154,29 @@ const DonutChart: React.FC = () => {
 // ─────────────────────────────────────────────
 //  Bar Chart (SLA Met vs Breach)
 // ─────────────────────────────────────────────
-const SLABarChart: React.FC = () => {
+const SLABarChart: React.FC<{ tickets: BackendTicket[] }> = ({ tickets }) => {
+  const getSlaStats = (priority: 'CAO' | 'TRUNG_BINH' | 'THAP') => {
+    const filtered = tickets.filter(t => t.muc_do_uu_tien === priority);
+    const withSla = filtered.filter(t => t.danh_sach_sla && t.danh_sach_sla.length > 0);
+    if (withSla.length === 0) return { met: 100, breach: 0 };
+    
+    let violated = 0;
+    withSla.forEach(t => {
+      const hasViolation = t.danh_sach_sla?.some(s => s.da_vi_pham);
+      if (hasViolation) violated++;
+    });
+    const breach = Math.round((violated / withSla.length) * 100);
+    return { met: 100 - breach, breach };
+  };
+
+  const highStats = getSlaStats('CAO');
+  const mediumStats = getSlaStats('TRUNG_BINH');
+  const lowStats = getSlaStats('THAP');
+
   const rows = [
-    { label: 'Ưu tiên Cao', met: 72, breach: 28 },
-    { label: 'Trung bình', met: 88, breach: 12 },
-    { label: 'Thấp', met: 94, breach: 6 },
+    { label: 'Ưu tiên Cao', met: highStats.met, breach: highStats.breach },
+    { label: 'Trung bình', met: mediumStats.met, breach: mediumStats.breach },
+    { label: 'Thấp', met: lowStats.met, breach: lowStats.breach },
   ];
 
   return (
@@ -245,18 +206,41 @@ const SLABarChart: React.FC = () => {
 // ─────────────────────────────────────────────
 //  Efficiency Chart
 // ─────────────────────────────────────────────
-const EfficiencyChart: React.FC = () => {
-  const staff = [
-    { name: 'Trần Văn Bình (L1)', resolved: 42, score: 94 },
-    { name: 'Lê Thị Cẩm (L1)', resolved: 37, score: 88 },
-    { name: 'Phạm Đình Dũng (L2)', resolved: 29, score: 96 },
-    { name: 'Nguyễn Thị Hoa (L1)', resolved: 33, score: 82 },
-    { name: 'Hoàng Văn Phúc (L2)', resolved: 25, score: 90 },
+const EfficiencyChart: React.FC<{ tickets: BackendTicket[] }> = ({ tickets }) => {
+  const staffMap: Record<string, { resolved: number; totalWithSla: number; metSla: number }> = {};
+  tickets.forEach(t => {
+    const supporterName = t.nguoi_ho_tro?.ho_ten;
+    if (!supporterName) return;
+
+    if (!staffMap[supporterName]) {
+      staffMap[supporterName] = { resolved: 0, totalWithSla: 0, metSla: 0 };
+    }
+
+    if (t.trang_thai === 'DA_GIAI_QUYET' || t.trang_thai === 'DA_DONG') {
+      staffMap[supporterName].resolved += 1;
+    }
+
+    if (t.danh_sach_sla && t.danh_sach_sla.length > 0) {
+      staffMap[supporterName].totalWithSla += 1;
+      const hasViolation = t.danh_sach_sla.some(s => s.da_vi_pham);
+      if (!hasViolation) {
+        staffMap[supporterName].metSla += 1;
+      }
+    }
+  });
+
+  const staffList = Object.entries(staffMap).map(([name, stats]) => {
+    const score = stats.totalWithSla > 0 ? Math.round((stats.metSla / stats.totalWithSla) * 100) : 100;
+    return { name, resolved: stats.resolved, score };
+  }).sort((a, b) => b.resolved - a.resolved).slice(0, 5);
+
+  const displayList = staffList.length > 0 ? staffList : [
+    { name: 'Chưa có kỹ thuật viên', resolved: 0, score: 100 }
   ];
 
   return (
     <div className="efficiency-list" style={{ paddingTop: 4 }}>
-      {staff.map((s, i) => (
+      {displayList.map((s, i) => (
         <div key={i} className="efficiency-item">
           <div className="efficiency-info">
             <span className="efficiency-name">{s.name}</span>
@@ -279,7 +263,7 @@ const EfficiencyChart: React.FC = () => {
 // ─────────────────────────────────────────────
 interface SLAModalProps {
   onClose: () => void;
-  onSave: (p: Omit<SLAPolicy, 'id' | 'active'>) => void;
+  onSave: (p: Omit<SLAPolicy, 'id' | 'active' | 'backendIds'>) => void;
 }
 
 const SLAModal: React.FC<SLAModalProps> = ({ onClose, onSave }) => {
@@ -447,32 +431,142 @@ const tdStyle: React.CSSProperties = {
 //  MAIN COMPONENT
 // ─────────────────────────────────────────────
 export const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'sla'>('overview');
   const [slaModalOpen, setSlaModalOpen] = useState(false);
   const [slaFilter, setSlaFilter] = useState('month');
-  const [policies, setPolicies] = useState<SLAPolicy[]>(INITIAL_SLA_POLICIES);
+  const [policies, setPolicies] = useState<SLAPolicy[]>([]);
+  const [tickets, setTickets] = useState<BackendTicket[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleTogglePolicy = (id: number) => {
-    setPolicies(prev => prev.map(p => (p.id === id ? { ...p, active: !p.active } : p)));
+  const groupPolicies = (backendPolicies: BackendSLAPolicy[]): SLAPolicy[] => {
+    const groups: Record<string, BackendSLAPolicy[]> = {};
+    backendPolicies.forEach(p => {
+      const name = p.ten_chinh_sach;
+      if (!groups[name]) groups[name] = [];
+      groups[name].push(p);
+    });
+
+    return Object.entries(groups).map(([name, list], index) => {
+      const pCao = list.find(p => p.muc_do_uu_tien === 'CAO');
+      const pTB = list.find(p => p.muc_do_uu_tien === 'TRUNG_BINH');
+      const pThap = list.find(p => p.muc_do_uu_tien === 'THAP');
+
+      const schedule = list[0].loai_thoi_gian === 'H24_7' ? '24x7' : 'business';
+      const active = list.some(p => p.trang_thai);
+      const minToHour = (min?: number) => min ? min / 60 : 0;
+
+      return {
+        id: index + 1,
+        name,
+        schedule,
+        low_response: minToHour(pThap?.tg_phan_hoi) || 8,
+        low_resolve: minToHour(pThap?.tg_xu_ly) || 72,
+        medium_response: minToHour(pTB?.tg_phan_hoi) || 4,
+        medium_resolve: minToHour(pTB?.tg_xu_ly) || 24,
+        high_response: minToHour(pCao?.tg_phan_hoi) || 1,
+        high_resolve: minToHour(pCao?.tg_xu_ly) || 8,
+        remind_before: 60,
+        active,
+        backendIds: list.map(p => p.chinh_sach_sla_id)
+      };
+    });
   };
 
-  const handleAddPolicy = (data: Omit<SLAPolicy, 'id' | 'active'>) => {
-    setPolicies(prev => [...prev, { ...data, id: Date.now(), active: true }]);
+  const fetchPolicies = async () => {
+    try {
+      const res = await slaService.getPolicies();
+      if (res.success && res.data) {
+        setPolicies(groupPolicies(res.data));
+      }
+    } catch (err) {
+      console.error('Error fetching SLA policies:', err);
+    }
+  };
+
+  const fetchTickets = async () => {
+    try {
+      const res = await ticketService.getTickets();
+      if (res.success && res.data) {
+        setTickets(res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching tickets for dashboard:', err);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([fetchPolicies(), fetchTickets()]).finally(() => setLoading(false));
+  }, []);
+
+  const handleTogglePolicy = async (id: number) => {
+    const policy = policies.find(p => p.id === id);
+    if (!policy) return;
+
+    try {
+      const newActiveState = !policy.active;
+      await Promise.all(
+        policy.backendIds.map(backendId =>
+          slaService.updatePolicy(backendId, { trang_thai: newActiveState })
+        )
+      );
+      fetchPolicies();
+    } catch (err) {
+      alert('Lỗi khi bật/tắt chính sách SLA: ' + (err as Error).message);
+    }
+  };
+
+  const handleAddPolicy = async (data: Omit<SLAPolicy, 'id' | 'active' | 'backendIds'>) => {
+    try {
+      const basePayload = {
+        ten_chinh_sach: data.name,
+        loai_thoi_gian: data.schedule === '24x7' ? 'H24_7' as const : 'GIO_HANH_CHINH' as const,
+      };
+
+      await Promise.all([
+        slaService.createPolicy({
+          ...basePayload,
+          muc_do_uu_tien: 'CAO',
+          tg_phan_hoi: data.high_response * 60,
+          tg_xu_ly: data.high_resolve * 60,
+          trang_thai: true
+        }),
+        slaService.createPolicy({
+          ...basePayload,
+          muc_do_uu_tien: 'TRUNG_BINH',
+          tg_phan_hoi: data.medium_response * 60,
+          tg_xu_ly: data.medium_resolve * 60,
+          trang_thai: true
+        }),
+        slaService.createPolicy({
+          ...basePayload,
+          muc_do_uu_tien: 'THAP',
+          tg_phan_hoi: data.low_response * 60,
+          tg_xu_ly: data.low_resolve * 60,
+          trang_thai: true
+        })
+      ]);
+
+      alert('Đã tạo chính sách SLA mới thành công!');
+      fetchPolicies();
+    } catch (err) {
+      alert('Lỗi khi tạo chính sách SLA mới: ' + (err as Error).message);
+    }
   };
 
   // ── Metric Cards ──────────────────────────
-  const metrics = [
-    { label: 'Tổng số phiếu', value: '1,247', change: '+12%', changeType: 'blue' as const, icon: '🎫', iconClass: 'total' },
-    { label: 'Đang mở', value: '183', change: '+5 hôm nay', changeType: 'red' as const, icon: '🔓', iconClass: 'open' },
-    { label: 'Đã giải quyết', value: '1,031', change: '+8%', changeType: 'green' as const, icon: '✅', iconClass: 'resolved' },
-    { label: 'Vi phạm SLA (%)', value: '14.2%', change: '-2.1%', changeType: 'green' as const, icon: '⚠️', iconClass: 'breach' },
-  ];
+  const moiTiepNhan = tickets.filter(t => t.trang_thai === 'MOI_TAO').length;
+  const dangXuLy = tickets.filter(t => t.trang_thai === 'DANG_GIAI_QUYET').length;
+  const daGiaiQuyet = tickets.filter(t => t.trang_thai === 'DA_GIAI_QUYET').length;
+  const daDong = tickets.filter(t => t.trang_thai === 'DA_DONG').length;
 
-  const getStatusLabel = (s: UrgentTicket['status']) => {
-    if (s === 'overdue') return { text: 'Quá hạn', cls: 'escaped' };
-    if (s === 'critical') return { text: 'Nguy cấp', cls: 'escaped' };
-    return { text: 'Gần hạn', cls: 'processing' };
-  };
+  const metrics = [
+    { label: 'Mới tiếp nhận', value: moiTiepNhan.toLocaleString(), change: 'Mới tạo', changeType: 'blue' as const, icon: '🎫', iconClass: 'total' },
+    { label: 'Đang xử lý', value: dangXuLy.toLocaleString(), change: 'Đang xử lý', changeType: 'red' as const, icon: '🔓', iconClass: 'open' },
+    { label: 'Đã giải quyết', value: daGiaiQuyet.toLocaleString(), change: 'Hoàn tất', changeType: 'green' as const, icon: '✅', iconClass: 'resolved' },
+    { label: 'Đã đóng', value: daDong.toLocaleString(), change: 'Đã đóng', changeType: 'green' as const, icon: '🗄️', iconClass: 'breach' },
+  ];
 
   const getPriorityLabel = (p: UrgentTicket['priority']) => {
     if (p === 'high') return { text: 'Cao', cls: 'high' };
@@ -483,6 +577,97 @@ export const AdminDashboard: React.FC = () => {
   const scheduleLabel = (s: 'business' | '24x7') =>
     s === 'business' ? '🏢 Hành chính' : '🌐 24x7';
 
+  const renderSlaColumn = (ticket: any, loaiSla: 'PHAN_HOI' | 'XU_LY') => {
+    const slaList = ticket.sla_theo_doi || ticket.danh_sach_sla || [];
+    const sla = slaList.find((s: any) => s.loai_sla === loaiSla);
+    
+    if (!sla) {
+      return <span style={{ color: '#64748B' }}>N/A</span>;
+    }
+
+    if (sla.thoi_diem_dat) {
+      return <span style={{ color: '#16A34A', fontWeight: 700 }}>Đạt</span>;
+    }
+
+    const now = Date.now();
+    const deadline = Date.parse(sla.han_chot);
+    const diff = deadline - now;
+    const isOverdue = diff <= 0 || sla.da_vi_pham;
+
+    if (isOverdue) {
+      return <span style={{ color: '#DC2626', fontWeight: 700 }}>Vi phạm</span>;
+    }
+
+    const hours = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const pad = (num: number) => String(num).padStart(2, '0');
+
+    return (
+      <span style={{
+        fontWeight: 700,
+        color: diff < 2 * 3600000 ? '#D97706' : '#16A34A'
+      }}>
+        {pad(hours)}h {pad(mins)}m
+      </span>
+    );
+  };
+
+  const renderDbStatusBadge = (status: 'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG') => {
+    switch (status) {
+      case 'MOI_TAO':
+        return <span className="status-badge new">Mới tiếp nhận</span>;
+      case 'DANG_GIAI_QUYET':
+        return <span className="status-badge processing">Đang xử lý</span>;
+      case 'DA_GIAI_QUYET':
+        return <span className="status-badge resolved">Đã giải quyết</span>;
+      case 'DA_DONG':
+        return <span className="status-badge" style={{ backgroundColor: '#F1F5F9', color: '#475569' }}>Đã đóng</span>;
+      default:
+        return <span className="status-badge">{status}</span>;
+    }
+  };
+
+  const getUrgentTicketsList = (): UrgentTicket[] => {
+    return tickets
+      .filter(t => t.trang_thai !== 'DA_DONG')
+      .map(t => {
+        const isHigh = t.muc_do_uu_tien === 'CAO';
+        const slaPhanHoi = t.danh_sach_sla?.find(s => s.loai_sla === 'PHAN_HOI');
+        const slaXuLy = t.danh_sach_sla?.find(s => s.loai_sla === 'XU_LY');
+        const isViolated = slaXuLy?.da_vi_pham || false;
+        
+        let status: UrgentTicket['status'] = 'near_due';
+        if (isViolated) status = 'overdue';
+        else if (isHigh) status = 'critical';
+
+        return {
+          id: t.ma_phieu,
+          dbId: t.phieu_ho_tro_id,
+          title: t.tieu_de,
+          priority: isHigh ? ('high' as const) : t.muc_do_uu_tien === 'TRUNG_BINH' ? ('medium' as const) : ('low' as const),
+          status,
+          trang_thai: t.trang_thai,
+          assignee: t.nguoi_ho_tro?.ho_ten || 'Chưa phân công',
+          slaPhanHoi,
+          slaXuLy,
+          danh_sach_sla: t.danh_sach_sla
+        };
+      })
+      .slice(0, 5);
+  };
+
+  const urgentTickets = getUrgentTicketsList();
+
+  if (loading) {
+    return (
+      <div className="admin-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <div style={{ fontSize: '18px', fontWeight: 600, color: '#64748B' }}>
+          🔄 Đang tải dữ liệu báo cáo thống kê...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-container">
       <div className="admin-content">
@@ -491,10 +676,9 @@ export const AdminDashboard: React.FC = () => {
         <div className="admin-header-card">
           <div className="admin-title-area">
             <h1 className="admin-title">📊 Bảng điều khiển & Quản lý SLA</h1>
-            <p className="admin-subtitle">Theo dõi hiệu suất vận hành IT và cấu hình chính sách SLA · Tháng 5/2026</p>
+            <p className="admin-subtitle">Theo dõi hiệu suất vận hành IT và cấu hình chính sách SLA · Hệ thống Live</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            {/* Filter selector */}
             <select
               className="filter-select"
               value={slaFilter}
@@ -506,7 +690,6 @@ export const AdminDashboard: React.FC = () => {
               <option value="quarter">Quý này</option>
               <option value="year">Năm nay</option>
             </select>
-            {/* Tab Buttons */}
             <div className="admin-tabs-row">
               <button
                 id="tab-overview"
@@ -540,21 +723,16 @@ export const AdminDashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* ═══════════════════════════════════════════
-            TAB: TỔNG QUAN
-        ═══════════════════════════════════════════ */}
+        {/* TAB: TỔNG QUAN */}
         {activeTab === 'overview' && (
           <>
-            {/* ── Charts 2×2 Grid ── */}
             <div className="charts-grid">
-
-              {/* Chart 1: Line – Trend */}
               <div className="chart-card">
                 <div className="chart-header">
                   <h3 className="chart-title">📈 Xu hướng phiếu theo thời gian</h3>
                   <span style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>Năm 2026</span>
                 </div>
-                <LineChart />
+                <LineChart tickets={tickets} />
                 <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
                   <div className="legend-item">
                     <div className="legend-dot" style={{ backgroundColor: '#2563EB', borderRadius: 2 }} />
@@ -563,120 +741,107 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Chart 2: Donut – Priority */}
               <div className="chart-card">
                 <div className="chart-header">
                   <h3 className="chart-title">🎯 Phiếu theo mức độ ưu tiên</h3>
                   <span style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>Tháng 5/2026</span>
                 </div>
-                <DonutChart />
+                <DonutChart tickets={tickets} />
               </div>
 
-              {/* Chart 3: Bar – SLA */}
               <div className="chart-card">
                 <div className="chart-header">
                   <h3 className="chart-title">⚡ Tỷ lệ đạt / vi phạm SLA</h3>
                   <span style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>Tháng 5/2026</span>
                 </div>
                 <div className="chart-wrapper" style={{ height: 220, alignItems: 'stretch' }}>
-                  <SLABarChart />
+                  <SLABarChart tickets={tickets} />
                 </div>
               </div>
 
-              {/* Chart 4: Staff Efficiency */}
               <div className="chart-card">
                 <div className="chart-header">
                   <h3 className="chart-title">👥 Hiệu suất xử lý nhân viên</h3>
                   <span style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>Tháng 5/2026</span>
                 </div>
-                <EfficiencyChart />
+                <EfficiencyChart tickets={tickets} />
               </div>
-
             </div>
 
-            {/* ── Priority Tickets Table ── */}
             <div className="table-card">
               <div className="table-card-header">
                 <h3 className="table-card-title">
                   🚨 Danh sách ưu tiên xử lý
-                  <span style={{ fontSize: 12, color: '#EF4444', fontWeight: 600, backgroundColor: '#FEF2F2', padding: '2px 8px', borderRadius: 6 }}>
-                    {URGENT_TICKETS.filter(t => t.status === 'overdue' || t.status === 'critical').length} cần xử lý ngay
-                  </span>
                 </h3>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <span style={{ fontSize: 12, color: '#64748B', fontWeight: 600, alignSelf: 'center' }}>
-                    Quá hạn · Gần hạn · Nghiêm trọng
-                  </span>
                   <button className="btn-outline" onClick={() => alert('Xuất danh sách ưu tiên ra Excel...')}>
                     📥 Xuất báo cáo
                   </button>
                 </div>
               </div>
               <div className="table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Mã phiếu</th>
-                      <th>Tiêu đề</th>
-                      <th>Ưu tiên</th>
-                      <th>Trạng thái</th>
-                      <th>Kỹ thuật viên</th>
-                      <th>SLA Deadline</th>
-                      <th>Thời gian còn lại</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {URGENT_TICKETS.map(ticket => {
-                      const s = getStatusLabel(ticket.status);
-                      const p = getPriorityLabel(ticket.priority);
-                      return (
-                        <tr key={ticket.id} className="ticket-row-clickable">
-                          <td>
-                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563EB', fontSize: 13 }}>
-                              {ticket.id}
-                            </span>
-                          </td>
-                          <td style={{ maxWidth: 280 }}>
-                            <span style={{ fontWeight: 600, color: '#0F172A', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                              {ticket.title}
-                            </span>
-                          </td>
-                          <td><span className={`priority-badge ${p.cls}`}>{p.text}</span></td>
-                          <td><span className={`status-badge ${s.cls}`}>{s.text}</span></td>
-                          <td style={{ fontWeight: 600, color: '#334155' }}>{ticket.assignee}</td>
-                          <td style={{ fontFamily: 'monospace', fontSize: 13, color: '#475569' }}>{ticket.sla_deadline}</td>
-                          <td>
-                            <span style={{
-                              fontWeight: 700,
-                              fontSize: 13,
-                              color: ticket.status === 'overdue' ? '#DC2626'
-                                : ticket.status === 'critical' ? '#D97706'
-                                : '#16A34A'
-                            }}>
-                              {ticket.remaining}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                {urgentTickets.length > 0 ? (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Mã phiếu</th>
+                        <th>Tiêu đề</th>
+                        <th>Ưu tiên</th>
+                        <th>Trạng thái</th>
+                        <th>Kỹ thuật viên</th>
+                        <th>SLA Phản hồi</th>
+                        <th>SLA Xử lý</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {urgentTickets.map(ticket => {
+                        const p = getPriorityLabel(ticket.priority);
+                        return (
+                          <tr key={ticket.id} className="ticket-row-clickable">
+                            <td>
+                              <span 
+                                style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563EB', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
+                                onClick={() => navigate(`/dashboard/tickets/${ticket.dbId}`)}
+                              >
+                                {ticket.id}
+                              </span>
+                            </td>
+                            <td style={{ maxWidth: 280 }}>
+                              <span 
+                                style={{ fontWeight: 600, color: '#0F172A', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', cursor: 'pointer' }}
+                                onClick={() => navigate(`/dashboard/tickets/${ticket.dbId}`)}
+                              >
+                                {ticket.title}
+                              </span>
+                            </td>
+                            <td><span className={`priority-badge ${p.cls}`}>{p.text}</span></td>
+                            <td>{renderDbStatusBadge(ticket.trang_thai)}</td>
+                            <td style={{ fontWeight: 600, color: '#334155' }}>{ticket.assignee}</td>
+                            <td>{renderSlaColumn(ticket, 'PHAN_HOI')}</td>
+                            <td>{renderSlaColumn(ticket, 'XU_LY')}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+                    🎉 Không có sự cố khẩn cấp hoặc vi phạm SLA nào cần ưu tiên xử lý lúc này!
+                  </div>
+                )}
               </div>
             </div>
           </>
         )}
 
-        {/* ═══════════════════════════════════════════
-            TAB: QUẢN LÝ SLA
-        ═══════════════════════════════════════════ */}
+        {/* TAB: QUẢN LÝ SLA */}
         {activeTab === 'sla' && (
           <>
-            {/* SLA Policy Table */}
             <div className="table-card">
               <div className="table-card-header">
                 <h3 className="table-card-title">
                   ⏱️ Chính sách SLA hiện tại
-                  <span style={{ fontSize: 12, color: '#16A34A', fontWeight: 600, backgroundColor: '#F0FDF4', padding: '2px 8px', borderRadius: 6 }}>
+                  <span style={{ fontSize: 12, color: '#16A34A', fontWeight: 600, backgroundColor: '#F0FDF4', padding: '2px 8px', borderRadius: 6, marginLeft: 10 }}>
                     {policies.filter(p => p.active).length} đang áp dụng
                   </span>
                 </h3>
@@ -757,7 +922,6 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* SLA Info Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
               <div className="sla-info-card" style={{ borderLeft: '4px solid #2563EB' }}>
                 <div style={{ fontSize: 22, marginBottom: 8 }}>🏢</div>
@@ -780,72 +944,12 @@ export const AdminDashboard: React.FC = () => {
                 <p className="sla-info-desc">Chính sách SLA được kích hoạt sẽ áp dụng cho toàn bộ phiếu mới tạo. Phiếu cũ vẫn giữ cấu hình SLA tại thời điểm tạo.</p>
               </div>
             </div>
-
-            {/* Priority Tickets at Bottom */}
-            <div className="table-card">
-              <div className="table-card-header">
-                <h3 className="table-card-title">
-                  🚨 Phiếu vi phạm & gần vi phạm SLA
-                </h3>
-                <button className="btn-outline" onClick={() => alert('Xuất danh sách vi phạm SLA...')}>
-                  📥 Xuất báo cáo
-                </button>
-              </div>
-              <div className="table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Mã phiếu</th>
-                      <th>Tiêu đề</th>
-                      <th>Ưu tiên</th>
-                      <th>Trạng thái SLA</th>
-                      <th>Kỹ thuật viên</th>
-                      <th>SLA Deadline</th>
-                      <th>Thời gian còn lại</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {URGENT_TICKETS.map(ticket => {
-                      const s = getStatusLabel(ticket.status);
-                      const p = getPriorityLabel(ticket.priority);
-                      return (
-                        <tr key={ticket.id} className="ticket-row-clickable">
-                          <td>
-                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563EB', fontSize: 13 }}>
-                              {ticket.id}
-                            </span>
-                          </td>
-                          <td style={{ maxWidth: 280 }}>
-                            <span style={{ fontWeight: 600, color: '#0F172A' }}>{ticket.title}</span>
-                          </td>
-                          <td><span className={`priority-badge ${p.cls}`}>{p.text}</span></td>
-                          <td><span className={`status-badge ${s.cls}`}>{s.text}</span></td>
-                          <td style={{ fontWeight: 600 }}>{ticket.assignee}</td>
-                          <td style={{ fontFamily: 'monospace', fontSize: 13, color: '#475569' }}>{ticket.sla_deadline}</td>
-                          <td>
-                            <span style={{
-                              fontWeight: 700,
-                              fontSize: 13,
-                              color: ticket.status === 'overdue' ? '#DC2626'
-                                : ticket.status === 'critical' ? '#D97706'
-                                : '#16A34A'
-                            }}>
-                              {ticket.remaining}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </>
         )}
 
       </div>
 
-      {/* ── SLA Modal ── */}
+      {/* SLA Modal */}
       {slaModalOpen && (
         <SLAModal
           onClose={() => setSlaModalOpen(false)}

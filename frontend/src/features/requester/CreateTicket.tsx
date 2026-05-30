@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateTicket.css';
+import { ticketService } from '../../services/ticket.service';
+import { kbService } from '../../services/kb.service';
+import { useAuth } from '../../context/AuthContext';
 
 interface KnowledgeArticle {
   id: string;
@@ -8,40 +11,6 @@ interface KnowledgeArticle {
   title: string;
   content: string;
 }
-
-// Mock Cơ sở tri thức phục vụ tìm kiếm nhanh khi gõ tiêu đề
-const MOCK_KB_ARTICLES: KnowledgeArticle[] = [
-  {
-    id: 'KB-001',
-    category: 'Mạng & Kết nối',
-    title: 'Hướng dẫn cấu hình VPN công ty để làm việc từ xa (WFA)',
-    content: 'Để kết nối mạng VPN công ty làm việc từ xa:\n1. Tải phần mềm FortiClient về máy tính từ cổng phần mềm nội bộ.\n2. Chọn "Configure VPN" -> Thiết lập kết nối mới IPSEC hoặc SSL VPN.\n3. Điền tên kết nối tùy ý, Gateway là "vpn.company.com", port "443".\n4. Đăng nhập bằng tài khoản Active Directory (email công ty bỏ đuôi @company.com) và mật khẩu cá nhân.\n5. Xác nhận mã bảo mật OTP được gửi đến ứng dụng xác thực trên điện thoại của bạn.'
-  },
-  {
-    id: 'KB-002',
-    category: 'Mạng & Kết nối',
-    title: 'Khắc phục sự cố không kết nối được mạng Wifi Office_HCM_5G',
-    content: 'Khi gặp lỗi kết nối mạng Wi-Fi tại văn phòng:\n1. Nhấp chuột vào biểu tượng mạng và chọn "Quên mạng" (Forget Network) đối với Office_HCM_5G.\n2. Tắt bộ nhận sóng Wi-Fi trên máy tính khoảng 5 giây rồi bật lại.\n3. Chọn lại mạng Office_HCM_5G và kết nối bằng tài khoản AD cá nhân của bạn.\n4. Nếu lỗi liên tục xảy ra, có thể dải IP văn phòng bị đầy, vui lòng khởi động lại card mạng hoặc liên hệ IT để gán IP tĩnh tạm thời.'
-  },
-  {
-    id: 'KB-003',
-    category: 'Tài khoản & Bảo mật',
-    title: 'Quy trình tự thiết lập xác thực hai lớp (MFA) Microsoft Authenticator',
-    content: 'Quy trình cài đặt MFA dành cho tài khoản nhân viên mới:\n1. Tải app "Microsoft Authenticator" trên Google Play hoặc App Store.\n2. Trên máy tính truy cập trang bảo mật: security.company.com và đăng nhập tài khoản.\n3. Bấm chọn "Thêm phương thức" -> Chọn "Ứng dụng xác thực".\n4. Mở app Authenticator trên điện thoại, chọn dấu "+" ở góc phải -> Chọn "Tài khoản công việc hoặc trường học" -> Quét mã QR hiện trên máy tính.\n5. Nhập số hiển thị trên máy tính vào app trên điện thoại để hoàn tất liên kết.'
-  },
-  {
-    id: 'KB-004',
-    category: 'Thiết bị & Phần cứng',
-    title: 'Xử lý nhanh khi máy in văn phòng kẹt giấy hoặc không nhận lệnh in',
-    content: 'Các bước xử lý nhanh khi máy in văn phòng gặp sự cố kẹt giấy hoặc không in được:\n1. Kiểm tra màn hình máy in xem có báo lỗi đỏ kẹt giấy (Paper Jam) không. Nếu có, hãy tắt nguồn máy in, mở nắp khay mực và kéo nhẹ nhàng mẩu giấy bị kẹt ra.\n2. Kiểm tra hàng đợi in trên máy tính (Print Queue): Vào Control Panel -> Devices and Printers -> Click đúp vào máy in đang dùng. Nếu có lệnh in bị kẹt (Error), click chuột phải chọn "Cancel".\n3. Khởi động lại dịch vụ Print Spooler trên máy tính: Nhấn Windows + R gõ "services.msc" -> Tìm service "Print Spooler" -> Chuột phải chọn "Restart".'
-  },
-  {
-    id: 'KB-005',
-    category: 'Tài khoản & Bảo mật',
-    title: 'Cách tự reset mật khẩu tài khoản Windows AD hoặc mở khóa tài khoản',
-    content: 'Nếu tài khoản Windows/AD bị khóa do nhập sai mật khẩu quá 5 lần:\n1. Hệ thống sẽ tự động mở khóa tài khoản sau đúng 15 phút.\n2. Để đổi mật khẩu định kỳ, nhấn tổ hợp phím Ctrl + Alt + Delete trên máy tính Windows -> Chọn "Change a password".\n3. Nhập mật khẩu hiện tại và mật khẩu mới. Lưu ý mật khẩu mới phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt.'
-  }
-];
 
 // Mock Câu hỏi thường gặp
 const MOCK_FAQS = [
@@ -61,8 +30,11 @@ const MOCK_FAQS = [
 
 export const CreateTicket: React.FC = () => {
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   // Form states
+  const [requesterName, setRequesterName] = useState(session?.ho_ten || '');
+  const [requesterEmail, setRequesterEmail] = useState(session?.email || '');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [impact, setImpact] = useState('Medium');
@@ -76,6 +48,14 @@ export const CreateTicket: React.FC = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdTicketId, setCreatedTicketId] = useState('');
 
+  // Pre-fill user session details
+  useEffect(() => {
+    if (session) {
+      if (!requesterName) setRequesterName(session.ho_ten);
+      if (!requesterEmail) setRequesterEmail(session.email);
+    }
+  }, [session]);
+
   // Right column state (FAQ accordion)
   const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(null);
 
@@ -87,27 +67,37 @@ export const CreateTicket: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Real-time suggestions filtering based on Title text
+  // Real-time suggestions filtering based on Title text via Backend API search
   useEffect(() => {
     if (!title.trim()) {
       setSuggestions([]);
       return;
     }
 
-    const keywords = title.toLowerCase().split(/\s+/).filter(word => word.length > 1);
-    if (keywords.length === 0) {
-      setSuggestions([]);
-      return;
-    }
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const data = await kbService.search(title);
+        if (Array.isArray(data)) {
+          setSuggestions(data.map((art: any) => {
+            let cat = 'Mạng & Kết nối';
+            if (art.loai_su_co === 'security') cat = 'Tài khoản & Bảo mật';
+            else if (art.loai_su_co === 'hardware') cat = 'Thiết bị & Phần cứng';
+            else if (art.loai_su_co === 'software') cat = 'Phần mềm & Dịch vụ';
 
-    // Filter articles containing any matching keyword in title or content
-    const filtered = MOCK_KB_ARTICLES.filter(article => {
-      const artTitle = article.title.toLowerCase();
-      const artContent = article.content.toLowerCase();
-      return keywords.some(keyword => artTitle.includes(keyword) || artContent.includes(keyword));
-    });
+            return {
+              id: String(art.tri_thuc_id),
+              category: cat,
+              title: art.tieu_de,
+              content: art.noi_dung,
+            };
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch suggestions:', err);
+      }
+    }, 300);
 
-    setSuggestions(filtered);
+    return () => clearTimeout(delayDebounce);
   }, [title]);
 
   // Handle Mock Rich Text Editor Formatting Buttons
@@ -191,24 +181,38 @@ export const CreateTicket: React.FC = () => {
   };
 
   // Submit Handler
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim() || !description.trim()) {
       return;
     }
 
-    setIsLoading(true);
+    let finalDescription = description;
+    if (requesterName !== session?.ho_ten || requesterEmail !== session?.email) {
+      finalDescription = `[Người yêu cầu: ${requesterName} - Email: ${requesterEmail}]\n\n${description}`;
+    }
 
-    // Giả lập hệ thống phân tích mức độ ưu tiên động và lưu phiếu sau 2 giây
-    setTimeout(() => {
+    setIsLoading(true);
+    try {
+      const response = await ticketService.createTicket(title, finalDescription, attachedFiles);
+      if (response.success && response.data) {
+        setCreatedTicketId(response.data.ma_phieu);
+        setShowSuccessModal(true);
+      } else {
+        alert(response.message || 'Tạo phiếu thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu hỗ trợ.');
+    } finally {
       setIsLoading(false);
-      setCreatedTicketId('SW-2026-0001'); // Mã Ticket mẫu như yêu cầu đặc tả
-      setShowSuccessModal(true);
-    }, 2000);
+    }
   };
 
   const handleResetForm = () => {
+    setRequesterName(session?.ho_ten || '');
+    setRequesterEmail(session?.email || '');
     setTitle('');
     setDescription('');
     setImpact('Medium');
@@ -255,6 +259,40 @@ export const CreateTicket: React.FC = () => {
           <div className="form-column">
             <form onSubmit={handleSubmit}>
               
+              {/* Họ tên & Email người yêu cầu */}
+              <div className="form-grid-2" style={{ marginBottom: '20px' }}>
+                <div>
+                  <label htmlFor="requester_name" className="field-label">
+                    Họ và tên người yêu cầu <span className="required-star">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="requester_name"
+                    className="text-input"
+                    placeholder="Họ và tên..."
+                    value={requesterName}
+                    onChange={(e) => setRequesterName(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="requester_email" className="field-label">
+                    Email công ty <span className="required-star">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="requester_email"
+                    className="text-input"
+                    placeholder="Email công ty..."
+                    value={requesterEmail}
+                    onChange={(e) => setRequesterEmail(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+              </div>
+
               {/* Tiêu đề phiếu */}
               <div className="form-group-full">
                 <label htmlFor="tieu_de" className="field-label">

@@ -1,100 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TicketQueue.css';
+import { ticketService } from '../../services/ticket.service';
 
 interface Ticket {
   id: string;
+  maPhieu: string;
   title: string;
   requesterName: string;
   priority: 'Low' | 'Medium' | 'High';
   status: 'New' | 'Pending' | 'Resolved' | 'Closed';
-  slaDeadline: number; // timestamp
+  trang_thai: 'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG';
+  slaPhanHoi?: any;
+  slaXuLy?: any;
   assignee: string;
   group: 'IT L1' | 'IT L2';
   createdAt: string; // 'YYYY-MM-DD'
   isReopened?: boolean;
+  sla_theo_doi?: any[];
+  danh_sach_sla?: any[];
 }
 
-// Mock ticket list for L1 Queue
-const INITIAL_TICKETS: Ticket[] = [
-  {
-    id: 'HW-2026-0042',
-    title: 'Hỗ trợ lỗi màn hình xanh (BSOD) khi đang họp Zoom',
-    requesterName: 'Nguyễn Văn A',
-    priority: 'High',
-    status: 'Pending',
-    slaDeadline: Date.now() + 2 * 3600 * 1000 + 14 * 60 * 1000, // 2 giờ 14 phút
-    assignee: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-    group: 'IT L1',
-    createdAt: '2026-05-25'
-  },
-  {
-    id: 'SW-2026-0045',
-    title: 'Yêu cầu cấp phát bản quyền phần mềm Figma Design Pro',
-    requesterName: 'Trần Thị Thiết Kế',
-    priority: 'Medium',
-    status: 'New',
-    slaDeadline: Date.now() + 15 * 3600 * 1000,
-    assignee: 'Chưa phân công',
-    group: 'IT L1',
-    createdAt: '2026-05-25'
-  },
-  {
-    id: 'NW-2026-0041',
-    title: 'Không kết nối được vào mạng Wifi Office_HCM_5G',
-    requesterName: 'Lê Văn Mạng',
-    priority: 'High',
-    status: 'Pending',
-    slaDeadline: Date.now() + 4 * 60 * 1000 + 12 * 1000, // 4 phút (Sắp quá hạn)
-    assignee: 'Phạm Văn Mạng (IT L2)',
-    group: 'IT L2',
-    createdAt: '2026-05-25'
-  },
-  {
-    id: 'SW-2026-0030',
-    title: 'Lỗi không đăng nhập được hệ thống quản lý CRM nội bộ',
-    requesterName: 'Hoàng Văn Lập',
-    priority: 'High',
-    status: 'Pending',
-    slaDeadline: Date.now() - 45 * 60 * 1000, // Đã quá hạn 45 phút
-    assignee: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-    group: 'IT L1',
-    createdAt: '2026-05-24'
-  },
-  {
-    id: 'HW-2026-0012',
-    title: 'Máy in văn phòng tầng 3 báo lỗi kẹt giấy liên tục',
-    requesterName: 'Bùi Thị Kế Toán',
-    priority: 'Medium',
-    status: 'Pending',
-    slaDeadline: Date.now() + 11 * 3600 * 1000,
-    assignee: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-    group: 'IT L1',
-    createdAt: '2026-05-23',
-    isReopened: true
-  },
-  {
-    id: 'SW-2026-0046',
-    title: 'Cài đặt phần mềm lập trình Docker và VS Code cho máy mới',
-    requesterName: 'Vũ Dev Tân Binh',
-    priority: 'Low',
-    status: 'New',
-    slaDeadline: Date.now() + 24 * 3600 * 1000,
-    assignee: 'Chưa phân công',
-    group: 'IT L1',
-    createdAt: '2026-05-25'
-  }
-];
+const mapBackendTicket = (t: any): Ticket => {
+  let priorityMapped: 'Low' | 'Medium' | 'High' = 'Medium';
+  if (t.muc_do_uu_tien === 'CAO') priorityMapped = 'High';
+  else if (t.muc_do_uu_tien === 'THAP') priorityMapped = 'Low';
+
+  let statusMapped: 'New' | 'Pending' | 'Resolved' | 'Closed' = 'New';
+  if (t.trang_thai === 'DANG_GIAI_QUYET') statusMapped = 'Pending';
+  else if (t.trang_thai === 'DA_GIAI_QUYET') statusMapped = 'Resolved';
+  else if (t.trang_thai === 'DA_DONG') statusMapped = 'Closed';
+
+  const slaPhanHoi = t.danh_sach_sla?.find((s: any) => s.loai_sla === 'PHAN_HOI');
+  const slaXuLy = t.danh_sach_sla?.find((s: any) => s.loai_sla === 'XU_LY');
+
+  return {
+    id: String(t.phieu_ho_tro_id),
+    maPhieu: t.ma_phieu,
+    title: t.tieu_de,
+    requesterName: t.nguoi_tao?.ho_ten || '',
+    priority: priorityMapped,
+    status: statusMapped,
+    trang_thai: t.trang_thai,
+    slaPhanHoi,
+    slaXuLy,
+    assignee: t.nguoi_ho_tro?.ho_ten || 'Chưa phân công',
+    group: t.nhom_xu_ly?.ten_nhom?.includes('L2') ? 'IT L2' : 'IT L1',
+    createdAt: new Date(t.ngay_tao).toISOString().split('T')[0],
+    isReopened: t.so_lan_mo_lai > 0,
+    sla_theo_doi: t.sla_theo_doi || t.danh_sach_sla,
+    danh_sach_sla: t.danh_sach_sla
+  };
+};
 
 export const TicketQueue: React.FC = () => {
   const navigate = useNavigate();
-  const [tickets] = useState<Ticket[]>(() => {
-    const saved = localStorage.getItem('l1_mock_tickets');
-    return saved ? JSON.parse(saved) : INITIAL_TICKETS;
-  });
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // State Tabs và Bộ lọc
-  const [activeTab, setActiveTab] = useState<'new' | 'pending' | 'warning' | 'danger' | 'reopened'>('new');
+  const [activeTab, setActiveTab] = useState<'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG'>('MOI_TAO');
   const [filterPriority, setFilterPriority] = useState<string>('All');
   const [filterGroup, setFilterGroup] = useState<string>('All');
   const [filterTime, setFilterTime] = useState<string>('All');
@@ -102,6 +67,25 @@ export const TicketQueue: React.FC = () => {
 
   // Cập nhật đếm ngược SLA mỗi giây để bảng hoạt động real-time
   const [timeTicker, setTimeTicker] = useState(Date.now());
+
+  const loadTickets = async () => {
+    setIsLoading(true);
+    try {
+      const response = await ticketService.getTickets();
+      if (response.success && Array.isArray(response.data)) {
+        setTickets(response.data.map(mapBackendTicket));
+      }
+    } catch (err) {
+      console.error('Failed to load queue:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeTicker(Date.now());
@@ -109,31 +93,41 @@ export const TicketQueue: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Đồng bộ hóa danh sách ticket lên localStorage khi có sự thay đổi
-  useEffect(() => {
-    localStorage.setItem('l1_mock_tickets', JSON.stringify(tickets));
-  }, [tickets]);
+  // Bộ lọc dữ liệu logic
+  // Helper to render SLA columns dynamically
+  const renderSlaColumn = (ticket: any, loaiSla: 'PHAN_HOI' | 'XU_LY') => {
+    const slaList = ticket.sla_theo_doi || ticket.danh_sach_sla || [];
+    const sla = slaList.find((s: any) => s.loai_sla === loaiSla);
+    
+    if (!sla) {
+      return <span className="queue-sla-timer" style={{ color: '#64748B' }}>N/A</span>;
+    }
+
+    if (sla.thoi_diem_dat) {
+      return <span className="queue-sla-timer" style={{ color: '#16A34A' }}>Đạt</span>;
+    }
+
+    const deadline = Date.parse(sla.han_chot);
+    const diff = deadline - timeTicker;
+
+    if (diff <= 0 || sla.da_vi_pham) {
+      return <span className="queue-sla-timer danger">Vi phạm</span>;
+    }
+
+    const hours = Math.floor(diff / (3600 * 1000));
+    const mins = Math.floor((diff % (3600 * 1000)) / (60 * 1000));
+    const pad = (num: number) => String(num).padStart(2, '0');
+
+    return <span className="queue-sla-timer" style={{ color: diff < 2 * 3600 * 1000 ? '#D97706' : '#0F172A' }}>
+      {pad(hours)}h {pad(mins)}m
+    </span>;
+  };
 
   // Bộ lọc dữ liệu logic
   const getFilteredTickets = () => {
     return tickets.filter(t => {
       // 1. Phân loại theo Tabs trạng thái
-      const diff = t.slaDeadline - timeTicker;
-      if (activeTab === 'new') {
-        if (t.status !== 'New') return false;
-      } else if (activeTab === 'pending') {
-        if (t.status !== 'Pending' || t.isReopened) return false;
-      } else if (activeTab === 'warning') {
-        // Sắp quá hạn: Đang giải quyết & SLA còn dưới 2 giờ và chưa quá hạn
-        if (t.status !== 'Pending') return false;
-        if (diff <= 0 || diff > 2 * 3600 * 1000) return false;
-      } else if (activeTab === 'danger') {
-        // Quá hạn: Đang giải quyết & SLA quá hạn (<=0)
-        if (t.status !== 'Pending') return false;
-        if (diff > 0) return false;
-      } else if (activeTab === 'reopened') {
-        if (t.status !== 'Pending' || !t.isReopened) return false;
-      }
+      if (t.trang_thai !== activeTab) return false;
 
       // 2. Bộ lọc độ ưu tiên
       if (filterPriority !== 'All' && t.priority !== filterPriority) return false;
@@ -143,17 +137,30 @@ export const TicketQueue: React.FC = () => {
 
       // 4. Bộ lọc thời gian
       if (filterTime !== 'All') {
-        const todayStr = new Date().toISOString().split('T')[0];
-        if (filterTime === 'Today' && t.createdAt !== todayStr) return false;
-        // Giả lập tuần này/tháng này đối với mock data đơn giản
-        if (filterTime === 'Week' && t.createdAt < '2026-05-19') return false;
+        const ticketTime = new Date(t.createdAt).getTime();
+        const diffDays = (timeTicker - ticketTime) / (24 * 3600 * 1000);
+        
+        if (filterTime === 'Today') {
+          const todayStr = new Date(timeTicker).toISOString().split('T')[0];
+          if (t.createdAt !== todayStr) return false;
+        } else if (filterTime === 'Week') {
+          if (diffDays > 7 || diffDays < 0) return false;
+        } else if (filterTime === 'Month') {
+          if (diffDays > 30 || diffDays < 0) return false;
+        }
       }
 
       // 5. Bộ lọc trạng thái SLA
       if (filterSlaStatus !== 'All') {
-        if (filterSlaStatus === 'Breached' && diff > 0) return false;
-        if (filterSlaStatus === 'Critical' && (diff <= 0 || diff > 2 * 3600 * 1000)) return false;
-        if (filterSlaStatus === 'Normal' && diff < 2 * 3600 * 1000) return false;
+        const slaList = t.sla_theo_doi || t.danh_sach_sla || [];
+        const hasViolation = slaList.some((s: any) => {
+          const isBreachedByField = s.da_vi_pham === true;
+          const isPastDeadline = !s.thoi_diem_dat && Date.parse(s.han_chot) <= timeTicker;
+          return isBreachedByField || isPastDeadline;
+        });
+
+        if (filterSlaStatus === 'Breached' && !hasViolation) return false;
+        if (filterSlaStatus === 'OnTime' && hasViolation) return false;
       }
 
       return true;
@@ -164,40 +171,10 @@ export const TicketQueue: React.FC = () => {
 
   // Đếm số lượng ticket tương ứng với mỗi tab
   const getTabCounts = (tabName: typeof activeTab) => {
-    return tickets.filter(t => {
-      const diff = t.slaDeadline - timeTicker;
-      if (tabName === 'new') return t.status === 'New';
-      if (tabName === 'pending') return t.status === 'Pending' && !t.isReopened;
-      if (tabName === 'warning') return t.status === 'Pending' && diff > 0 && diff <= 2 * 3600 * 1000;
-      if (tabName === 'danger') return t.status === 'Pending' && diff <= 0;
-      if (tabName === 'reopened') return t.status === 'Pending' && !!t.isReopened;
-      return false;
-    }).length;
+    return tickets.filter(t => t.trang_thai === tabName).length;
   };
 
-  // Trình hiển thị đếm ngược SLA
-  const renderSlaTimer = (deadline: number) => {
-    const diff = deadline - timeTicker;
-    if (diff <= 0) {
-      const overTime = Math.abs(diff);
-      const hours = Math.floor(overTime / (3600 * 1000));
-      const mins = Math.floor((overTime % (3600 * 1000)) / (60 * 1000));
-      return <span className="queue-sla-timer danger">Quá hạn: -{hours}g {mins}p</span>;
-    }
 
-    const hours = Math.floor(diff / (3600 * 1000));
-    const mins = Math.floor((diff % (3600 * 1000)) / (60 * 1000));
-    const secs = Math.floor((diff % (60 * 1000)) / 1000);
-
-    const pad = (num: number) => String(num).padStart(2, '0');
-
-    if (diff < 15 * 60 * 1000) {
-      return <span className="queue-sla-timer danger">{pad(hours)}:{pad(mins)}:{pad(secs)} ⚠</span>;
-    } else if (diff < 2 * 3600 * 1000) {
-      return <span className="queue-sla-timer warning">{pad(hours)}:{pad(mins)}:{pad(secs)}</span>;
-    }
-    return <span className="queue-sla-timer">{pad(hours)}g {pad(mins)}p</span>;
-  };
 
   return (
     <div className="ticket-queue-container">
@@ -251,6 +228,7 @@ export const TicketQueue: React.FC = () => {
                 <option value="All">Tất cả thời gian</option>
                 <option value="Today">Hôm nay</option>
                 <option value="Week">Trong 7 ngày qua</option>
+                <option value="Month">Trong 1 tháng</option>
               </select>
             </div>
 
@@ -262,9 +240,8 @@ export const TicketQueue: React.FC = () => {
                 onChange={(e) => setFilterSlaStatus(e.target.value)}
               >
                 <option value="All">Tất cả hạn SLA</option>
-                <option value="Normal">Bình thường</option>
-                <option value="Critical">Sắp quá hạn (&lt; 2g)</option>
-                <option value="Breached">Đã quá hạn</option>
+                <option value="OnTime">Trong hạn (Đạt)</option>
+                <option value="Breached">Vi phạm SLA</option>
               </select>
             </div>
           </div>
@@ -274,53 +251,49 @@ export const TicketQueue: React.FC = () => {
         <div className="queue-tabs-container">
           <button
             type="button"
-            className={`queue-tab-btn tab-pending ${activeTab === 'new' ? 'active' : ''}`}
-            onClick={() => setActiveTab('new')}
+            className={`queue-tab-btn tab-pending ${activeTab === 'MOI_TAO' ? 'active' : ''}`}
+            onClick={() => setActiveTab('MOI_TAO')}
           >
-            Mới tạo
-            <span className="tab-badge">{getTabCounts('new')}</span>
+            Mới tiếp nhận
+            <span className="tab-badge">{getTabCounts('MOI_TAO')}</span>
           </button>
 
           <button
             type="button"
-            className={`queue-tab-btn tab-pending ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pending')}
+            className={`queue-tab-btn tab-pending ${activeTab === 'DANG_GIAI_QUYET' ? 'active' : ''}`}
+            onClick={() => setActiveTab('DANG_GIAI_QUYET')}
           >
-            Đang giải quyết
-            <span className="tab-badge">{getTabCounts('pending')}</span>
+            Đang xử lý
+            <span className="tab-badge">{getTabCounts('DANG_GIAI_QUYET')}</span>
           </button>
 
           <button
             type="button"
-            className={`queue-tab-btn tab-warning ${activeTab === 'warning' ? 'active' : ''}`}
-            onClick={() => setActiveTab('warning')}
+            className={`queue-tab-btn tab-pending ${activeTab === 'DA_GIAI_QUYET' ? 'active' : ''}`}
+            onClick={() => setActiveTab('DA_GIAI_QUYET')}
           >
-            Sắp quá hạn
-            <span className="tab-badge">{getTabCounts('warning')}</span>
+            Đã giải quyết
+            <span className="tab-badge">{getTabCounts('DA_GIAI_QUYET')}</span>
           </button>
 
           <button
             type="button"
-            className={`queue-tab-btn tab-danger ${activeTab === 'danger' ? 'active' : ''}`}
-            onClick={() => setActiveTab('danger')}
+            className={`queue-tab-btn tab-pending ${activeTab === 'DA_DONG' ? 'active' : ''}`}
+            onClick={() => setActiveTab('DA_DONG')}
           >
-            Quá hạn
-            <span className="tab-badge">{getTabCounts('danger')}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`queue-tab-btn tab-pending ${activeTab === 'reopened' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reopened')}
-          >
-            Mở lại
-            <span className="tab-badge">{getTabCounts('reopened')}</span>
+            Đã đóng
+            <span className="tab-badge">{getTabCounts('DA_DONG')}</span>
           </button>
         </div>
 
         {/* 4. Thẻ chứa Bảng Hàng đợi */}
         <div className="queue-table-card">
-          {filteredTickets.length > 0 ? (
+          {isLoading ? (
+            <div className="empty-state">
+              <span className="spinner-inline" style={{ width: '32px', height: '32px', borderWidth: '3px', display: 'inline-block' }}></span>
+              <p style={{ marginTop: '12px', color: '#64748B', fontWeight: 500 }}>Đang tải danh sách ticket...</p>
+            </div>
+          ) : filteredTickets.length > 0 ? (
             <table className="queue-table">
               <thead>
                 <tr>
@@ -329,7 +302,8 @@ export const TicketQueue: React.FC = () => {
                   <th>Người gửi</th>
                   <th>Mức độ ưu tiên</th>
                   <th>Trạng thái</th>
-                  <th>Hạn xử lý SLA</th>
+                  <th>SLA Phản hồi</th>
+                  <th>SLA Xử lý</th>
                   <th>Người phụ trách</th>
                 </tr>
               </thead>
@@ -338,18 +312,23 @@ export const TicketQueue: React.FC = () => {
                   <tr key={ticket.id}>
                     <td>
                       <a 
-                        href={`/tickets/process/${ticket.id}`}
+                        href={`/dashboard/tickets/${ticket.id}`}
                         className="queue-ticket-id"
                         onClick={(e) => {
                           e.preventDefault();
-                          navigate(`/tickets/process/${ticket.id}`);
+                          navigate(`/dashboard/tickets/${ticket.id}`);
                         }}
                       >
-                        {ticket.id}
+                        {ticket.maPhieu}
                       </a>
                     </td>
                     <td>
-                      <div className="queue-ticket-title" title={ticket.title}>
+                      <div 
+                        className="queue-ticket-title" 
+                        title={ticket.title} 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate(`/dashboard/tickets/${ticket.id}`)}
+                      >
                         {ticket.title}
                       </div>
                     </td>
@@ -366,20 +345,21 @@ export const TicketQueue: React.FC = () => {
                       )}
                     </td>
                     <td>
-                      {ticket.status === 'New' && (
-                        <span className="badge-status" style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}>Mới tạo</span>
+                      {ticket.trang_thai === 'MOI_TAO' && (
+                        <span className="badge-status" style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}>Mới tiếp nhận</span>
                       )}
-                      {ticket.status === 'Pending' && (
-                        <span className="badge-status" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>Đang giải quyết</span>
+                      {ticket.trang_thai === 'DANG_GIAI_QUYET' && (
+                        <span className="badge-status" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>Đang xử lý</span>
                       )}
-                      {ticket.status === 'Resolved' && (
+                      {ticket.trang_thai === 'DA_GIAI_QUYET' && (
                         <span className="badge-status" style={{ backgroundColor: '#ECFDF5', color: '#065F46' }}>Đã giải quyết</span>
                       )}
-                      {ticket.status === 'Closed' && (
+                      {ticket.trang_thai === 'DA_DONG' && (
                         <span className="badge-status" style={{ backgroundColor: '#F1F5F9', color: '#475569' }}>Đã đóng</span>
                       )}
                     </td>
-                    <td>{renderSlaTimer(ticket.slaDeadline)}</td>
+                    <td>{renderSlaColumn(ticket, 'PHAN_HOI')}</td>
+                    <td>{renderSlaColumn(ticket, 'XU_LY')}</td>
                     <td>{ticket.assignee}</td>
                   </tr>
                 ))}
