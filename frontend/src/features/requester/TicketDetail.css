@@ -1,0 +1,1031 @@
+/* Stylesheet cho màn hình Chi tiết phiếu hỗ trợ (TicketDetail.css) */
+
+.ticket-detail-container {
+  min-height: 100vh;
+  background-color: var(--color-bg, #F8FAFC);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--color-text, #0F172A);
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.ticket-detail-content {
+  width: 100%;
+  max-width: 100%; /* Đảm bảo tràn màn hình chuẩn website, không giới hạn max-width */
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --- BANNER KHẢO SÁT HÀI LÒNG (UC-04) --- */
+.survey-banner {
+  background-color: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  animation: fadeIn 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+.survey-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #065F46;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.survey-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.survey-question-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.survey-question-text {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #047857;
+}
+
+.survey-toggle-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-survey-toggle {
+  background-color: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  color: #374151;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-survey-toggle:hover {
+  background-color: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.btn-survey-toggle.active-yes {
+  background-color: #10B981;
+  border-color: #10B981;
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-survey-toggle.active-no {
+  background-color: #EF4444;
+  border-color: #EF4444;
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.survey-rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  color: #D1D5DB;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.star-btn:hover {
+  transform: scale(1.15);
+}
+
+.star-btn.active {
+  color: #F59E0B;
+}
+
+.survey-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #A7F3D0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.survey-textarea:focus {
+  outline: none;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.btn-survey-submit {
+  background-color: #10B981;
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.btn-survey-submit:hover {
+  background-color: #059669;
+}
+
+/* --- BANNER KHÓA PHIẾU ĐÃ ĐÓNG --- */
+.closed-banner {
+  background-color: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #475569;
+  font-size: 14.5px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.closed-banner-icon {
+  color: #64748B;
+  flex-shrink: 0;
+  display: flex;
+}
+
+/* --- ĐẦU TRANG CHI TIẾT (HEADER) --- */
+.detail-header-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.header-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ticket-id-tag {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2563EB;
+  background-color: #EFF6FF;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #BFDBFE;
+}
+
+/* Priority & Status Badges */
+.badge-priority-detail {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-status-detail {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-status-detail::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Title */
+.detail-ticket-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+}
+
+/* --- LAYOUT CHÍNH (2 CỘT) --- */
+.detail-main-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .detail-main-layout {
+    grid-template-columns: 65fr 35fr;
+  }
+}
+
+/* --- CỘT TRÁI: NỘI DUNG CHÍNH --- */
+.left-column-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.detail-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.detail-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-card-title svg {
+  color: #2563EB;
+}
+
+/* Nội dung sự cố */
+.ticket-info-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .ticket-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #0F172A;
+}
+
+.ticket-description-box {
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 20px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-wrap;
+}
+
+/* Bình luận & cập nhật */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.comment-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #E2E8F0;
+}
+
+.comment-bubble {
+  background-color: #F1F5F9;
+  border-radius: 12px;
+  padding: 12px 16px;
+  flex: 1;
+}
+
+.comment-bubble.is-it-support {
+  background-color: #EFF6FF;
+  border: 1px solid #BFDBFE;
+}
+
+.comment-meta-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.comment-author {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.comment-role-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2563EB;
+  background-color: #EFF6FF;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.comment-date {
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+.comment-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Đính kèm trong bình luận */
+.comment-attachments {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.comment-attachment-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: #2563EB;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.comment-attachment-file:hover {
+  text-decoration: underline;
+}
+
+/* Khung nhập bình luận */
+.comment-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid #F1F5F9;
+  padding-top: 20px;
+}
+
+.comment-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px 16px;
+  font-size: 14.5px;
+  font-family: inherit;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.comment-textarea:disabled {
+  background-color: #F1F5F9;
+  color: #94A3B8;
+  cursor: not-allowed;
+}
+
+.comment-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-comment-attach {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-comment-attach:hover:not(:disabled) {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+.btn-comment-submit {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-comment-submit:hover:not(:disabled) {
+  background-color: #1D4ED8;
+}
+
+.btn-comment-submit:disabled {
+  background-color: #E2E8F0;
+  color: #94A3B8;
+  cursor: not-allowed;
+}
+
+/* --- CỘT PHẢI: SIDEBAR PANEL --- */
+.right-column-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Đồng hồ hạn SLA */
+.sla-countdown-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.sla-countdown-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.sla-countdown-time {
+  font-family: monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.sla-countdown-time.warning {
+  color: #D97706;
+}
+
+.sla-countdown-time.danger {
+  color: #DC2626;
+  animation: blinkSLA 1s infinite alternate;
+}
+
+@keyframes blinkSLA {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.sla-countdown-desc {
+  font-size: 12.5px;
+  color: #64748B;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* Tệp đính kèm phiếu */
+.ticket-attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticket-attachment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+}
+
+.ticket-attachment-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.ticket-attachment-size {
+  font-size: 11px;
+  color: #64748B;
+}
+
+.btn-download-attachment {
+  background: none;
+  border: none;
+  color: #2563EB;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.btn-download-attachment:hover {
+  color: #1D4ED8;
+}
+
+.attachments-empty {
+  font-size: 13px;
+  color: #94A3B8;
+  font-style: italic;
+}
+
+/* --- KHỐI ĐIỀU KHIỂN KIỂM THỬ NHANH (TESTING PANEL) --- */
+.test-panel-card {
+  background-color: #FFFBEB;
+  border: 1px solid #FCD34D;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.test-panel-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #B45309;
+  text-transform: uppercase;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.test-panel-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-test-state {
+  background-color: #FFFFFF;
+  border: 1px solid #F59E0B;
+  color: #B45309;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-test-state:hover {
+  background-color: #FFFBEB;
+}
+
+.btn-test-state.active {
+  background-color: #F59E0B;
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+/* --- OPTIMIZED STYLES FOR USER ROLE --- */
+.header-infobar {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.header-infobar svg {
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.activity-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 12px;
+}
+
+.activity-tab-btn {
+  background: none;
+  border: none;
+  color: #64748B;
+  padding: 6px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.activity-tab-btn:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+}
+
+.activity-tab-btn.active {
+  background-color: #EFF6FF;
+  color: #2563EB;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15);
+}
+
+.system-activity-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: #F8FAFC;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid #3B82F6;
+  font-size: 13px;
+  margin: 6px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
+}
+
+.system-activity-icon {
+  display: flex;
+  color: #3B82F6;
+  flex-shrink: 0;
+}
+
+.system-activity-content {
+  flex: 1;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.system-activity-status {
+  font-weight: 600;
+  color: #2563EB;
+}
+
+.system-activity-note {
+  color: #64748B;
+  font-style: italic;
+}
+
+.system-activity-date {
+  font-size: 11px;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+.activity-history-placeholder {
+  padding: 20px;
+  background-color: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  border-radius: 10px;
+  text-align: center;
+  color: #64748B;
+  font-size: 13.5px;
+  margin-top: 16px;
+  font-weight: 500;
+}
+
+.sla-static-deadline {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #F1F5F9;
+  letter-spacing: 0.2px;
+}
+
+.details-widget-card {
+  border-color: #E2E8F0;
+  background-color: #FFFFFF;
+}
+
+.details-widget-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.details-widget-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #F1F5F9;
+}
+
+.details-widget-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.details-row-label {
+  font-size: 13px;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.details-row-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- TECHNICIAN TOOLBAR (TOP TOOLBAR) --- */
+.tech-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px; /* rounded-md */
+}
+
+.btn-tech-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #334155;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-tech-toolbar:hover {
+  background-color: #F1F5F9;
+  border-color: #94A3B8;
+  color: #0F172A;
+}
+
+.btn-tech-toolbar svg {
+  color: #64748B;
+  flex-shrink: 0;
+}
+
+.tech-toolbar-dropdown-wrapper {
+  position: relative;
+}
+
+.tech-toolbar-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  min-width: 180px;
+  overflow: hidden;
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* --- RIGHT COLUMN - STATUS & ESCALATE --- */
+.status-actions-widget {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+}
+
+.status-dropdown-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.btn-status-dropdown {
+  width: 100%;
+  background-color: #2563EB; /* dynamic standout color: blue */
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.btn-status-dropdown:hover {
+  background-color: #1D4ED8;
+}
+
+.btn-status-dropdown svg {
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.status-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  padding: 10px 16px;
+  font-size: 13.5px;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+}
+
+.dropdown-item.text-danger {
+  color: #DC2626;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: #FEF2F2;
+}
+
+.btn-escalate-action {
+  width: 100%;
+  background-color: #EA580C; /* strong standby color: orange */
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.2);
+}
+
+.btn-escalate-action:hover:not(:disabled) {
+  background-color: #C2410C;
+}
+
+.btn-escalate-action:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-escalate-action:disabled {
+  background-color: #E2E8F0;
+  color: #94A3B8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- SECURITY & INTERNAL NOTES YELLOW STYLING --- */
+.comment-card.is-internal-note {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.comment-bubble.is-internal {
+  background-color: #FEF9E7 !important; /* light yellow bg-yellow-50 equivalent */
+  border: 1px dashed #F59E0B !important; /* warning amber dashed border */
+}
+
+.comment-input-area.internal-note-active {
+  background-color: #FEF9E7 !important; /* bg-yellow-50 equivalent */
+  border: 2px dashed #F59E0B !important;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: inset 0 2px 4px rgba(245, 158, 11, 0.05);
+}
+
+/* --- ESCALATE MODAL STYLES --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6); /* backdrop-blur equivalent with nice overlay */
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-container {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+

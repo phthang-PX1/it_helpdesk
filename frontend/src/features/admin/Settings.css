@@ -1,0 +1,314 @@
+/* Settings.css – Phân hệ Cài đặt & Cấu hình hệ thống */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.settings-container {
+  font-family: 'Inter', system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+.settings-header {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.settings-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.4px;
+}
+
+.settings-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+}
+
+/* ── Tabs ── */
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  flex-wrap: wrap;
+}
+
+.settings-tab-btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-tab-btn.active {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+/* ── Roles Split Layout ── */
+.settings-split-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .settings-split-container {
+    grid-template-columns: 280px 1fr; /* 1/4 and 3/4 split layout */
+  }
+}
+
+/* ── Left Column: Role Cards ── */
+.settings-split-left {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.roles-sidebar-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0 0 12px 0;
+}
+
+.role-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.role-card-item {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px; /* bo góc 12px hiện đại */
+  border: 1.5px solid #E2E8F0;
+  background: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.role-card-item:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+.role-card-item.active {
+  background: #EFF6FF;
+  border-color: #2563EB; /* viền xanh active state */
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+
+.role-card-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-card-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.role-card-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background-color: #F1F5F9;
+  color: #475569;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.role-card-item.active .role-card-badge {
+  background-color: #DBEAFE;
+  color: #2563EB;
+}
+
+/* ── Right Column: Permissions Matrix ── */
+.settings-split-right {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.permissions-matrix-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.permissions-matrix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #F1F5F9;
+  background: #FAFBFC;
+}
+
+.permissions-matrix-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+}
+
+.btn-save-split {
+  padding: 9px 18px;
+  background: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+}
+
+.btn-save-split:hover {
+  background: #1D4ED8;
+}
+
+.permissions-rows-list {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 24px 24px;
+}
+
+.permission-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #F1F5F9;
+  gap: 16px;
+}
+
+.permission-toggle-row:last-child {
+  border-bottom: none;
+}
+
+.permission-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.permission-row-label {
+  font-size: 14px;
+  font-weight: 700; /* font-semibold equivalent */
+  color: #0F172A;
+}
+
+.permission-row-desc {
+  font-size: 12px;
+  color: #64748B; /* xám mờ */
+}
+
+/* ── Custom Toggle Switch slider ── */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #CBD5E1;
+  transition: .3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+input:checked + .slider {
+  background-color: #10B981; /* Green color when active */
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #10B981;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.select-role-placeholder {
+  padding: 60px;
+  text-align: center;
+  color: #64748B;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

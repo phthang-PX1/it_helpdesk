@@ -1,0 +1,350 @@
+/* Stylesheet cho Hàng đợi Ticket tuyến L1 (TicketQueue.css) */
+
+.ticket-queue-container {
+  min-height: 100vh;
+  background-color: var(--color-bg, #F8FAFC);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--color-text, #0F172A);
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.ticket-queue-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.queue-header-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.queue-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.queue-subtitle {
+  font-size: 14.5px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Thanh Bộ Lọc */
+.queue-filters-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  box-sizing: border-box;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .filters-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .filters-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.5px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Tabs Trạng Thái */
+.queue-tabs-container {
+  display: flex;
+  border-bottom: 2px solid #E2E8F0;
+  overflow-x: auto;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.queue-tab-btn {
+  background: none;
+  border: none;
+  padding: 12px 20px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.queue-tab-btn:hover {
+  color: #0F172A;
+}
+
+.queue-tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.queue-tab-btn.active {
+  color: #2563EB;
+}
+
+.queue-tab-btn.active::after {
+  background-color: #2563EB;
+}
+
+/* Tab Colors & Badges */
+.queue-tab-btn.active.tab-pending {
+  color: #2563EB;
+}
+.queue-tab-btn.active.tab-pending::after {
+  background-color: #2563EB;
+}
+
+.queue-tab-btn.active.tab-warning {
+  color: #D97706;
+}
+.queue-tab-btn.active.tab-warning::after {
+  background-color: #D97706;
+}
+
+.queue-tab-btn.active.tab-danger {
+  color: #DC2626;
+}
+.queue-tab-btn.active.tab-danger::after {
+  background-color: #DC2626;
+}
+
+.tab-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #F1F5F9;
+  color: #475569;
+}
+
+.queue-tab-btn.active.tab-pending .tab-badge {
+  background-color: #EFF6FF;
+  color: #2563EB;
+}
+
+.queue-tab-btn.active.tab-warning .tab-badge {
+  background-color: #FFFBEB;
+  color: #D97706;
+}
+
+.queue-tab-btn.active.tab-danger .tab-badge {
+  background-color: #FEF2F2;
+  color: #DC2626;
+}
+
+/* Thẻ Bảng Hàng Đợi */
+.queue-table-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 8px 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14.5px;
+}
+
+.queue-table th {
+  padding: 16px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #E2E8F0;
+  background-color: #F8FAFC;
+}
+
+.queue-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #F1F5F9;
+  color: #334155;
+}
+
+.queue-table tr:last-child td {
+  border-bottom: none;
+}
+
+.queue-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.queue-table tbody tr:hover {
+  background-color: #F8FAFC;
+}
+
+/* Link Ticket ID */
+.queue-ticket-id {
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2563EB;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.queue-ticket-id:hover {
+  color: #1D4ED8;
+  text-decoration: underline;
+}
+
+/* Bảng cột đặc thù */
+.queue-ticket-title {
+  font-weight: 600;
+  color: #0F172A;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Huy hiệu trong bảng */
+.badge-priority {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+}
+
+.badge-status {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.queue-sla-timer {
+  font-family: monospace;
+  font-weight: 700;
+}
+
+.queue-sla-timer.danger {
+  color: #DC2626;
+}
+
+.queue-sla-timer.warning {
+  color: #D97706;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  color: #94A3B8;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 6px 0;
+}
+
+.empty-state-desc {
+  font-size: 13.5px;
+  color: #94A3B8;
+  margin: 0;
+  max-width: 300px;
+  line-height: 1.5;
+}

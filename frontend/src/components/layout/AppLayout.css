@@ -1,0 +1,430 @@
+/* Stylesheet cho Khung ứng dụng chung (AppLayout) */
+
+.app-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #F8FAFC;
+  box-sizing: border-box;
+}
+
+/* 1. Thanh điều hướng bên trái (Sidebar) */
+.app-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 100vh;
+  background-color: #F8FAFC;
+  border-right: 1px solid #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px 20px 12px;
+  border-bottom: 1px solid #E2E8F0;
+  margin-bottom: 24px;
+}
+
+.sidebar-logo-icon {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  padding: 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-logo-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.sidebar-brand-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+/* Bọc các mục menu */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #64748B;
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.menu-item svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform 0.2s ease;
+}
+
+/* Hiệu ứng hover và active bo góc 12px - 16px */
+.menu-item:hover {
+  background-color: #EFF6FF;
+  color: #2563EB;
+}
+
+.menu-item:hover svg {
+  transform: translateX(2px);
+}
+
+.menu-item.active {
+  background-color: #2563EB;
+  color: #FFFFFF;
+}
+
+.menu-item.active svg {
+  color: #FFFFFF;
+}
+
+/* Nút đăng xuất ở chân sidebar (optional/phụ trợ) */
+.sidebar-footer {
+  border-top: 1px solid #E2E8F0;
+  padding-top: 16px;
+}
+
+.btn-sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #94A3B8;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-sidebar-logout:hover {
+  background-color: #FEF2F2;
+  color: #DC2626;
+}
+
+/* 2. Thanh trên cùng (Topbar) */
+.app-main-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-left: 260px; /* Nhường chỗ cho Sidebar */
+  min-height: 100vh;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.app-topbar {
+  position: fixed;
+  left: 260px; /* Bắt đầu sau Sidebar */
+  right: 0;
+  top: 0;
+  height: 70px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 90;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+/* Search Box */
+.topbar-search-box {
+  display: flex;
+  align-items: center;
+  background-color: #F1F5F9;
+  border-radius: 10px;
+  padding: 8px 14px;
+  width: 320px;
+  gap: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.topbar-search-box:focus-within {
+  background-color: #FFFFFF;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.topbar-search-icon {
+  color: #64748B;
+  display: flex;
+  align-items: center;
+}
+
+.topbar-search-input {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #0F172A;
+  width: 100%;
+  font-family: inherit;
+}
+
+.topbar-search-input::placeholder {
+  color: #94A3B8;
+}
+
+/* Actions Row */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Nút tạo nhanh */
+.btn-quick-create {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+}
+
+.btn-quick-create:hover {
+  background-color: #1D4ED8;
+  transform: translateY(-0.5px);
+}
+
+.btn-quick-create:active {
+  transform: translateY(0);
+}
+
+.btn-quick-create svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Icon thông báo */
+.topbar-notify-btn {
+  background: none;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.topbar-notify-btn:hover {
+  background-color: #F1F5F9;
+  color: #2563EB;
+}
+
+.topbar-notify-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.topbar-notify-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background-color: #DC2626;
+  border-radius: 50%;
+  border: 1.5px solid #FFFFFF;
+}
+
+/* Profile Section */
+.topbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 1px solid #E2E8F0;
+  padding-left: 20px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.profile-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.profile-role-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #2563EB;
+  background-color: #EFF6FF;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-top: 2px;
+  display: inline-block;
+}
+
+.profile-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #E2E8F0;
+  background-color: #F1F5F9;
+}
+
+/* 3. Khu vực nội dung chính (Main Content) */
+.app-content {
+  margin-top: 70px; /* Nhường chỗ cho Topbar */
+  padding: 32px;
+  flex: 1;
+  box-sizing: border-box;
+  background-color: #F8FAFC;
+  width: 100%;
+}
+
+/* Mobile Toggle Header (Chỉ hiển thị trên mobile) */
+.mobile-nav-header {
+  display: none;
+  height: 60px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  box-sizing: border-box;
+}
+
+.mobile-menu-toggle {
+  background: none;
+  border: none;
+  color: #0F172A;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-menu-toggle svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/* --- RESPONSIVE MEDIA QUERIES --- */
+@media (max-width: 900px) {
+  .app-sidebar {
+    transform: translateX(-100%); /* Ẩn sidebar trên mobile */
+  }
+  
+  .app-sidebar.open {
+    transform: translateX(0); /* Hiện sidebar khi click toggle */
+    box-shadow: 10px 0 30px rgba(15, 23, 42, 0.15);
+  }
+  
+  .app-main-wrapper {
+    margin-left: 0; /* Chiếm full chiều rộng */
+  }
+  
+  .app-topbar {
+    left: 0;
+    padding: 0 16px;
+    top: 60px; /* Nằm dưới Mobile Header */
+    height: 60px;
+  }
+  
+  .topbar-search-box {
+    width: 180px;
+  }
+  
+  .app-content {
+    margin-top: 120px; /* Chừa khoảng trống cho cả 2 top bar trên mobile */
+    padding: 16px;
+  }
+  
+  .mobile-nav-header {
+    display: flex; /* Hiện mobile header */
+  }
+  
+  .topbar-profile {
+    padding-left: 10px;
+  }
+  
+  .profile-info {
+    display: none; /* Ẩn thông tin tên trên mobile để tiết kiệm diện tích */
+  }
+}
+
+@media (max-width: 580px) {
+  .topbar-search-box {
+    display: none; /* Ẩn thanh tìm kiếm trên mobile nhỏ */
+  }
+  
+  .btn-quick-create span {
+    display: none; /* Ẩn chữ nút tạo nhanh, chỉ giữ icon */
+  }
+  
+  .btn-quick-create {
+    padding: 10px;
+    border-radius: 50%;
+  }
+}
