@@ -8,7 +8,7 @@ export const KnowledgeEditor: React.FC = () => {
   const navigate = useNavigate();
 
   // Role check
-  const [userRole, setUserRole] = useState<string>('');
+
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // Form states
@@ -31,7 +31,6 @@ export const KnowledgeEditor: React.FC = () => {
         role = JSON.parse(savedSession).role;
       } catch (e) {}
     }
-    setUserRole(role);
 
     // Chỉ L2 (hoặc Quản lý IT) mới được quyền soạn thảo
     if (role === 'L2' || role === 'Quản lý IT') {

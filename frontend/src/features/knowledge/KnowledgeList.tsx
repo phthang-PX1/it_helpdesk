@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './KnowledgeList.css';
-import { kbService, KBArticle } from '../../services/kb.service';
+import { kbService, type KBArticle } from '../../services/kb.service';
 
 export const KnowledgeList: React.FC = () => {
   const navigate = useNavigate();

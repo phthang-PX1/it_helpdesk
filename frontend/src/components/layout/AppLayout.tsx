@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './AppLayout.css';
-import { notificationService, NotificationItem } from '../../services/notification.service';
+import { notificationService, type NotificationItem } from '../../services/notification.service';
 // NOTE: AppLayout nhận session qua props để tương thích ngược với AppRoutes.tsx
 
 interface UserSession {

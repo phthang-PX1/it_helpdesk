@@ -4,8 +4,7 @@
  */
 import React, { useState } from 'react';
 import './Reports.css';
-import { ticketService, Ticket } from '../../services/ticket.service';
-import { adminService, Employee } from '../../services/admin.service';
+import { ticketService, type Ticket } from '../../services/ticket.service';
 
 // ─── Mock report templates ────────────────────────────────────────────────────
 const REPORT_TEMPLATES = [

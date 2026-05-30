@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './KnowledgeDetail.css';
-import { kbService, KBArticle } from '../../services/kb.service';
+import { kbService, type KBArticle } from '../../services/kb.service';
 
 export const KnowledgeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

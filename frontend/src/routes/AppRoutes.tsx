@@ -49,8 +49,6 @@ import { AdminDashboard }      from '../features/admin/AdminDashboard';
 import { Reports }             from '../features/admin/Reports';
 import { Settings }            from '../features/admin/Settings';
 import { UserManagement }      from '../features/admin/UserManagement';
-import { RequireAuth }         from '../components/auth/RequireAuth';
-import { RoleGuard }           from '../components/auth/RoleGuard';
 
 // FEATURES
 import { ReviewPage }          from '../features/requester/ReviewPage';

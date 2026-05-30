@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './UserManagement.css';
-import { adminService, Employee, Role, Department, SupportTeam } from '../../services/admin.service';
+import { adminService, type Employee, type Role, type Department, type SupportTeam } from '../../services/admin.service';
 
 export const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<Employee[]>([]);
