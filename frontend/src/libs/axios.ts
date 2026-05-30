@@ -110,12 +110,12 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Gọi API-04: POST /auth/refresh
-        const { data } = await axios.post<{ token: string }>(
+        const { data } = await axios.post<{ success: boolean; message: string; data: { token: string } }>(
           `${BASE_URL}/auth/refresh`,
           { refresh_token: refreshToken },
         );
 
-        const newToken = data.token;
+        const newToken = data.data.token;
         localStorage.setItem(TOKEN_KEY, newToken);
 
         // Cập nhật header mặc định cho các request tiếp theo

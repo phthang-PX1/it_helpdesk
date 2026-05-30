@@ -212,8 +212,6 @@ export const KnowledgeEditor: React.FC = () => {
               >
                 <option value="Phần cứng">Hỗ trợ Phần cứng</option>
                 <option value="Phần mềm">Hỗ trợ Phần mềm</option>
-                <option value="Mạng">Hỗ trợ Mạng</option>
-                <option value="Hệ thống">Hệ thống Cloud/Postgres</option>
               </select>
             </div>
 

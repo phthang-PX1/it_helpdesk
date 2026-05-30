@@ -16,7 +16,7 @@
  *   /settings          → Protected, chỉ Quản lý IT
  *   /*                 → Redirect về /dashboard
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // ── Layout & Auth ──────────────────────────────────────────────────────────────
@@ -48,6 +48,7 @@ import { KnowledgeEditor }     from '../features/knowledge/KnowledgeEditor';
 import { AdminDashboard }      from '../features/admin/AdminDashboard';
 import { Reports }             from '../features/admin/Reports';
 import { Settings }            from '../features/admin/Settings';
+import { ticketService }       from '../services/ticket.service';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Guard: Chặn truy cập nếu chưa đăng nhập
@@ -95,13 +96,60 @@ const DashboardRouter: React.FC = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 const SupportDashboard: React.FC = () => {
   const { session } = useAuth();
-  const ticketsPath = session?.role === 'L2' ? '/tickets/l2' : '/tickets/queue';
+  const [counts, setCounts] = useState({
+    moiTao: 0,
+    dangGiaiQuyet: 0,
+    daGiaiQuyet: 0,
+    daDong: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await ticketService.getTickets({ limit: 1000 });
+        if (res.success && Array.isArray(res.data)) {
+          let mCount = 0;
+          let dgCount = 0;
+          let dyCount = 0;
+          let ddCount = 0;
+          res.data.forEach((t: any) => {
+            if (t.trang_thai === 'MOI_TAO') mCount++;
+            else if (t.trang_thai === 'DANG_GIAI_QUYET') dgCount++;
+            else if (t.trang_thai === 'DA_GIAI_QUYET') dyCount++;
+            else if (t.trang_thai === 'DA_DONG') ddCount++;
+          });
+          setCounts({
+            moiTao: mCount,
+            dangGiaiQuyet: dgCount,
+            daGiaiQuyet: dyCount,
+            daDong: ddCount
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard counts:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCounts();
+  }, []);
+
+  const totalPending = counts.moiTao + counts.dangGiaiQuyet;
+
+  const statCards = [
+    { icon: '🆕', label: 'Mới tiếp nhận', value: counts.moiTao,       color: '#2563EB', bg: '#EFF6FF' },
+    { icon: '⚙️', label: 'Đang xử lý',    value: counts.dangGiaiQuyet, color: '#D97706', bg: '#FFFBEB' },
+    { icon: '✅', label: 'Đã giải quyết', value: counts.daGiaiQuyet,  color: '#16A34A', bg: '#F0FDF4' },
+    { icon: '📦', label: 'Đã đóng',       value: counts.daDong,        color: '#64748B', bg: '#F1F5F9' },
+  ];
 
   return (
     <div style={{
       display: 'flex',
       flexDirection: 'column',
       gap: 24,
+      paddingBottom: 24,
     }}>
       {/* Welcome banner */}
       <div style={{
@@ -124,36 +172,20 @@ const SupportDashboard: React.FC = () => {
             Xin chào, {session?.role} 👋
           </h2>
           <p style={{ margin: '8px 0 0', fontSize: 14, opacity: 0.85 }}>
-            Hôm nay bạn có <strong>7 phiếu</strong> đang chờ xử lý. Chúc bạn làm việc hiệu quả!
+            {loading ? (
+              'Đang tải số lượng phiếu...'
+            ) : (
+              <>
+                Hôm nay bạn có <strong>{totalPending} phiếu</strong> đang chờ xử lý. Chúc bạn làm việc hiệu quả!
+              </>
+            )}
           </p>
         </div>
-        <a
-          href={ticketsPath}
-          style={{
-            background: 'rgba(255,255,255,0.2)',
-            border: '1.5px solid rgba(255,255,255,0.5)',
-            color: '#FFFFFF',
-            borderRadius: 12,
-            padding: '12px 24px',
-            fontWeight: 700,
-            fontSize: 14,
-            textDecoration: 'none',
-            backdropFilter: 'blur(6px)',
-            transition: 'background 0.2s',
-          }}
-        >
-          ⚡ Mở hàng đợi →
-        </a>
       </div>
 
       {/* Quick stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-        {[
-          { icon: '🆕', label: 'Mới tạo',       value: '7',  color: '#2563EB', bg: '#EFF6FF' },
-          { icon: '⚙️', label: 'Đang xử lý',    value: '12', color: '#D97706', bg: '#FFFBEB' },
-          { icon: '✅', label: 'Hoàn thành hôm nay', value: '5', color: '#16A34A', bg: '#F0FDF4' },
-          { icon: '⚠️', label: 'Gần quá hạn',   value: '3',  color: '#DC2626', bg: '#FEF2F2' },
-        ].map((c, i) => (
+        {statCards.map((c, i) => (
           <div key={i} style={{
             background: '#FFFFFF',
             border: `1px solid #E2E8F0`,
@@ -170,31 +202,6 @@ const SupportDashboard: React.FC = () => {
             <span style={{ fontSize: 28, fontWeight: 800, color: c.color }}>{c.value}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: '#64748B', textAlign: 'center' }}>{c.label}</span>
           </div>
-        ))}
-      </div>
-
-      {/* Quick links */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        {[
-          { href: ticketsPath,   icon: '🎫', title: 'Hàng đợi Phiếu',   desc: 'Tiếp nhận và xử lý phiếu hỗ trợ đang chờ.',       color: '#2563EB' },
-          { href: '/knowledge',  icon: '📚', title: 'Cơ sở tri thức',   desc: 'Tra cứu hướng dẫn và soạn bài viết tri thức.',      color: '#7C3AED' },
-        ].map((card, i) => (
-          <a key={i} href={card.href} style={{
-            display: 'flex', gap: 16, alignItems: 'flex-start',
-            background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 14,
-            padding: '20px 22px', textDecoration: 'none',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-          }}>
-            <div style={{ fontSize: 28, padding: 10, background: '#F8FAFC', borderRadius: 10 }}>{card.icon}</div>
-            <div>
-              <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 15, color: '#0F172A' }}>{card.title}</p>
-              <p style={{ margin: 0, fontSize: 13, color: '#64748B', lineHeight: 1.5 }}>{card.desc}</p>
-              <span style={{ display: 'inline-block', marginTop: 8, fontSize: 13, fontWeight: 700, color: card.color }}>
-                Truy cập →
-              </span>
-            </div>
-          </a>
         ))}
       </div>
     </div>
@@ -283,6 +290,11 @@ export const AppRoutes: React.FC = () => {
                 {/* ─── Phiếu hỗ trợ: Chi tiết ──────────────────── */}
                 <Route
                   path="tickets/detail/:id"
+                  element={<TicketDetail />}
+                />
+
+                <Route
+                  path="dashboard/tickets/:id"
                   element={<TicketDetail />}
                 />
 

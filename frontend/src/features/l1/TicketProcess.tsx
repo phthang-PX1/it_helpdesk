@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './TicketProcess.css';
+import { ticketService } from '../../services/ticket.service';
+import axiosInstance from '../../libs/axios';
 
 interface Comment {
   id: string;
@@ -35,93 +37,101 @@ interface Ticket {
   createdAt: string;
   description: string;
   isReopened?: boolean;
+  attachments?: any[];
 }
-
-const DEFAULT_TICKET: Ticket = {
-  id: 'HW-2026-0042',
-  title: 'Hỗ trợ lỗi màn hình xanh (BSOD) khi đang họp Zoom',
-  requesterName: 'Nguyễn Văn A',
-  requesterEmail: 'user@company.com',
-  department: 'Bộ phận Thiết kế (Văn phòng HCM)',
-  deviceSoftware: 'Laptop Dell Latitude 7420 / Windows 11 Pro',
-  priority: 'High',
-  status: 'Pending',
-  slaDeadline: Date.now() + 2 * 3600 * 1000 + 14 * 60 * 1000,
-  assignee: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-  group: 'IT L1',
-  createdAt: '2026-05-25',
-  description: 'Tôi đang sử dụng ứng dụng Zoom để họp với đối tác thì máy tính bỗng nhiên hiển thị màn hình xanh chết chóc (BSOD) với mã lỗi WHEA_UNCORRECTABLE_ERROR. Hiện tại máy khởi động lại rất chậm và thường xuyên bị treo sau 5-10 phút sử dụng.'
-};
 
 export const TicketProcess: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Load ticket list from localStorage to keep it synchronized with the queue
-  const [tickets, setTickets] = useState<Ticket[]>(() => {
-    const saved = localStorage.getItem('l1_mock_tickets');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  });
-
-  // Find target ticket or fallback
-  const [ticket, setTicket] = useState<Ticket>(() => {
-    const saved = localStorage.getItem('l1_mock_tickets');
-    if (saved && id) {
-      try {
-        const list = JSON.parse(saved) as Ticket[];
-        const found = list.find(t => t.id === id);
-        if (found) return found;
-      } catch (e) {}
-    }
-    return { ...DEFAULT_TICKET, id: id || DEFAULT_TICKET.id };
-  });
-
-  // System audit log
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([
-    {
-      id: 'L-1',
-      action: 'Tạo phiếu hỗ trợ',
-      time: '25/05/2026 10:30:00',
-      user: ticket.requesterName,
-      message: 'Người dùng gửi yêu cầu thành công từ Cổng thông tin nội bộ.'
-    },
-    {
-      id: 'L-2',
-      action: 'Hệ thống phân công',
-      time: '25/05/2026 10:30:05',
-      user: 'Hệ thống tự động',
-      message: 'Tự động gán phiếu vào hàng đợi IT L1 và khởi tạo cam kết SLA.',
-      active: true
-    }
-  ]);
-
-  // Comments
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: 'C-1',
-      author: ticket.requesterName,
-      role: 'Người yêu cầu',
-      text: 'Máy cứ chạy Zoom bật camera lên khoảng 3 phút là tự động hiện màn hình xanh BSOD và sập nguồn.',
-      date: '25/05/2026 10:32:00'
-    }
-  ]);
-
+  const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [timeTicker, setTimeTicker] = useState(Date.now());
   const [showEscalateModal, setShowEscalateModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Form Escalate L2
   const [escalateReason, setEscalateReason] = useState('');
   const [escalateStepsTried, setEscalateStepsTried] = useState('');
   const [escalateFile, setEscalateFile] = useState<string>('');
   const [modalError, setModalError] = useState<string | null>(null);
+
+  const loadTicketData = async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const response = await ticketService.getTicketDetail(Number(id));
+      if (response.success && response.data) {
+        const data = response.data;
+        
+        let priorityMapped: 'Low' | 'Medium' | 'High' = 'Medium';
+        if (data.muc_do_uu_tien === 'CAO') priorityMapped = 'High';
+        else if (data.muc_do_uu_tien === 'THAP') priorityMapped = 'Low';
+
+        let statusMapped: 'New' | 'Pending' | 'Resolved' | 'Closed' = 'New';
+        if (data.trang_thai === 'DANG_GIAI_QUYET') statusMapped = 'Pending';
+        else if (data.trang_thai === 'DA_GIAI_QUYET') statusMapped = 'Resolved';
+        else if (data.trang_thai === 'DA_DONG') statusMapped = 'Closed';
+
+        const slaXuLy = data.danh_sach_sla?.find((s: any) => s.loai_sla === 'XU_LY');
+        const slaDeadline = slaXuLy ? new Date(slaXuLy.han_chot).getTime() : Date.now();
+
+        setTicket({
+          id: String(data.phieu_ho_tro_id),
+          title: data.tieu_de,
+          requesterName: data.nguoi_tao?.ho_ten || '',
+          requesterEmail: data.nguoi_tao?.email || '',
+          department: (data.nguoi_tao as any)?.phong_ban?.ten_phong_ban || 'Bộ phận Kỹ thuật',
+          deviceSoftware: '', 
+          status: statusMapped,
+          priority: priorityMapped,
+          slaDeadline,
+          assignee: data.nguoi_ho_tro?.ho_ten || 'Chưa phân công',
+          group: data.nhom_xu_ly?.ten_nhom?.includes('L2') ? 'IT L2' : 'IT L1',
+          createdAt: new Date(data.ngay_tao).toLocaleString('vi-VN'),
+          description: data.mo_ta_chi_tiet,
+          isReopened: data.so_lan_mo_lai > 0,
+          attachments: data.danh_sach_file?.map((f: any) => ({
+            name: f.ten_tep,
+            size: `${f.dung_luong_kb} KB`,
+            duong_dan_file: f.duong_dan_file
+          }))
+        });
+
+        // comments
+        const commentsMapped = (data.danh_sach_bl || []).map((c: any) => ({
+          id: String(c.binh_luan_id),
+          author: c.nguoi_gui?.ho_ten || 'Unknown',
+          role: c.nguoi_gui?.vai_tro?.ma_vai_tro === 'NGUOI_YEU_CAU' ? 'Người yêu cầu' : 'IT Support',
+          text: c.noi_dung,
+          date: new Date(c.ngay_tao).toLocaleString('vi-VN'),
+          isSystem: c.loai_binh_luan === 'CHUYEN_CAP'
+        }));
+        setComments(commentsMapped);
+
+        // timeline (audit logs)
+        const logsMapped = (data.danh_sach_log || []).map((l: any, idx: number) => ({
+          id: String(l.lich_su_id),
+          action: l.hanh_dong,
+          time: new Date(l.ngay_thuc_hien).toLocaleString('vi-VN'),
+          user: l.nguoi_thuc_hien?.ho_ten || 'Hệ thống',
+          message: l.ghi_chu || `${l.hanh_dong} (Từ: "${l.gia_tri_cu || ''}" Sang: "${l.gia_tri_moi || ''}")`,
+          active: idx === ((data.danh_sach_log || []).length - 1)
+        }));
+        setAuditLogs(logsMapped.reverse()); // Show latest first
+      }
+    } catch (err) {
+      console.error('Failed to load ticket process detail:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTicketData();
+  }, [id]);
 
   // Đồng hồ đếm ngược SLA
   useEffect(() => {
@@ -131,118 +141,91 @@ export const TicketProcess: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Đồng bộ ticket detail về danh sách tickets trong localStorage
-  const updateTicketInStorage = (updatedTicket: Ticket, logEntry?: AuditLog, newCommentObj?: Comment) => {
-    setTicket(updatedTicket);
-    const updatedList = tickets.map(t => t.id === updatedTicket.id ? updatedTicket : t);
-    setTickets(updatedList);
-    localStorage.setItem('l1_mock_tickets', JSON.stringify(updatedList));
-
-    if (logEntry) {
-      setAuditLogs(prev => [logEntry, ...prev]);
-    }
-    if (newCommentObj) {
-      setComments(prev => [...prev, newCommentObj]);
-    }
-  };
-
   // 1. Nút "Bắt đầu xử lý"
-  const handleStartProcessing = () => {
-    const nowStr = new Date().toLocaleString('vi-VN');
-    const updatedTicket: Ticket = {
-      ...ticket,
-      status: 'Pending',
-      assignee: 'Nguyễn Văn Hỗ Trợ (IT L1)'
-    };
-    const log: AuditLog = {
-      id: `L-${Date.now()}`,
-      action: 'Bắt đầu xử lý',
-      time: nowStr,
-      user: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-      message: 'Kỹ thuật viên L1 tiếp nhận sự cố và bắt đầu giải quyết.',
-      active: true
-    };
-    const comment: Comment = {
-      id: `C-${Date.now()}`,
-      author: 'Hệ thống',
-      role: 'System',
-      text: '[Cập nhật hệ thống] Kỹ thuật viên Nguyễn Văn Hỗ Trợ đã tiếp nhận và bắt đầu xử lý phiếu.',
-      date: nowStr,
-      isSystem: true
-    };
-
-    updateTicketInStorage(updatedTicket, log, comment);
-    alert('Đã tiếp nhận ticket thành công!');
+  const handleStartProcessing = async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const response = await ticketService.updateStatus(Number(id), 'DANG_GIAI_QUYET', 'Kỹ thuật viên tiếp nhận sự cố và bắt đầu giải quyết.');
+      if (response.success) {
+        alert('Đã tiếp nhận và bắt đầu xử lý ticket thành công!');
+        await loadTicketData();
+      } else {
+        alert(response.message || 'Tiếp nhận ticket thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Không thể tiếp nhận ticket.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // 2. Nút "Cập nhật kết quả" (Viết bình luận mang tính kỹ thuật)
-  const handlePostComment = (e: React.FormEvent) => {
+  // 2. Nút "Gửi phản hồi" (Viết bình luận mang tính kỹ thuật / public)
+  const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !id) return;
 
-    const nowStr = new Date().toLocaleString('vi-VN');
-    const commentObj: Comment = {
-      id: `C-${Date.now()}`,
-      author: 'Nguyễn Văn Hỗ Trợ',
-      role: 'IT Support L1',
-      text: newComment,
-      date: nowStr
-    };
-
-    setComments(prev => [...prev, commentObj]);
-    setNewComment('');
+    setIsLoading(true);
+    try {
+      const response = await ticketService.addComment(Number(id), newComment, 'public');
+      if (response.success) {
+        await loadTicketData();
+        setNewComment('');
+      } else {
+        alert(response.message || 'Gửi phản hồi thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Không thể gửi phản hồi.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Cập nhật kết quả nhanh (Simulation)
-  const handleQuickUpdate = () => {
+  // Cập nhật kết quả nhanh (Simulation / Internal Comment)
+  const handleQuickUpdate = async () => {
     const updateText = prompt('Nhập nội dung cập nhật tiến độ xử lý kỹ thuật:', 'Đã gỡ driver card đồ họa cũ và tiến hành cài đặt bản Driver ổn định nhất từ nhà sản xuất Dell.');
-    if (updateText === null || !updateText.trim()) return;
+    if (updateText === null || !updateText.trim() || !id) return;
 
-    const nowStr = new Date().toLocaleString('vi-VN');
-    const commentObj: Comment = {
-      id: `C-${Date.now()}`,
-      author: 'Nguyễn Văn Hỗ Trợ',
-      role: 'IT Support L1',
-      text: `[Cập nhật kỹ thuật]: ${updateText}`,
-      date: nowStr
-    };
-    const log: AuditLog = {
-      id: `L-${Date.now()}`,
-      action: 'Cập nhật tiến độ',
-      time: nowStr,
-      user: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-      message: updateText
-    };
-
-    setComments(prev => [...prev, commentObj]);
-    setAuditLogs(prev => [log, ...prev]);
+    setIsLoading(true);
+    try {
+      const response = await ticketService.addComment(Number(id), `[Cập nhật kỹ thuật]: ${updateText}`, 'internal');
+      if (response.success) {
+        alert('Đã cập nhật tiến độ kỹ thuật!');
+        await loadTicketData();
+      } else {
+        alert(response.message || 'Cập nhật tiến độ thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Không thể cập nhật tiến độ.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 3. Nút "Đánh dấu đã giải quyết" (Resolved)
-  const handleMarkResolved = () => {
-    const nowStr = new Date().toLocaleString('vi-VN');
-    const updatedTicket: Ticket = {
-      ...ticket,
-      status: 'Resolved'
-    };
-    const log: AuditLog = {
-      id: `L-${Date.now()}`,
-      action: 'Đã giải quyết',
-      time: nowStr,
-      user: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-      message: 'Sự cố đã được khắc phục. Chờ người dùng xác nhận đánh giá hài lòng.',
-      active: true
-    };
-    const comment: Comment = {
-      id: `C-${Date.now()}`,
-      author: 'Nguyễn Văn Hỗ Trợ',
-      role: 'IT Support L1',
-      text: '[Xác nhận giải quyết] Đã kiểm tra liên tục 20 phút chạy thử Zoom meeting không phát sinh lỗi BSOD. Đã đóng ứng dụng và bàn giao máy cho người dùng test.',
-      date: nowStr
-    };
+  const handleMarkResolved = async () => {
+    if (!id) return;
+    const notes = prompt('Nhập ghi chú kết quả giải quyết:', 'Đã xử lý xong lỗi.');
+    if (notes === null) return; // Cancel
 
-    updateTicketInStorage(updatedTicket, log, comment);
-    alert('Đã cập nhật trạng thái: Đã giải quyết!');
+    setIsLoading(true);
+    try {
+      const response = await ticketService.updateStatus(Number(id), 'DA_GIAI_QUYET', notes || 'IT Support đã giải quyết sự cố.');
+      if (response.success) {
+        alert('Đã cập nhật trạng thái: Đã giải quyết!');
+        await loadTicketData();
+      } else {
+        alert(response.message || 'Cập nhật trạng thái thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Không thể đánh dấu giải quyết.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 4. Modal Chuyển cấp L2 (Escalate L2)
@@ -251,7 +234,7 @@ export const TicketProcess: React.FC = () => {
     setShowEscalateModal(true);
   };
 
-  const handleConfirmEscalate = (e: React.FormEvent) => {
+  const handleConfirmEscalate = async (e: React.FormEvent) => {
     e.preventDefault();
     setModalError(null);
 
@@ -265,42 +248,30 @@ export const TicketProcess: React.FC = () => {
       return;
     }
 
-    const nowStr = new Date().toLocaleString('vi-VN');
-    const updatedTicket: Ticket = {
-      ...ticket,
-      status: 'Pending',
-      group: 'IT L2',
-      assignee: 'Phạm Văn Mạng (IT L2)' // Assigned to L2
-    };
-
-    const log: AuditLog = {
-      id: `L-${Date.now()}`,
-      action: 'Chuyển cấp L2',
-      time: nowStr,
-      user: 'Nguyễn Văn Hỗ Trợ (IT L1)',
-      message: `Chuyển cấp lên đội L2. Lý do: "${escalateReason}". Các bước đã thử: "${escalateStepsTried}".`,
-      active: true
-    };
-
-    const comment: Comment = {
-      id: `C-${Date.now()}`,
-      author: 'Hệ thống',
-      role: 'System',
-      text: `[Chuyển cấp L2] Phiếu yêu cầu đã được bàn giao lên tuyến hỗ trợ L2.\n- Lý do chuyển cấp: ${escalateReason}\n- Các bước L1 đã thử: ${escalateStepsTried}${escalateFile ? `\n- File đi kèm: ${escalateFile}` : ''}`,
-      date: nowStr,
-      isSystem: true
-    };
-
-    updateTicketInStorage(updatedTicket, log, comment);
-    setShowEscalateModal(false);
-    setEscalateReason('');
-    setEscalateStepsTried('');
-    setEscalateFile('');
-    alert('Đã chuyển cấp lên L2 thành công!');
+    setIsLoading(true);
+    try {
+      const response = await ticketService.escalateTicket(Number(id), escalateReason, escalateStepsTried);
+      if (response.success) {
+        alert('Đã chuyển cấp lên tuyến hỗ trợ L2 thành công!');
+        setShowEscalateModal(false);
+        setEscalateReason('');
+        setEscalateStepsTried('');
+        setEscalateFile('');
+        await loadTicketData();
+      } else {
+        setModalError(response.message || 'Chuyển cấp thất bại.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setModalError(err.response?.data?.message || 'Không thể chuyển cấp ticket.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // SLA Time Countdown Renderer
   const renderSLACountdown = () => {
+    if (!ticket) return null;
     if (ticket.status === 'Resolved' || ticket.status === 'Closed') {
       return <span className="sla-countdown-time" style={{ color: '#16A34A' }}>Đạt SLA ✓</span>;
     }
@@ -323,6 +294,23 @@ export const TicketProcess: React.FC = () => {
       return <span className="sla-countdown-time warning">{displayStr}</span>;
     }
     return <span className="sla-countdown-time">{displayStr}</span>;
+  };
+
+  if (!ticket) {
+    return (
+      <div className="ticket-process-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <span className="spinner-inline" style={{ width: '32px', height: '32px', borderWidth: '3px' }}></span>
+          <p style={{ marginTop: '12px', color: '#64748B', fontWeight: 500 }}>Đang tải thông tin xử lý sự cố...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getFileUrl = (filePath: string) => {
+    const base = axiosInstance.defaults.baseURL || 'http://localhost:3000/api/v1';
+    const origin = base.replace('/api/v1', '');
+    return `${origin}${filePath}`;
   };
 
   return (
@@ -440,18 +428,23 @@ export const TicketProcess: React.FC = () => {
                 Tệp đính kèm gốc
               </h3>
               <div className="ticket-attachments-list">
-                {ticket.id === 'HW-2026-0042' ? (
-                  <div className="ticket-attachment-item">
-                    <span className="ticket-attachment-name">anh_man_hinh_xanh.png</span>
-                    <span className="ticket-attachment-size">842 KB</span>
-                    <button 
-                      type="button" 
-                      className="btn-download-attachment"
-                      onClick={() => alert('Đang tải tệp tin: anh_man_hinh_xanh.png')}
-                    >
-                      ⬇
-                    </button>
-                  </div>
+                {ticket.attachments && ticket.attachments.length > 0 ? (
+                  ticket.attachments.map((file: any, fileIdx: number) => (
+                    <div key={fileIdx} className="ticket-attachment-item">
+                      <span className="ticket-attachment-name">{file.name}</span>
+                      <span className="ticket-attachment-size">{file.size}</span>
+                      <a
+                        href={getFileUrl(file.duong_dan_file || file.url)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-download-attachment"
+                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                        title="Tải xuống tệp"
+                      >
+                        ⬇
+                      </a>
+                    </div>
+                  ))
                 ) : (
                   <span className="attachments-empty">Không có tệp đính kèm nào.</span>
                 )}
@@ -516,7 +509,7 @@ export const TicketProcess: React.FC = () => {
                   <button 
                     type="submit" 
                     className="btn-comment-submit"
-                    disabled={!newComment.trim() || ticket.status === 'Closed'}
+                    disabled={!newComment.trim() || ticket.status === 'Closed' || isLoading}
                   >
                     Gửi phản hồi
                   </button>
@@ -593,6 +586,7 @@ export const TicketProcess: React.FC = () => {
                     type="button" 
                     className="btn-action-primary"
                     onClick={handleStartProcessing}
+                    disabled={isLoading}
                   >
                     Bắt đầu xử lý phiếu
                   </button>
@@ -604,6 +598,7 @@ export const TicketProcess: React.FC = () => {
                       type="button" 
                       className="btn-action-secondary"
                       onClick={handleQuickUpdate}
+                      disabled={isLoading}
                     >
                       Cập nhật kết quả
                     </button>
@@ -611,6 +606,7 @@ export const TicketProcess: React.FC = () => {
                       type="button" 
                       className="btn-action-success"
                       onClick={handleMarkResolved}
+                      disabled={isLoading}
                     >
                       Đánh dấu Đã giải quyết
                     </button>
@@ -618,6 +614,7 @@ export const TicketProcess: React.FC = () => {
                       type="button" 
                       className="btn-action-warning"
                       onClick={handleOpenEscalateModal}
+                      disabled={isLoading}
                     >
                       Chuyển cấp L2
                     </button>
@@ -712,8 +709,9 @@ export const TicketProcess: React.FC = () => {
               <button 
                 type="submit" 
                 className="btn-modal-submit"
+                disabled={isLoading}
               >
-                Xác nhận chuyển cấp
+                {isLoading ? 'Đang chuyển cấp...' : 'Xác nhận chuyển cấp'}
               </button>
             </div>
           </form>
