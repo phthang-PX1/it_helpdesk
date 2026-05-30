@@ -38,6 +38,7 @@ export const CreateTicket: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [impact, setImpact] = useState('Medium');
+  const [urgency, setUrgency] = useState('Medium');
   const [incidentTime, setIncidentTime] = useState('');
   const [deviceSoftware, setDeviceSoftware] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -195,7 +196,7 @@ export const CreateTicket: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await ticketService.createTicket(title, finalDescription, attachedFiles);
+      const response = await ticketService.createTicket(title, finalDescription, impact, urgency, attachedFiles);
       if (response.success && response.data) {
         setCreatedTicketId(response.data.ma_phieu);
         setShowSuccessModal(true);
@@ -311,14 +312,14 @@ export const CreateTicket: React.FC = () => {
               </div>
 
               {/* Grid 2 cột cho các trường thông tin bổ sung */}
-              <div className="form-grid-2">
+              <div className="form-grid-2" style={{ marginBottom: '20px' }}>
                 {/* Mức độ ảnh hưởng */}
                 <div>
-                  <label htmlFor="muc_do_uu_tien" className="field-label">
+                  <label htmlFor="muc_do_anh_huong" className="field-label">
                     Mức độ ảnh hưởng <span className="required-star">*</span>
                   </label>
                   <select
-                    id="muc_do_uu_tien"
+                    id="muc_do_anh_huong"
                     className="select-input"
                     value={impact}
                     onChange={(e) => setImpact(e.target.value)}
@@ -330,6 +331,26 @@ export const CreateTicket: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Mức độ khẩn cấp */}
+                <div>
+                  <label htmlFor="muc_do_khan_cap" className="field-label">
+                    Mức độ khẩn cấp <span className="required-star">*</span>
+                  </label>
+                  <select
+                    id="muc_do_khan_cap"
+                    className="select-input"
+                    value={urgency}
+                    onChange={(e) => setUrgency(e.target.value)}
+                    disabled={isLoading}
+                  >
+                    <option value="Low">Thấp (Có thể trì hoãn xử lý, không gấp)</option>
+                    <option value="Medium">Trung bình (Cần giải quyết trong ngày/tuần)</option>
+                    <option value="High">Cao (Cần giải quyết ngay lập tức, cực kỳ gấp)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-grid-2" style={{ marginBottom: '20px' }}>
                 {/* Thời điểm phát sinh */}
                 <div>
                   <label htmlFor="ngay_tao" className="field-label">
