@@ -14,12 +14,27 @@ import notificationRoutes from './routes/notification.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 import cors from 'cors';
-import { initSocket } from './libs/socket'; // IMPORT CHUẨN: Bộ khởi tạo socket singleton
+import { initSocket } from './libs/socket';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { initCronJobs } from './jobs/cron';
 
 const app = express();
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 100, // Giới hạn 100 request/15 phút mỗi IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Quá nhiều request từ IP này, vui lòng thử lại sau 15 phút' }
+});
+
+// Health check endpoint cho Load Balancer / Docker
+app.get('/health', (req, res) => res.status(200).json({ status: 'OK' }));
 
 // --- BỌC SERVER EXPRESS QUA HTTP SERVER ĐỂ CHẠY SOCKET.IO ---
 const httpServer = createServer(app);
@@ -271,7 +286,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // --- ĐĂNG KÝ ROUTES ---
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', apiLimiter, authRoutes);
 app.use('/api/v1/tickets', ticketRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/kb', kbRoutes);
@@ -285,6 +300,8 @@ app.use(errorHandler);
 
 // --- KÍCH HOẠT MỞ CỔNG SERVER (CHẠY QUA HTTP_SERVER CHỨ KHÔNG DÙNG APP.LISTEN) ---
 const PORT = process.env.PORT || 3000;
+
+initCronJobs(); // Kích hoạt Background Jobs
 
 httpServer.listen(PORT, () => {
   console.log(`====================================================`);

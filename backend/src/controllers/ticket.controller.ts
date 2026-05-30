@@ -116,20 +116,32 @@ export const ticketController = {
       if (isNaN(ticketId)) throw new AppError('Định dạng mã ID không hợp lệ', 400);
 
       const { ly_do } = reopenSchema.parse(req.body);
-      const result = await ticketService.reopenTicket(ticketId, req.user.nhan_vien_id, ly_do);
+      const userRole = req.user.vai_tro?.ma_vai_tro || req.user.vai_tro;
+      const result: any = await ticketService.reopenTicket(ticketId, req.user.nhan_vien_id, userRole, ly_do);
+
+      if (result.action === 'CREATED_NEW') {
+        res.status(201).json({
+          success: true,
+          message: result.message,
+          data: result.ticket
+        });
+        return;
+      }
+
+      const reopened: any = result;
 
       // 🔗 REALTIME SOCKET.IO TRIGGER: Đẩy thông tin mở lại phiếu về phòng IT đang phụ trách xử lý phiếu
       const io = getIo();
-      io.to(`group_${result.nhom_xu_ly_id}`).emit('ticket_reopened_event', {
-        message: `Cảnh báo: Phiếu ${result.ma_phieu} bị mở lại! Số lần mở lại: ${result.so_lan_mo_lai}`,
-        ticket_id: result.phieu_ho_tro_id,
-        so_lan_mo_lai: result.so_lan_mo_lai
+      io.to(`group_${reopened.nhom_xu_ly_id}`).emit('ticket_reopened_event', {
+        message: `Cảnh báo: Phiếu ${reopened.ma_phieu} bị mở lại! Số lần mở lại: ${reopened.so_lan_mo_lai}`,
+        ticket_id: reopened.phieu_ho_tro_id,
+        so_lan_mo_lai: reopened.so_lan_mo_lai
       });
 
       res.status(200).json({
         success: true,
         message: 'Hệ thống kích hoạt mở lại phiếu và cập nhật danh sách IT thành công.',
-        data: { phieu_ho_tro_id: result.phieu_ho_tro_id, trang_thai: result.trang_thai, so_lan_mo_lai: result.so_lan_mo_lai }
+        data: { phieu_ho_tro_id: reopened.phieu_ho_tro_id, trang_thai: reopened.trang_thai, so_lan_mo_lai: reopened.so_lan_mo_lai }
       });
     } catch (error) { next(error); }
   },

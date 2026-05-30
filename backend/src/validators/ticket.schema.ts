@@ -1,10 +1,16 @@
 // src/validations/ticket.schema.ts
 import { z } from 'zod';
-import { TrangThaiPhieu, MucDoUuTien } from '@prisma/client';
+import { TrangThaiPhieu, MucDoUuTien, MucDoAnhHuong, MucDoKhanCap } from '@prisma/client';
 
 export const createTicketSchema = z.object({
   tieu_de: z.string().min(5, 'Tiêu đề phải có ít nhất 5 ký tự'),
   mo_ta_chi_tiet: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
+  muc_do_anh_huong: z.enum(Object.values(MucDoAnhHuong) as [string, ...string[]], {
+    message: 'Mức độ ảnh hưởng không hợp lệ'
+  }),
+  muc_do_khan_cap: z.enum(Object.values(MucDoKhanCap) as [string, ...string[]], {
+    message: 'Mức độ khẩn cấp không hợp lệ'
+  })
 });
 
 export const updateTicketStatusSchema = z.object({
