@@ -26,6 +26,56 @@ Dự án được xây dựng với kiến trúc Client-Server hiện đại, ch
 
 ---
 
+## 📁 Cấu trúc Thư mục (Project Structure)
+
+Dự án được tổ chức theo mô hình Monorepo chứa cả 2 thư mục gốc độc lập (để phân tách tuyệt đối môi trường chạy):
+
+### 1. Thư mục Frontend (`frontend/`)
+```text
+frontend/
+├── public/               # File tĩnh (icons, favicon, ảnh mặc định)
+├── src/
+│   ├── assets/           # Hình ảnh, file CSS dùng chung
+│   ├── components/       # Các UI Component dùng chung (Button, Layout, Modal)
+│   ├── context/          # State Management toàn cục (vd: AuthContext)
+│   ├── features/         # Chứa màn hình và logic của từng Module nghiệp vụ
+│   │   ├── admin/        # Dành cho Quản lý IT (Báo cáo SLA, Cấu hình Nhân sự)
+│   │   ├── auth/         # Module Đăng nhập (Tài khoản nội bộ & Google SSO)
+│   │   ├── knowledge/    # Quản lý Cơ sở tri thức (Bài viết HDSD)
+│   │   ├── l1/           # Bàn làm việc của IT Support Tuyến 1
+│   │   ├── l2/           # Bàn làm việc của IT Support Tuyến 2 (Chuyên sâu)
+│   │   └── requester/    # Màn hình tạo phiếu cho Người yêu cầu
+│   ├── libs/             # Cấu hình thư viện ngoài (Axios Interceptors chặn Token)
+│   ├── routes/           # Định nghĩa luồng di chuyển trang (React Router)
+│   └── services/         # Nơi định nghĩa các hàm gọi API sang Backend
+├── .env.example          # Biến môi trường mẫu
+└── package.json
+```
+
+### 2. Thư mục Backend (`backend/`)
+Được thiết kế chặt chẽ theo Kiến trúc N-Tier (Phân tầng):
+```text
+backend/
+├── prisma/
+│   ├── schema.prisma     # Định nghĩa 12 bảng CSDL, quan hệ và Schema Validation
+│   └── seed.js           # Kịch bản nạp dữ liệu mẫu tự động (71 user, 17 phiếu...)
+├── src/
+│   ├── controllers/      # Tầng 1: Đón Request và đóng gói trả về JSON Response
+│   ├── middlewares/      # Tầng 1: "Cửa ải" bảo vệ an ninh (JWT, Phân quyền RBAC)
+│   ├── routes/           # Tầng 1: Bản đồ định tuyến 40+ API Endpoints
+│   ├── validators/       # Tầng 1: "Máy quét" định dạng dữ liệu đầu vào (Zod)
+│   ├── services/         # Tầng 2: "Bộ não" xử lý tính toán SLA, Gửi Email, Workflow
+│   ├── repositories/     # Tầng 3: Tương tác với PostgreSQL thông qua Prisma
+│   ├── libs/             # Hỗ trợ chung: Cấu hình Socket.IO, Nodemailer, Redis
+│   ├── jobs/             # Tác vụ chạy ngầm tự động (Cron Jobs báo hạn SLA)
+│   ├── utils/            # Các hàm dùng chung (VD: catchAsync bắt lỗi tự động)
+│   └── server.ts         # Điểm khởi chạy toàn bộ máy chủ Node.js & Swagger
+├── .env.example          # Biến môi trường mẫu
+└── package.json
+```
+
+---
+
 ## 🚀 Hướng dẫn Triển khai (Cloud Deployment)
 
 Dự án hiện đã được thiết lập để triển khai hoàn toàn tự động và miễn phí trên Cloud qua quy trình CI/CD.
