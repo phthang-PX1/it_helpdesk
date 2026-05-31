@@ -194,8 +194,8 @@ export const Settings: React.FC = () => {
 
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch (err) {
-      alert('Lỗi cập nhật quyền: ' + (err as Error).message);
+    } catch (err: any) {
+      alert('Lỗi cập nhật quyền: ' + (err.response?.data?.message || err.message || err));
     }
   };
 

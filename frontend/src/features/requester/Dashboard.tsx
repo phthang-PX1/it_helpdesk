@@ -167,7 +167,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
 
     setIsLoading(true);
     try {
-      const response = await ticketService.createTicket(newTitle, newDesc);
+      const response = await ticketService.createTicket(newTitle, newDesc, newPriority, 'Medium');
       if (response.success && response.data) {
         const addedTicket = mapBackendTicket(response.data);
         setTickets(prev => [addedTicket, ...prev]);

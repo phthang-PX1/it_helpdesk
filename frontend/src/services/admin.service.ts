@@ -69,8 +69,18 @@ export const adminService = {
     if (filters.trang_thai !== undefined) params.append('trang_thai', filters.trang_thai.toString());
     if (filters.keyword) params.append('keyword', filters.keyword);
 
-    const response = await axiosInstance.get<UserListResponse>(`/admin/users?${params.toString()}`);
-    return response.data;
+    const response = await axiosInstance.get<{
+      success: boolean;
+      data: Employee[];
+      pagination: { total: number; page: number; limit: number };
+    }>(`/admin/users?${params.toString()}`);
+
+    return {
+      data: response.data.data,
+      total: response.data.pagination.total,
+      page: response.data.pagination.page,
+      limit: response.data.pagination.limit,
+    };
   },
 
   createUser: async (payload: {
@@ -82,8 +92,8 @@ export const adminService = {
     phong_ban_id: number;
     nhom_ho_tro_id?: number | null;
   }) => {
-    const response = await axiosInstance.post<Employee>('/admin/users', payload);
-    return response.data;
+    const response = await axiosInstance.post<{ success: boolean; message: string; data: Employee }>('/admin/users', payload);
+    return response.data.data;
   },
 
   updateUser: async (
@@ -96,36 +106,36 @@ export const adminService = {
       trang_thai?: boolean;
     }
   ) => {
-    const response = await axiosInstance.put<Employee>(`/admin/users/${id}`, payload);
-    return response.data;
+    const response = await axiosInstance.put<{ success: boolean; message: string; data: Employee }>(`/admin/users/${id}`, payload);
+    return response.data.data;
   },
 
   getRoles: async () => {
-    const response = await axiosInstance.get<Role[]>('/admin/roles');
-    return response.data;
+    const response = await axiosInstance.get<{ success: boolean; data: Role[] }>('/admin/roles');
+    return response.data.data;
   },
 
   updateRolePermissions: async (id: number, quyen_han: string[]) => {
-    const response = await axiosInstance.put<{ message: string }>(`/admin/roles/${id}/permissions`, {
+    const response = await axiosInstance.put<{ success: boolean; message: string; data: any }>(`/admin/roles/${id}/permissions`, {
       quyen_han,
     });
     return response.data;
   },
 
   getTeams: async () => {
-    const response = await axiosInstance.get<SupportTeam[]>('/admin/teams');
-    return response.data;
+    const response = await axiosInstance.get<{ success: boolean; data: SupportTeam[] }>('/admin/teams');
+    return response.data.data;
   },
 
   updateTeamMembers: async (id: number, nhan_vien_ids: number[]) => {
-    const response = await axiosInstance.put<{ message: string }>(`/admin/teams/${id}/members`, {
+    const response = await axiosInstance.put<{ success: boolean; message: string; data: any }>(`/admin/teams/${id}/members`, {
       nhan_vien_ids,
     });
     return response.data;
   },
 
   getDepartments: async () => {
-    const response = await axiosInstance.get<Department[]>('/admin/departments');
-    return response.data;
+    const response = await axiosInstance.get<{ success: boolean; data: Department[] }>('/admin/departments');
+    return response.data.data;
   },
 };

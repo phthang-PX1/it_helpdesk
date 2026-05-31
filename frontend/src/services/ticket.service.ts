@@ -162,10 +162,29 @@ export const ticketService = {
     return response.data;
   },
 
-  createTicket: async (tieu_de: string, mo_ta_chi_tiet: string, files: File[] = []) => {
+  createTicket: async (
+    tieu_de: string,
+    mo_ta_chi_tiet: string,
+    muc_do_anh_huong: string = 'TRUNG_BINH',
+    muc_do_khan_cap: string = 'TRUNG_BINH',
+    files: File[] = []
+  ) => {
+    // Map values to database-expected uppercase enums
+    const mapLevel = (val: string) => {
+      const v = val.toUpperCase();
+      if (v === 'LOW' || v === 'THAP' || v === 'THẤP') return 'THAP';
+      if (v === 'HIGH' || v === 'CAO') return 'CAO';
+      return 'TRUNG_BINH'; // default for Medium, TRUNG_BINH, etc.
+    };
+
+    const parsedImpact = mapLevel(muc_do_anh_huong);
+    const parsedUrgency = mapLevel(muc_do_khan_cap);
+
     const formData = new FormData();
     formData.append('tieu_de', tieu_de);
     formData.append('mo_ta_chi_tiet', mo_ta_chi_tiet);
+    formData.append('muc_do_anh_huong', parsedImpact);
+    formData.append('muc_do_khan_cap', parsedUrgency);
     files.forEach(file => {
       formData.append('files', file);
     });

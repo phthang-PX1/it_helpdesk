@@ -21,16 +21,19 @@ export interface KBArticle {
 }
 
 export interface KBListResponse {
+  success: boolean;
   data: KBArticle[];
-  total: number;
-  page: number;
-  limit: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+  };
 }
 
 export const kbService = {
   search: async (q: string, limit = 5) => {
-    const response = await axiosInstance.get<KBArticle[]>(`/kb/search?q=${encodeURIComponent(q)}&limit=${limit}`);
-    return response.data;
+    const response = await axiosInstance.get<{ success: boolean; data: KBArticle[] }>(`/kb/search?q=${encodeURIComponent(q)}&limit=${limit}`);
+    return response.data.data;
   },
 
   getAll: async (filters: {
@@ -54,17 +57,17 @@ export const kbService = {
   },
 
   getDetail: async (id: number) => {
-    const response = await axiosInstance.get<KBArticle>(`/kb/${id}`);
-    return response.data;
+    const response = await axiosInstance.get<{ success: boolean; data: KBArticle }>(`/kb/${id}`);
+    return response.data.data;
   },
 
   create: async (formData: FormData) => {
-    const response = await axiosInstance.post<KBArticle>('/kb', formData, {
+    const response = await axiosInstance.post<{ success: boolean; message: string; data: KBArticle }>('/kb', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
+    return response.data.data;
   },
 
   update: async (id: number, payload: {
@@ -75,12 +78,12 @@ export const kbService = {
     trang_thai?: 'NHAP' | 'DA_XUAT_BAN';
     quyen_xem?: 'CONG_KHAI' | 'NOI_BO';
   }) => {
-    const response = await axiosInstance.put<KBArticle>(`/kb/${id}`, payload);
-    return response.data;
+    const response = await axiosInstance.put<{ success: boolean; message: string; data: KBArticle }>(`/kb/${id}`, payload);
+    return response.data.data;
   },
 
   feedback: async (id: number, huu_ich: boolean) => {
-    const response = await axiosInstance.post<{ message: string }>(`/kb/${id}/feedback`, {
+    const response = await axiosInstance.post<{ success: boolean; message: string; data: any }>(`/kb/${id}/feedback`, {
       huu_ich,
     });
     return response.data;
