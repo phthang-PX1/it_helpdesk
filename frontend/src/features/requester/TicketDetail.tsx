@@ -980,7 +980,7 @@ export const TicketDetail: React.FC = () => {
                     </button>
                     {showStatusDropdown && (
                       <div className="status-dropdown-menu">
-                        <div className="dropdown-item" onClick={() => handleUpdateStatus('New')}>🆕 Mới tiếp nhận</div>
+                        <div className="dropdown-item" onClick={() => handleUpdateStatus('New')}>🆕 Mới tạo</div>
                         <div className="dropdown-item" onClick={() => handleUpdateStatus('Pending')}>⚙️ Đang giải quyết</div>
                         <div className="dropdown-item" onClick={() => handleUpdateStatus('Resolved')}>✅ Đã giải quyết</div>
                         <div className="dropdown-item" onClick={() => handleUpdateStatus('Closed')}>🔒 Đã đóng</div>

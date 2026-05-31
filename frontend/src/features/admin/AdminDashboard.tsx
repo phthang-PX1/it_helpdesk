@@ -562,7 +562,7 @@ export const AdminDashboard: React.FC = () => {
   const daDong = tickets.filter(t => t.trang_thai === 'DA_DONG').length;
 
   const metrics = [
-    { label: 'Mới tiếp nhận', value: moiTiepNhan.toLocaleString(), change: 'Mới tạo', changeType: 'blue' as const, icon: '🎫', iconClass: 'total' },
+    { label: 'Mới tạo', value: moiTiepNhan.toLocaleString(), change: 'Mới tạo', changeType: 'blue' as const, icon: '🎫', iconClass: 'total' },
     { label: 'Đang xử lý', value: dangXuLy.toLocaleString(), change: 'Đang xử lý', changeType: 'red' as const, icon: '🔓', iconClass: 'open' },
     { label: 'Đã giải quyết', value: daGiaiQuyet.toLocaleString(), change: 'Hoàn tất', changeType: 'green' as const, icon: '✅', iconClass: 'resolved' },
     { label: 'Đã đóng', value: daDong.toLocaleString(), change: 'Đã đóng', changeType: 'green' as const, icon: '🗄️', iconClass: 'breach' },
@@ -615,7 +615,7 @@ export const AdminDashboard: React.FC = () => {
   const renderDbStatusBadge = (status: 'MOI_TAO' | 'DANG_GIAI_QUYET' | 'DA_GIAI_QUYET' | 'DA_DONG') => {
     switch (status) {
       case 'MOI_TAO':
-        return <span className="status-badge new">Mới tiếp nhận</span>;
+        return <span className="status-badge new">Mới tạo</span>;
       case 'DANG_GIAI_QUYET':
         return <span className="status-badge processing">Đang xử lý</span>;
       case 'DA_GIAI_QUYET':

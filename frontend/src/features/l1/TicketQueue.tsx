@@ -254,7 +254,7 @@ export const TicketQueue: React.FC = () => {
             className={`queue-tab-btn tab-pending ${activeTab === 'MOI_TAO' ? 'active' : ''}`}
             onClick={() => setActiveTab('MOI_TAO')}
           >
-            Mới tiếp nhận
+            Mới tạo
             <span className="tab-badge">{getTabCounts('MOI_TAO')}</span>
           </button>
 
@@ -346,7 +346,7 @@ export const TicketQueue: React.FC = () => {
                     </td>
                     <td>
                       {ticket.trang_thai === 'MOI_TAO' && (
-                        <span className="badge-status" style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}>Mới tiếp nhận</span>
+                        <span className="badge-status" style={{ backgroundColor: '#EFF6FF', color: '#1E40AF' }}>Mới tạo</span>
                       )}
                       {ticket.trang_thai === 'DANG_GIAI_QUYET' && (
                         <span className="badge-status" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>Đang xử lý</span>
