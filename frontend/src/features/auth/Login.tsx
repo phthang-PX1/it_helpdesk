@@ -37,37 +37,29 @@ interface LoginProps {
 export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
 
-  const [usernameOrEmail, setUsernameOrEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [emailValidationError, setEmailValidationError] = useState('');
+  const [usernameValidationError, setUsernameValidationError] = useState('');
   const [passwordValidationError, setPasswordValidationError] = useState('');
 
   // Thay thế bằng Google Client ID thật của bạn khi triển khai lên Cloud
   const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
 
   // ─── Validation helpers ─────────────────────────────────────────────────────
-  const validateUsernameOrEmail = (val: string): boolean => {
+  const validateUsername = (val: string): boolean => {
     if (!val) {
-      setEmailValidationError('Vui lòng nhập tên tài khoản hoặc email công ty.');
+      setUsernameValidationError('Vui lòng nhập tài khoản.');
       return false;
     }
-    if (val.includes('@')) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(val)) {
-        setEmailValidationError('Email không đúng định dạng. Ví dụ: abc@company.com');
-        return false;
-      }
-    } else {
-      if (val.trim().length < 2) {
-        setEmailValidationError('Tên tài khoản phải có độ dài tối thiểu 2 ký tự.');
-        return false;
-      }
+    if (val.trim().length < 2) {
+      setUsernameValidationError('Tài khoản phải có độ dài tối thiểu 2 ký tự.');
+      return false;
     }
-    setEmailValidationError('');
+    setUsernameValidationError('');
     return true;
   };
 
@@ -84,10 +76,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     return true;
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setUsernameOrEmail(val);
-    if (emailValidationError) validateUsernameOrEmail(val);
+    setUsername(val);
+    if (usernameValidationError) validateUsername(val);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,17 +93,17 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
-    setEmailValidationError('');
+    setUsernameValidationError('');
     setPasswordValidationError('');
 
-    const isEmailValid = validateUsernameOrEmail(usernameOrEmail);
+    const isUsernameValid = validateUsername(username);
     const isPasswordValid = validatePassword(password);
-    if (!isEmailValid || !isPasswordValid) return;
+    if (!isUsernameValid || !isPasswordValid) return;
 
     setIsLoading(true);
 
     try {
-      const response = await authService.login(usernameOrEmail, password);
+      const response = await authService.login(username, password);
 
       if (response.success && response.data) {
         handleSuccessAuth(response.data);
@@ -231,14 +223,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
               <form onSubmit={handleSubmit} noValidate>
                 <div className="form-group">
-                  <label htmlFor="usernameOrEmail" className="form-label">Tên tài khoản hoặc Email công ty</label>
+                  <label htmlFor="username" className="form-label">Tài khoản</label>
                   <div className="input-container">
                     <span className="input-icon">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </span>
-                    <input type="text" id="usernameOrEmail" className="form-input" placeholder="taikhoan hoặc taikhoan@gmail.com" value={usernameOrEmail} onChange={handleEmailChange} onBlur={() => validateUsernameOrEmail(usernameOrEmail)} disabled={isLoading} required />
+                    <input type="text" id="username" className="form-input" placeholder="Nhập tài khoản" value={username} onChange={handleUsernameChange} onBlur={() => validateUsername(username)} disabled={isLoading} required />
                   </div>
-                  {emailValidationError && <span className="password-strength-hint" style={{ color: 'var(--color-error)' }}>{emailValidationError}</span>}
+                  {usernameValidationError && <span className="password-strength-hint" style={{ color: 'var(--color-error)' }}>{usernameValidationError}</span>}
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '24px' }}>
