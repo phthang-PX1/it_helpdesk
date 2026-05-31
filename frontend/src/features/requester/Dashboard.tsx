@@ -289,7 +289,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
             <div className="summary-card">
               <div className="summary-info">
                 <span className="summary-count">{countByStatus('MOI_TAO')}</span>
-                <span className="summary-label">Mới tiếp nhận</span>
+                <span className="summary-label">Mới tạo</span>
               </div>
               <div className="summary-icon-wrapper state-new">
                 <svg viewBox="0 0 24 24">
@@ -385,7 +385,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ triggerQuickCreate }) => {
                         {ticket.priority === 'Low' && <span className="badge-priority priority-low">Thấp</span>}
                       </td>
                       <td>
-                        {ticket.trang_thai === 'MOI_TAO' && <span className="badge-status status-new">Mới tiếp nhận</span>}
+                        {ticket.trang_thai === 'MOI_TAO' && <span className="badge-status status-new">Mới tạo</span>}
                         {ticket.trang_thai === 'DANG_GIAI_QUYET' && <span className="badge-status status-pending">Đang xử lý</span>}
                         {ticket.trang_thai === 'DA_GIAI_QUYET' && <span className="badge-status status-resolved">Đã giải quyết</span>}
                         {ticket.trang_thai === 'DA_DONG' && <span className="badge-status status-closed" style={{ backgroundColor: '#F1F5F9', color: '#475569' }}>Đã đóng</span>}

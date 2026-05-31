@@ -138,7 +138,7 @@ const SupportDashboard: React.FC = () => {
   const totalPending = counts.moiTao + counts.dangGiaiQuyet;
 
   const statCards = [
-    { icon: '🆕', label: 'Mới tiếp nhận', value: counts.moiTao,       color: '#2563EB', bg: '#EFF6FF' },
+    { icon: '🆕', label: 'Mới tạo', value: counts.moiTao,       color: '#2563EB', bg: '#EFF6FF' },
     { icon: '⚙️', label: 'Đang xử lý',    value: counts.dangGiaiQuyet, color: '#D97706', bg: '#FFFBEB' },
     { icon: '✅', label: 'Đã giải quyết', value: counts.daGiaiQuyet,  color: '#16A34A', bg: '#F0FDF4' },
     { icon: '📦', label: 'Đã đóng',       value: counts.daDong,        color: '#64748B', bg: '#F1F5F9' },
