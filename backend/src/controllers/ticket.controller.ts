@@ -11,10 +11,10 @@ export const ticketController = {
       if (!nhanVienId) throw new AppError('Yêu cầu xác thực tài khoản', 401);
 
       const validatedBody = createTicketSchema.parse(req.body);
-      
+
       // MẢNH GHÉP MULTER: Ép kiểu mảng tệp đính kèm chui từ Network qua RAM
       const files = (req.files as Express.Multer.File[]) || [];
-      
+
       // Nạp cả body và files xuống cho Service giải bài toán
       const { ticket, sla } = await ticketService.createTicket(validatedBody, nhanVienId, files);
 
@@ -24,9 +24,9 @@ export const ticketController = {
         thoiGianBaoTin = timeObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       }
 
-      res.status(201).json({ 
-        success: true, 
-        message: `Khởi tạo ticket thành công. Thời hạn IT Helpdesk phản hồi muộn nhất là trước ${thoiGianBaoTin}.`, 
+      res.status(201).json({
+        success: true,
+        message: `Khởi tạo ticket thành công. Thời hạn IT Helpdesk phản hồi muộn nhất là trước ${thoiGianBaoTin}.`,
         data: {
           ...ticket,
           trang_thai: "Mới tạo",
@@ -76,7 +76,11 @@ export const ticketController = {
 
       const { trang_thai, ghi_chu } = updateTicketStatusSchema.parse(req.body);
       // cast trang_thai to any to satisfy service typing (validated by schema)
-      const data = await ticketService.updateStatus(ticketId, trang_thai as any, ghi_chu || '', req.user);
+      let data: any = await ticketService.updateStatus(ticketId, trang_thai as any, ghi_chu || '', req.user);
+      if (trang_thai === 'DA_GIAI_QUYET') {
+        const danhGia = await require('../libs/prisma').prisma.phieuDanhGia.findUnique({ where: { phieu_ho_tro_id: ticketId } });
+        if (danhGia) data = { ...data, danh_gia: danhGia };
+      }
 
       res.status(200).json({ success: true, message: 'Cập nhật trạng thái và lưu lịch sử thành công', data });
     } catch (error) { next(error); }
@@ -153,7 +157,7 @@ export const ticketController = {
       if (isNaN(ticketId)) throw new AppError('Định dạng mã ID không hợp lệ', 400);
 
       const { noi_dung, loai_binh_luan } = commentSchema.parse(req.body);
-      
+
       // Lấy mảng tệp tin từ Multer Buffer (Hỗ trợ tối đa 5 files, 20MB cấp từ Router)
       const expressFiles = (req.files as any[]) || [];
 
@@ -170,10 +174,10 @@ export const ticketController = {
         io.to(`group_${groupId}`).emit('new_internal_note_alert', { ticket_id: ticketId });
       }
 
-      res.status(201).json({ 
-        success: true, 
-        message: 'Đã thêm bình luận cùng tệp đính kèm hoàn tất.', 
-        data: result 
+      res.status(201).json({
+        success: true,
+        message: 'Đã thêm bình luận cùng tệp đính kèm hoàn tất.',
+        data: result
       });
     } catch (error) { next(error); }
   },
@@ -204,7 +208,7 @@ export const ticketController = {
       if (isNaN(ticketId)) throw new AppError('Định dạng mã ID không hợp lệ', 400);
 
       const data = await ticketService.getHistory(ticketId, req.user);
-      
+
       res.status(200).json({
         success: true,
         message: 'Tải toàn bộ lịch sử ticket thành công',
@@ -224,7 +228,7 @@ export const ticketController = {
       const result = await ticketService.assignTicket(ticketId, req.user.nhan_vien_id, nguoi_ho_tro_id);
 
       // 🔗 REALTIME SOCKET.IO: Bắn thông báo trực tiếp cho Kỹ thuật viên mới
-      const io = require('../libs/socket').getIo(); 
+      const io = require('../libs/socket').getIo();
       io.to(`group_${result.ticket.nhom_xu_ly_id}`).emit('ticket_reassigned', {
         message: `Quản lý đã chỉ định bạn xử lý phiếu ${result.ticket.ma_phieu}`,
         ticket_id: result.ticket.phieu_ho_tro_id,

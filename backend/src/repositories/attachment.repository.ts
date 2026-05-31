@@ -22,12 +22,32 @@ export const attachmentRepository = {
     });
   },
 
-  // Bulk Insert nhiều files cùng lúc
-  saveAttachments: async (filesData: any[]) => {
-    await prisma.tepDinhKem.createMany({ data: filesData });
-    // Trả về danh sách file vừa tạo dựa trên đường dẫn
-    return prisma.tepDinhKem.findMany({
-      where: { duong_dan_file: { in: filesData.map(f => f.duong_dan_file) } }
+  // Bulk Insert nhiều files cùng lúc và cập nhật Ticket
+  saveAttachments: async (ticketId: number, userId: number, filesData: any[]) => {
+    return prisma.$transaction(async (tx) => {
+      // 1. Insert file
+      await tx.tepDinhKem.createMany({ data: filesData });
+      
+      // 2. Cập nhật ngày cập nhật của ticket để đẩy ticket lên
+      await tx.phieuHoTro.update({
+        where: { phieu_ho_tro_id: ticketId },
+        data: { ngay_cap_nhat: new Date() }
+      });
+
+      // 3. Ghi lịch sử phiếu
+      await tx.lichSuPhieu.create({
+        data: {
+          phieu_ho_tro_id: ticketId,
+          nguoi_thuc_hien_id: userId,
+          hanh_dong: 'FILE_UPLOADED',
+          ghi_chu: `Đính kèm thêm ${filesData.length} tệp vào phiếu.`
+        }
+      });
+
+      // 4. Trả về danh sách file vừa tạo
+      return tx.tepDinhKem.findMany({
+        where: { duong_dan_file: { in: filesData.map(f => f.duong_dan_file) } }
+      });
     });
   },
 

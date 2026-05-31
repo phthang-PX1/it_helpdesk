@@ -1,6 +1,6 @@
 // src/repositories/sla.repository.ts
 import { prisma } from '../libs/prisma';
-import { Prisma, MucDoUuTien } from '@prisma/client';
+import { Prisma, MucDoUuTien, LoaiThoiGian } from '@prisma/client';
 
 export const slaRepository = {
   // Lấy danh sách SLA
@@ -11,10 +11,11 @@ export const slaRepository = {
     });
   },
 
-  // Kiểm tra xem đã có Policy nào đang ACTIVE cho mức độ ưu tiên này chưa
-  checkActivePolicyConflict: async (mucDo: MucDoUuTien, excludeId?: number) => {
+  // Kiểm tra xem đã có Policy nào đang ACTIVE cho mức độ ưu tiên và loại thời gian này chưa
+  checkActivePolicyConflict: async (mucDo: MucDoUuTien, loaiThoiGian: LoaiThoiGian, excludeId?: number) => {
     const whereClause: Prisma.ChinhSachSlaWhereInput = {
       muc_do_uu_tien: mucDo,
+      loai_thoi_gian: loaiThoiGian,
       trang_thai: true
     };
     

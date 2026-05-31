@@ -8,6 +8,7 @@ import path from 'path';
 import { TrangThaiPhieu, MucDoUuTien, MucDoAnhHuong, MucDoKhanCap, LoaiSla, TrangThaiMucTieu, QuyenXem, VaiTroEnum, LoaiThoiGian } from '@prisma/client';
 import { saveMemoryFileToDisk } from '../libs/multer';
 import { addBusinessMinutes, calculatePriority } from '../utils/ticket.utils';
+import { analyzeTicketPriority } from '../utils/gemini.util';
 
 // addBusinessMinutes đã được chuyển sang src/utils/ticket.utils.ts
 
@@ -16,10 +17,17 @@ export const ticketService = {
   createTicket: async (data: any, userId: number, expressFiles: Express.Multer.File[] = []) => {
     const today = new Date();
     const traceId = crypto.randomUUID();
-    
-    // Tính Priority dựa trên Ma trận Impact x Urgency
-    const i = data.muc_do_anh_huong as MucDoAnhHuong;
-    const u = data.muc_do_khan_cap as MucDoKhanCap;
+
+    // Tính Priority dựa trên Ma trận Impact x Urgency (Nếu không truyền, dùng Gemini LLM để đánh giá)
+    let i = data.muc_do_anh_huong as MucDoAnhHuong;
+    let u = data.muc_do_khan_cap as MucDoKhanCap;
+
+    if (!i || !u) {
+      const llmResult = await analyzeTicketPriority(data.tieu_de, data.mo_ta_chi_tiet);
+      i = i || llmResult.muc_do_anh_huong;
+      u = u || llmResult.muc_do_khan_cap;
+    }
+
     let muc_do_uu_tien: MucDoUuTien = calculatePriority(i, u);
 
     // Định tuyến nhân viên
@@ -43,6 +51,7 @@ export const ticketService = {
     });
 
     let optimalSupporter = null;
+    let supporterEmail = null;
     if (candidates.length > 0) {
       candidates.sort((a, b) => {
         const countA = a._count.tickets_ho_tro;
@@ -59,12 +68,13 @@ export const ticketService = {
     if (optimalSupporter && optimalSupporter.nhom_ho_tro_id) {
       supporterId = optimalSupporter.nhan_vien_id;
       groupXulyId = optimalSupporter.nhom_ho_tro_id;
+      supporterEmail = optimalSupporter.email;
     } else {
-      const defaultGroup = await prisma.nhomHoTro.findFirst();
-      if (!defaultGroup) {
-        throw new AppError('Hệ thống lỗi: Bảng nhom_ho_tro đang trống.', 400);
+      const defaultL1Group = await prisma.nhomHoTro.findFirst({ where: { ten_nhom: { contains: 'L1' } } });
+      if (!defaultL1Group) {
+        throw new AppError('Hệ thống lỗi: Không tìm thấy nhóm L1.', 400);
       }
-      groupXulyId = defaultGroup.nhom_ho_tro_id;
+      groupXulyId = defaultL1Group.nhom_ho_tro_id;
       supporterId = null;
     }
 
@@ -88,12 +98,12 @@ export const ticketService = {
     }
 
     const now = new Date();
-    const hanChotPhanHoi = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
-      ? addBusinessMinutes(now, policy.tg_phan_hoi) 
+    const hanChotPhanHoi = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH
+      ? addBusinessMinutes(now, policy.tg_phan_hoi)
       : new Date(now.getTime() + policy.tg_phan_hoi * 60 * 1000);
-      
-    const hanChotXuLy = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
-      ? addBusinessMinutes(now, policy.tg_xu_ly) 
+
+    const hanChotXuLy = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH
+      ? addBusinessMinutes(now, policy.tg_xu_ly)
       : new Date(now.getTime() + policy.tg_xu_ly * 60 * 1000);
 
     const slaData = [
@@ -122,8 +132,8 @@ export const ticketService = {
       nguoi_tao_id: userId,
       nhom_xu_ly_id: groupXulyId,
       nguoi_ho_tro_id: supporterId,
-      muc_do_anh_huong: data.muc_do_anh_huong,
-      muc_do_khan_cap: data.muc_do_khan_cap,
+      muc_do_anh_huong: i,
+      muc_do_khan_cap: u,
       muc_do_uu_tien,
       trang_thai: TrangThaiPhieu.MOI_TAO
     };
@@ -149,6 +159,31 @@ export const ticketService = {
         <p><b>Map Pacific Singapore IT Operations Team</b></p>
       `;
       sendEmail(creator.email, subject, htmlContent);
+    }
+
+    // Gửi thông báo và email cho người được gán L1
+    if (supporterId) {
+      await prisma.thongBao.create({
+        data: {
+          nguoi_nhan_id: supporterId,
+          phieu_ho_tro_id: result.phieu_ho_tro_id,
+          loai: 'TICKET_ASSIGNED',
+          tieu_de: `Có ticket mới được gán cho bạn: ${result.ma_phieu}`,
+          noi_dung: `Bạn vừa được hệ thống phân công tự động xử lý phiếu hỗ trợ ${result.ma_phieu}.`
+        }
+      });
+
+      if (supporterEmail) {
+        const emailContent = `
+          <h3>Chào bạn,</h3>
+          <p>Hệ thống vừa phân công cho bạn một phiếu yêu cầu hỗ trợ mới.</p>
+          <p><b>Mã phiếu:</b> ${result.ma_phieu}</p>
+          <p><b>Tiêu đề:</b> ${data.tieu_de}</p>
+          <p><b>Mức độ ưu tiên:</b> ${muc_do_uu_tien}</p>
+          <p>Vui lòng kiểm tra hệ thống và xử lý theo SLA.</p>
+        `;
+        sendEmail(supporterEmail, `[IT Helpdesk] Ticket mới được phân công - ${result.ma_phieu}`, emailContent);
+      }
     }
 
     const phanHoiSla = slaData.find((s) => s.loai_sla === LoaiSla.PHAN_HOI);
@@ -227,7 +262,7 @@ export const ticketService = {
     }
 
     const validTransitions: Record<TrangThaiPhieu, TrangThaiPhieu[]> = {
-      [TrangThaiPhieu.MOI_TAO]: [TrangThaiPhieu.DANG_GIAI_QUYET],
+      [TrangThaiPhieu.MOI_TAO]: [TrangThaiPhieu.DANG_GIAI_QUYET, TrangThaiPhieu.CHO_PHAN_HOI],
       [TrangThaiPhieu.DANG_GIAI_QUYET]: [TrangThaiPhieu.DA_GIAI_QUYET, TrangThaiPhieu.CHO_PHAN_HOI],
       [TrangThaiPhieu.CHO_PHAN_HOI]: [TrangThaiPhieu.DANG_GIAI_QUYET],
       [TrangThaiPhieu.DA_GIAI_QUYET]: [TrangThaiPhieu.DA_DONG],
@@ -271,8 +306,8 @@ export const ticketService = {
     }
 
     if (ticket.trang_thai === TrangThaiPhieu.CHO_PHAN_HOI && newStatus === TrangThaiPhieu.DANG_GIAI_QUYET) {
-      const slas = await prisma.slaTheoDoi.findMany({ 
-        where: { phieu_ho_tro_id: id, thoi_diem_dat: null, thoi_diem_tam_dung: { not: null } } 
+      const slas = await prisma.slaTheoDoi.findMany({
+        where: { phieu_ho_tro_id: id, thoi_diem_dat: null, thoi_diem_tam_dung: { not: null } }
       });
       const now = new Date();
       for (const sla of slas) {
@@ -352,7 +387,7 @@ export const ticketService = {
       where: { nhom_ho_tro_id: nhomL2Id, trang_thai: true },
       select: { nhan_vien_id: true }
     });
-    
+
     if (l2Members.length > 0) {
       const thongBaoData = l2Members.map(m => ({
         nguoi_nhan_id: m.nhan_vien_id,
@@ -382,10 +417,10 @@ export const ticketService = {
       where: { phieu_ho_tro_id: ticketId, gia_tri_moi: TrangThaiPhieu.DA_GIAI_QUYET },
       orderBy: { ngay_thuc_hien: 'desc' }
     });
-    
+
     const resolveTime = resolvedLog ? resolvedLog.ngay_thuc_hien.getTime() : ticket.ngay_cap_nhat.getTime();
     const hoursSinceResolved = Math.abs(new Date().getTime() - resolveTime) / 36e5;
-    
+
     if (hoursSinceResolved > 48) {
       throw new AppError('Quá 48h kể từ lúc giải quyết, không thể mở lại. Vui lòng tạo ticket mới.', 409);
     }
@@ -401,69 +436,80 @@ export const ticketService = {
         muc_do_anh_huong: ticket.muc_do_anh_huong,
         muc_do_khan_cap: ticket.muc_do_khan_cap,
       };
-      
+
       await ticketRepository.updateStatus(ticketId, TrangThaiPhieu.DA_DONG, userId, `Hệ thống tự động đóng phiếu do yêu cầu mở lại vượt quá số lần. Đã chuyển sang tạo phiếu mới.`, traceId);
-      
+
       const newTicketResult = await ticketService.createTicket(newTicketData, ticket.nguoi_tao_id, []);
-      
-      return { 
-        action: 'CREATED_NEW', 
+
+      return {
+        action: 'CREATED_NEW',
         message: 'Do số lần mở lại quá giới hạn, hệ thống đã tạo một phiếu mới và đưa vào hàng chờ L1.',
         ticket: newTicketResult.ticket,
         sla: newTicketResult.sla
       };
     }
 
-    // Mở lại bình thường -> Phân bổ lại cho L1 rảnh nhất
-    const candidates = await prisma.nhanVien.findMany({
-      where: {
-        vai_tro: { ma_vai_tro: VaiTroEnum.IT_L1 },
-        trang_thai: true,
-        nhom_ho_tro_id: { not: null }
-      },
-      include: {
-        _count: { select: { tickets_ho_tro: { where: { trang_thai: { in: [TrangThaiPhieu.MOI_TAO, TrangThaiPhieu.DANG_GIAI_QUYET] } } } } },
-        tickets_ho_tro: {
-          orderBy: { ngay_cap_nhat: 'desc' },
-          take: 1,
-          select: { ngay_cap_nhat: true }
-        }
-      }
-    });
-
-    let supporterId: number | null = null;
-    let groupXulyId: number | null = null;
+    let supporterId: number | null = ticket.nguoi_ho_tro_id;
+    let groupXulyId: number | null = ticket.nhom_xu_ly_id;
     let supporterEmail: string | null = null;
 
-    if (candidates.length > 0) {
-      candidates.sort((a, b) => {
-        const countA = a._count.tickets_ho_tro;
-        const countB = b._count.tickets_ho_tro;
-        if (countA !== countB) return countA - countB;
-        const timeA = a.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
-        const timeB = b.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
-        return timeA - timeB;
+    if (supporterId) {
+      const oldSupporter = await prisma.nhanVien.findUnique({ where: { nhan_vien_id: supporterId } });
+      if (oldSupporter && oldSupporter.trang_thai) {
+        supporterEmail = oldSupporter.email;
+      } else {
+        supporterId = null;
+      }
+    }
+
+    if (!supporterId) {
+      // Mở lại bình thường -> Phân bổ lại cho L1 rảnh nhất nếu người cũ không còn
+      const candidates = await prisma.nhanVien.findMany({
+        where: {
+          vai_tro: { ma_vai_tro: VaiTroEnum.IT_L1 },
+          trang_thai: true,
+          nhom_ho_tro_id: { not: null }
+        },
+        include: {
+          _count: { select: { tickets_ho_tro: { where: { trang_thai: { in: [TrangThaiPhieu.MOI_TAO, TrangThaiPhieu.DANG_GIAI_QUYET] } } } } },
+          tickets_ho_tro: {
+            orderBy: { ngay_cap_nhat: 'desc' },
+            take: 1,
+            select: { ngay_cap_nhat: true }
+          }
+        }
       });
-      supporterId = candidates[0].nhan_vien_id;
-      groupXulyId = candidates[0].nhom_ho_tro_id;
-      supporterEmail = candidates[0].email;
-    } else {
-      const defaultGroup = await prisma.nhomHoTro.findFirst();
-      if (!defaultGroup) throw new AppError('Hệ thống lỗi: Bảng nhom_ho_tro đang trống.', 400);
-      groupXulyId = defaultGroup.nhom_ho_tro_id;
+
+      if (candidates.length > 0) {
+        candidates.sort((a, b) => {
+          const countA = a._count.tickets_ho_tro;
+          const countB = b._count.tickets_ho_tro;
+          if (countA !== countB) return countA - countB;
+          const timeA = a.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
+          const timeB = b.tickets_ho_tro[0]?.ngay_cap_nhat.getTime() || 0;
+          return timeA - timeB;
+        });
+        supporterId = candidates[0].nhan_vien_id;
+        groupXulyId = candidates[0].nhom_ho_tro_id;
+        supporterEmail = candidates[0].email;
+      } else {
+        const defaultGroup = await prisma.nhomHoTro.findFirst({ where: { ten_nhom: { contains: 'L1' } } });
+        if (!defaultGroup) throw new AppError('Hệ thống lỗi: Không tìm thấy nhóm L1.', 400);
+        groupXulyId = defaultGroup.nhom_ho_tro_id;
+      }
     }
 
     const reopenedTicket = await ticketRepository.reopenTicket(ticketId, userId, newSoLanMoLai, groupXulyId as number, supporterId, lyDo, traceId);
-    
+
     const policy = await ticketRepository.findActiveSlaPolicy(ticket.muc_do_uu_tien);
     if (policy) {
       const now = new Date();
-      const hanChotPhanHoi = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
-        ? addBusinessMinutes(now, policy.tg_phan_hoi) 
+      const hanChotPhanHoi = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH
+        ? addBusinessMinutes(now, policy.tg_phan_hoi)
         : new Date(now.getTime() + policy.tg_phan_hoi * 60 * 1000);
-        
-      const hanChotXuLy = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH 
-        ? addBusinessMinutes(now, policy.tg_xu_ly) 
+
+      const hanChotXuLy = policy.loai_thoi_gian === LoaiThoiGian.GIO_HANH_CHINH
+        ? addBusinessMinutes(now, policy.tg_xu_ly)
         : new Date(now.getTime() + policy.tg_xu_ly * 60 * 1000);
 
       await prisma.slaTheoDoi.createMany({
@@ -489,7 +535,7 @@ export const ticketService = {
     }
 
     const notifyUserIds = supporterId ? [supporterId] : (await prisma.nhanVien.findMany({ where: { nhom_ho_tro_id: groupXulyId as number, trang_thai: true }, select: { nhan_vien_id: true } })).map(m => m.nhan_vien_id);
-    
+
     if (notifyUserIds.length > 0) {
       const thongBaoData = notifyUserIds.map(uid => ({
         nguoi_nhan_id: uid,
@@ -509,7 +555,7 @@ export const ticketService = {
       );
     } else if (groupXulyId) {
       const l1Emails = (await prisma.nhanVien.findMany({ where: { nhom_ho_tro_id: groupXulyId, trang_thai: true }, select: { email: true } })).map(m => m.email);
-      await Promise.all(l1Emails.map(email => 
+      await Promise.all(l1Emails.map(email =>
         sendEmail(
           email,
           `[IT Helpdesk] Phiếu ${ticket.ma_phieu} đã được mở lại`,

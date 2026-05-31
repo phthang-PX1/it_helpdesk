@@ -7,10 +7,10 @@ export const createTicketSchema = z.object({
   mo_ta_chi_tiet: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   muc_do_anh_huong: z.enum(Object.values(MucDoAnhHuong) as [string, ...string[]], {
     message: 'Mức độ ảnh hưởng không hợp lệ'
-  }),
+  }).optional(),
   muc_do_khan_cap: z.enum(Object.values(MucDoKhanCap) as [string, ...string[]], {
     message: 'Mức độ khẩn cấp không hợp lệ'
-  })
+  }).optional()
 });
 
 export const updateTicketStatusSchema = z.object({

@@ -25,7 +25,7 @@ export const attachmentService = {
       };
     });
 
-    return await attachmentRepository.saveAttachments(filesPayload);
+    return await attachmentRepository.saveAttachments(ticketId, userId, filesPayload);
   },
 
   // API-27
@@ -60,6 +60,6 @@ export const attachmentService = {
       console.error(`[Cảnh báo] Lỗi dọn rác file vật lý: ${attachment.duong_dan_file}`);
     }
 
-    return true;
+    return attachment.phieu_ho_tro_id;
   }
 };

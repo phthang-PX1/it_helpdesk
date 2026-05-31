@@ -1,0 +1,5347 @@
+{
+  "info": {
+    "_postman_id": "ithelpdesk-api-testcases-v1",
+    "name": "IT Helpdesk API — Test Cases (Map Pacific Singapore)",
+    "description": "138 test cases cho 41 endpoints. Base URL: http://localhost:3000/api/v1\n\nHướng dẫn:\n1. Import collection này vào Postman\n2. Cấu hình Collection Variables phù hợp với môi trường\n3. Chạy từng folder hoặc toàn bộ qua Collection Runner\n4. TC-AUTH-001 phải chạy đầu tiên để lấy accessToken và refreshToken",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "Auto-filled by TC-AUTH-001"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string",
+      "description": "Auto-filled by TC-AUTH-001"
+    },
+    {
+      "key": "validUsername",
+      "value": "nv01",
+      "type": "string"
+    },
+    {
+      "key": "validPassword",
+      "value": "Pass@123",
+      "type": "string"
+    },
+    {
+      "key": "lockedUsername",
+      "value": "locked_user",
+      "type": "string"
+    },
+    {
+      "key": "noRoleUsername",
+      "value": "no_role_user",
+      "type": "string"
+    },
+    {
+      "key": "itL1Token",
+      "value": "FILL_IN_IT_L1_TOKEN",
+      "type": "string",
+      "description": "Bearer token of an IT_L1 user"
+    },
+    {
+      "key": "itL2Token",
+      "value": "FILL_IN_IT_L2_TOKEN",
+      "type": "string",
+      "description": "Bearer token of an IT_L2 user"
+    },
+    {
+      "key": "managerToken",
+      "value": "FILL_IN_MANAGER_TOKEN",
+      "type": "string",
+      "description": "Bearer token of QUAN_LY"
+    },
+    {
+      "key": "otherItL2Token",
+      "value": "FILL_IN_OTHER_IT_L2_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "currentUserId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "itL1UserId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "itL2UserId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "managerId",
+      "value": "4",
+      "type": "string"
+    },
+    {
+      "key": "validItL1Id",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "wrongGroupItId",
+      "value": "99",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "1",
+      "type": "string",
+      "description": "Auto-filled after TC-TKT-001"
+    },
+    {
+      "key": "closedTicketId",
+      "value": "FILL_IN_CLOSED_TICKET_ID",
+      "type": "string"
+    },
+    {
+      "key": "otherUserTicketId",
+      "value": "FILL_IN_OTHER_USER_TICKET_ID",
+      "type": "string"
+    },
+    {
+      "key": "resolvedTicketId",
+      "value": "FILL_IN_RESOLVED_TICKET_ID",
+      "type": "string"
+    },
+    {
+      "key": "oldResolvedTicketId",
+      "value": "FILL_IN_OLD_RESOLVED_TICKET_ID",
+      "type": "string",
+      "description": ">48h ago"
+    },
+    {
+      "key": "noReviewTicketId",
+      "value": "FILL_IN_NO_REVIEW_TICKET_ID",
+      "type": "string"
+    },
+    {
+      "key": "attachmentId",
+      "value": "1",
+      "type": "string",
+      "description": "Auto-filled after TC-ATT-001"
+    },
+    {
+      "key": "otherUserAttachmentId",
+      "value": "FILL_IN_OTHER_USER_ATT_ID",
+      "type": "string"
+    },
+    {
+      "key": "closedTicketAttachmentId",
+      "value": "FILL_IN_CLOSED_ATT_ID",
+      "type": "string"
+    },
+    {
+      "key": "reviewToken",
+      "value": "FILL_IN_VALID_REVIEW_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "usedReviewToken",
+      "value": "FILL_IN_USED_REVIEW_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "kbArticleId",
+      "value": "1",
+      "type": "string",
+      "description": "Auto-filled after TC-KB-008"
+    },
+    {
+      "key": "draftKbId",
+      "value": "FILL_IN_DRAFT_KB_ID",
+      "type": "string"
+    },
+    {
+      "key": "slaId",
+      "value": "1",
+      "type": "string",
+      "description": "Auto-filled after TC-SLA-004"
+    },
+    {
+      "key": "roleId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "teamId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newUserId",
+      "value": "",
+      "type": "string",
+      "description": "Auto-filled after TC-ADM-004"
+    },
+    {
+      "key": "existingEmail",
+      "value": "existing@company.com",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "otherUserNotifId",
+      "value": "FILL_IN_OTHER_USER_NOTIF_ID",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "",
+      "type": "string",
+      "description": "Auto-filled after TC-TKT-027"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 01 — Authentication",
+      "item": [
+        {
+          "name": "TC-AUTH-001 | Login thành công",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tai_khoan\": \"{{validUsername}}\",\n  \"mat_khau\": \"{{validPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has access token\", () => { const j = pm.response.json(); pm.expect(j.data).to.have.property(\"token\"); pm.collectionVariables.set(\"accessToken\", j.data.token); });",
+                  "pm.test(\"Has refresh token\", () => { const j = pm.response.json(); pm.expect(j.data).to.have.property(\"refresh_token\"); pm.collectionVariables.set(\"refreshToken\", j.data.refresh_token); });",
+                  "pm.test(\"Has user object\", () => { const j = pm.response.json(); pm.expect(j.data).to.have.property(\"user\"); });",
+                  "pm.test(\"Response does NOT contain mat_khau\", () => { const txt = pm.response.text(); pm.expect(txt).to.not.include(\"mat_khau\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-002 | Login — sai mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tai_khoan\": \"{{validUsername}}\",\n  \"mat_khau\": \"WrongPassword@999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Error message present\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-003 | Login — tài khoản không tồn tại",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tai_khoan\": \"nonexistent_user_xyz\",\n  \"mat_khau\": \"Pass@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-004 | Login — tài khoản bị khóa",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tai_khoan\": \"{{lockedUsername}}\",\n  \"mat_khau\": \"{{validPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Locked account message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-005 | Login — chưa có vai trò",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tai_khoan\": \"{{noRoleUsername}}\",\n  \"mat_khau\": \"{{validPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-006 | Login — thiếu tai_khoan",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mat_khau\": \"Pass@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Zod validation error\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-007 | Login — body rỗng",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-008 | Logout thành công",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"success = true\", () => { const j = pm.response.json(); pm.expect(j.success).to.be.true; });",
+                  "pm.test(\"Đăng xuất thành công message\", () => pm.expect(pm.response.json().message).to.include(\"thành công\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-009 | Logout — refresh_token không hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"invalid_token_xyz_12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-010 | Logout — không có Access Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-011 | Refresh Token thành công",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has new access token\", () => { const j = pm.response.json(); pm.expect(j.data).to.have.property(\"token\"); pm.collectionVariables.set(\"accessToken\", j.data.token); });",
+                  "pm.test(\"NO new refresh_token returned\", () => { const j = pm.response.json(); pm.expect(j.data).to.not.have.property(\"refresh_token\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-012 | Refresh Token — hết hạn / không tồn tại trong Redis",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"expired_or_invalid_refresh_token_xyz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-013 | GET /me — lấy thông tin cá nhân",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Response does NOT contain mat_khau\", () => { const txt = pm.response.text(); pm.expect(txt).to.not.include(\"mat_khau\"); });",
+                  "pm.test(\"Has required user fields\", () => { const d = pm.response.json().data; [\"nhan_vien_id\",\"ho_ten\",\"email\",\"vai_tro\"].forEach(k => pm.expect(d).to.have.property(k)); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-AUTH-014 | GET /me — token hết hạn",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer expired.token.here",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎫 02 — Tickets",
+      "item": [
+        {
+          "name": "TC-TKT-001 | Tạo ticket thành công — không file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Lỗi không in được tài liệu",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Máy in tầng 3 không nhận lệnh in từ hôm qua sáng",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "TRUNG_BINH",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "CAO",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"ma_phieu format SW-YYYY-XXXX\", () => { const mp = pm.response.json().data.ma_phieu; pm.expect(mp).to.match(/^SW-\\d{4}-\\d+$/); pm.collectionVariables.set(\"ticketId\", pm.response.json().data.phieu_ho_tro_id); });",
+                  "pm.test(\"trang_thai = MOI_TAO\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"MOI_TAO\"));",
+                  "pm.test(\"Has SLA deadlines\", () => { const sla = pm.response.json().data.sla; pm.expect(sla).to.have.property(\"han_chot_phan_hoi\"); pm.expect(sla).to.have.property(\"han_chot_xu_ly\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-002 | Tạo ticket — kèm file hợp lệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Màn hình laptop bị sọc ngang",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Màn hình laptop Dell xuất hiện sọc ngang từ sáng nay, không dùng được",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "CAO",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "CAO",
+                  "type": "text"
+                },
+                {
+                  "key": "files[]",
+                  "type": "file",
+                  "src": "/path/to/screenshot.jpg",
+                  "description": "Ảnh chụp màn hình sự cố"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has file metadata\", () => { const d = pm.response.json().data; pm.expect(d).to.have.property(\"files\").that.is.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-003 | Tạo ticket — tieu_de < 5 ký tự",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Lỗi",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Mô tả chi tiết sự cố đang xảy ra",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "THAP",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "THAP",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Zod error on tieu_de\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-004 | Tạo ticket — mo_ta_chi_tiet < 10 ký tự",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Lỗi máy tính bàn",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Lỗi nhỏ",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "THAP",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "THAP",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-005 | Tạo ticket — sai enum muc_do_anh_huong",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Lỗi máy tính văn phòng A1",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Chi tiết sự cố máy tính không khởi động",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "INVALID_VALUE",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "CAO",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-006 | Tạo ticket — role không phải NGUOI_YEU_CAU",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Test role check ticket",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Kiểm tra phân quyền tạo ticket",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "THAP",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "THAP",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-007 | Priority: Impact=CAO + Urgency=CAO → Priority=CAO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Sự cố nghiêm trọng toàn hệ thống",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Toàn bộ hệ thống ERP không truy cập được",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "CAO",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "CAO",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Priority = CAO\", () => pm.expect(pm.response.json().data.muc_do_uu_tien).to.equal(\"CAO\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-008 | Priority: Impact=THAP + Urgency=THAP → Priority=THAP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Yêu cầu cài thêm phần mềm",
+                  "type": "text"
+                },
+                {
+                  "key": "mo_ta_chi_tiet",
+                  "value": "Cần cài thêm WinRAR cho máy phòng kế toán",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_anh_huong",
+                  "value": "THAP",
+                  "type": "text"
+                },
+                {
+                  "key": "muc_do_khan_cap",
+                  "value": "THAP",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Priority = THAP\", () => pm.expect(pm.response.json().data.muc_do_uu_tien).to.equal(\"THAP\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-009 | Danh sách ticket — NGUOI_YEU_CAU chỉ thấy của mình",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets?page=1&limit=10"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has pagination\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"pagination\"); pm.expect(j.pagination).to.have.all.keys(\"total\",\"page\",\"limit\"); });",
+                  "pm.test(\"All tickets belong to current user\", () => { const userId = parseInt(pm.collectionVariables.get(\"currentUserId\")); const tickets = pm.response.json().data; if(tickets.length > 0){ tickets.forEach(t => pm.expect(t.nguoi_tao_id).to.equal(userId)); } });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-010 | Danh sách ticket — lọc trang_thai",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets?trang_thai=DANG_GIAI_QUYET",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets?trang_thai=DANG_GIAI_QUYET"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"All DANG_GIAI_QUYET\", () => pm.response.json().data.forEach(t => pm.expect(t.trang_thai).to.equal(\"DANG_GIAI_QUYET\")));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-011 | Danh sách ticket — không có token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-012 | Chi tiết ticket — người tạo xem ticket của mình",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Response does NOT contain mat_khau\", () => { const txt = pm.response.text(); pm.expect(txt).to.not.include(\"mat_khau\"); });",
+                  "pm.test(\"Has SLA info\", () => { const d = pm.response.json().data; pm.expect(d).to.have.property(\"danh_sach_sla\"); });",
+                  "pm.test(\"NOI_BO comments filtered for NGUOI_YEU_CAU\", () => { const bls = pm.response.json().data.danh_sach_bl || []; bls.forEach(b => pm.expect(b.quyen_xem).to.not.equal(\"NOI_BO\")); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-013 | Chi tiết ticket — NGUOI_YEU_CAU xem ticket người khác",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{otherUserTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{otherUserTicketId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-014 | Chi tiết ticket — không tồn tại",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-015 | Cập nhật trạng thái: MOI_TAO → DANG_GIAI_QUYET",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"DANG_GIAI_QUYET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"trang_thai = DANG_GIAI_QUYET\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"DANG_GIAI_QUYET\"));",
+                  "pm.test(\"SLA phan_hoi stopped\", () => { const sla = (pm.response.json().data.danh_sach_sla || []).find(s => s.loai_sla === \"PHAN_HOI\"); if(sla) pm.expect(sla.thoi_diem_dat).to.not.be.null; });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-016 | Cập nhật trạng thái: DANG_GIAI_QUYET → DA_GIAI_QUYET",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"DA_GIAI_QUYET\",\n  \"ghi_chu\": \"Đã reset password và test lại thành công\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"trang_thai = DA_GIAI_QUYET\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"DA_GIAI_QUYET\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-017 | Cập nhật trạng thái — sai Workflow (MOI_TAO → DA_GIAI_QUYET)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"DA_GIAI_QUYET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Workflow error message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-018 | Cập nhật trạng thái — ticket DA_DONG",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{closedTicketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{closedTicketId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"DANG_GIAI_QUYET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-019 | SLA Pause — chuyển sang CHO_PHAN_HOI",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"CHO_PHAN_HOI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"trang_thai = CHO_PHAN_HOI\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"CHO_PHAN_HOI\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-020 | SLA Resume — CHO_PHAN_HOI → DANG_GIAI_QUYET",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "status"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"DANG_GIAI_QUYET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"trang_thai = DANG_GIAI_QUYET\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"DANG_GIAI_QUYET\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-021 | Escalate L2 thành công",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/escalate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "escalate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ly_do\": \"Không tìm được nguyên nhân sau 2h phân tích\",\n  \"cac_buoc_da_thu\": \"Đã restart service, kiểm tra log hệ thống và cấu hình mạng\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"nhom_ho_tro_moi = L2\", () => pm.expect(pm.response.json().data.nhom_ho_tro_moi).to.include(\"L2\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-022 | Escalate — ly_do < 10 ký tự",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/escalate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "escalate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ly_do\": \"Lỗi\",\n  \"cac_buoc_da_thu\": \"Đã thử các bước cơ bản nhưng không được\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-023 | Escalate — role không phải IT_L1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL2Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/escalate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "escalate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ly_do\": \"Không giải quyết được sau 2 giờ xử lý\",\n  \"cac_buoc_da_thu\": \"Đã thử restart và kiểm tra cấu hình\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-024 | Reopen ticket thành công — lần 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{resolvedTicketId}}/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{resolvedTicketId}}",
+                "reopen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ly_do\": \"Sự cố vẫn còn xảy ra sau khi giải quyết\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"trang_thai = DANG_GIAI_QUYET\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"DANG_GIAI_QUYET\"));",
+                  "pm.test(\"so_lan_mo_lai tăng\", () => pm.expect(pm.response.json().data.so_lan_mo_lai).to.be.at.least(1));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-025 | Reopen — quá 48h",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{oldResolvedTicketId}}/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{oldResolvedTicketId}}",
+                "reopen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ly_do\": \"Muốn kiểm tra lại sự cố cũ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-026 | Reopen — role không phải QUAN_LY",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{resolvedTicketId}}/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{resolvedTicketId}}",
+                "reopen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ly_do\": \"Muốn mở lại ticket này\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-027 | Thêm bình luận public thành công",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "noi_dung",
+                  "value": "Đã nhận được yêu cầu, đang kiểm tra và xử lý",
+                  "type": "text"
+                },
+                {
+                  "key": "loai_binh_luan",
+                  "value": "public",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"quyen_xem = CONG_KHAI\", () => pm.expect(pm.response.json().data.quyen_xem).to.equal(\"CONG_KHAI\"));",
+                  "pm.collectionVariables.set(\"commentId\", pm.response.json().data.binh_luan_id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-028 | Thêm bình luận internal bởi IT_L1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "noi_dung",
+                  "value": "Ghi chú nội bộ: cần liên hệ vendor xử lý phần cứng",
+                  "type": "text"
+                },
+                {
+                  "key": "loai_binh_luan",
+                  "value": "internal",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"quyen_xem = NOI_BO\", () => pm.expect(pm.response.json().data.quyen_xem).to.equal(\"NOI_BO\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-029 | NGUOI_YEU_CAU gửi internal — bị từ chối",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "noi_dung",
+                  "value": "Nội dung nội bộ",
+                  "type": "text"
+                },
+                {
+                  "key": "loai_binh_luan",
+                  "value": "internal",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-030 | Bình luận — ticket DA_DONG",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{closedTicketId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{closedTicketId}}",
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "noi_dung",
+                  "value": "Bình luận trên ticket đóng",
+                  "type": "text"
+                },
+                {
+                  "key": "loai_binh_luan",
+                  "value": "public",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-031 | Danh sách bình luận — NGUOI_YEU_CAU không thấy NOI_BO",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/comments?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "comments?page=1&limit=20"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has pagination\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"pagination\"); pm.expect(j.pagination).to.have.all.keys(\"total\",\"page\",\"limit\"); });",
+                  "pm.test(\"No NOI_BO comments for NGUOI_YEU_CAU\", () => { (pm.response.json().data || []).forEach(b => pm.expect(b.quyen_xem).to.not.equal(\"NOI_BO\")); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-032 | Lịch sử ticket thành công",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "history"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"History records have trace_id\", () => { (pm.response.json().data || []).forEach(h => pm.expect(h).to.have.property(\"hanh_dong\")); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-033 | Assign KTV thành công",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "assign"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nguoi_ho_tro_id\": \"{{validItL1Id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has nguoi_ho_tro info\", () => { const d = pm.response.json().data; pm.expect(d).to.have.property(\"nguoi_ho_tro_moi\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-034 | Assign — KTV không cùng nhóm",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "assign"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nguoi_ho_tro_id\": \"{{wrongGroupItId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-TKT-035 | SLA real-time status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{ticketId}}/sla",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{ticketId}}",
+                "sla"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has sla_phan_hoi and sla_xu_ly\", () => { const d = pm.response.json().data; pm.expect(d).to.have.property(\"sla_phan_hoi\"); pm.expect(d).to.have.property(\"sla_xu_ly\"); });",
+                  "pm.test(\"thoi_gian_con_lai_giay is number\", () => { const d = pm.response.json().data; pm.expect(d.sla_xu_ly.thoi_gian_con_lai_giay).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📎 03 — Attachments",
+      "item": [
+        {
+          "name": "TC-ATT-001 | Upload file vào ticket thành công",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/tickets/{{ticketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "tickets",
+                "{{ticketId}}"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files[]",
+                  "type": "file",
+                  "src": "/path/to/test.pdf",
+                  "description": "Test PDF"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"File metadata returned\", () => { const d = pm.response.json().data; pm.expect(d).to.be.an(\"array\").with.length.greaterThan(0); pm.expect(d[0]).to.have.property(\"ten_tep\"); pm.collectionVariables.set(\"attachmentId\", d[0].tep_dinh_kem_id); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-002 | Upload — ticket DA_DONG",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/tickets/{{closedTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "tickets",
+                "{{closedTicketId}}"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files[]",
+                  "type": "file",
+                  "src": "/path/to/test.pdf",
+                  "description": ""
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-003 | Upload — ticket không tồn tại",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/tickets/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "tickets",
+                "999999"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files[]",
+                  "type": "file",
+                  "src": "/path/to/test.pdf",
+                  "description": ""
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-004 | Xóa file thành công — chủ ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/{{attachmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "{{attachmentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"success = true\", () => { const j = pm.response.json(); pm.expect(j.success).to.be.true; });",
+                  "pm.test(\"Success message\", () => pm.expect(pm.response.json().message).to.include(\"thành công\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-005 | Xóa file — QUAN_LY xóa bất kỳ",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/{{attachmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "{{attachmentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-006 | Xóa file — không phải chủ sở hữu",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/{{otherUserAttachmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "{{otherUserAttachmentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-007 | Xóa file — ticket DA_DONG",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/{{closedTicketAttachmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "{{closedTicketAttachmentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ATT-008 | Xóa file — file không tồn tại",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attachments/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attachments",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⭐ 04 — Reviews",
+      "item": [
+        {
+          "name": "TC-REV-001 | Validate review token hợp lệ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/validate-token?token={{reviewToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "validate-token?token={{reviewToken}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has ticket info\", () => { const d = pm.response.json().data; [\"phieu_ho_tro_id\",\"ma_phieu\",\"tieu_de\",\"trang_thai\"].forEach(k => pm.expect(d).to.have.property(k)); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-002 | Validate review token — đã dùng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/validate-token?token={{usedReviewToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "validate-token?token={{usedReviewToken}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-003 | Validate review token — thiếu param",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/validate-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "validate-token"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-004 | Gửi đánh giá hài lòng — ticket tự đóng",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reviewToken}}\",\n  \"hai_long\": true,\n  \"so_sao\": 5,\n  \"nhan_xet\": \"Hỗ trợ rất nhanh và chuyên nghiệp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"ket_qua = CLOSED\", () => pm.expect(pm.response.json().data.ket_qua).to.equal(\"CLOSED\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-005 | Gửi đánh giá không hài lòng — ticket reopen",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reviewToken}}\",\n  \"hai_long\": false,\n  \"so_sao\": 2,\n  \"ly_do_khong_hai_long\": \"Sự cố vẫn còn xảy ra sau khi được thông báo giải quyết\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"ket_qua = REOPENED\", () => pm.expect(pm.response.json().data.ket_qua).to.equal(\"REOPENED\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-006 | Gửi đánh giá — không hài lòng nhưng thiếu ly_do",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reviewToken}}\",\n  \"hai_long\": false,\n  \"so_sao\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Zod refine error: ly_do required\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-007 | Gửi đánh giá — so_sao ngoài 1-5",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reviewToken}}\",\n  \"hai_long\": true,\n  \"so_sao\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-008 | Xem kết quả đánh giá thành công",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{ticketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{ticketId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has review fields\", () => { const d = pm.response.json().data; [\"hai_long\",\"so_sao\",\"ngay_danh_gia\"].forEach(k => pm.expect(d).to.have.property(k)); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-009 | Xem đánh giá — ticket chưa có đánh giá",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL1Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{noReviewTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{noReviewTicketId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-REV-010 | Xem đánh giá — NGUOI_YEU_CAU không có quyền",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{ticketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{ticketId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📚 05 — Knowledge Base",
+      "item": [
+        {
+          "name": "TC-KB-001 | Search KB thành công",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/search?q=lỗi máy in&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "search?q=lỗi máy in&limit=5"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Results have mo_dau (max 150 chars)\", () => { (pm.response.json().data || []).forEach(k => { pm.expect(k).to.have.property(\"mo_dau\"); pm.expect(k.mo_dau.length).to.be.at.most(150); }); });",
+                  "pm.test(\"No full noi_dung in search results\", () => { (pm.response.json().data || []).forEach(k => pm.expect(k).to.not.have.property(\"noi_dung\")); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-002 | Search KB — từ khóa < 2 ký tự",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/search?q=a",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "search?q=a"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-003 | Search KB — không có kết quả",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/search?q=xyzabcnotexistquery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "search?q=xyzabcnotexistquery"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Empty array returned\", () => pm.expect(pm.response.json().data).to.be.an(\"array\").that.is.empty);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-004 | Danh sách KB — NGUOI_YEU_CAU chỉ thấy DA_XUAT_BAN",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb?page=1&limit=10"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"All DA_XUAT_BAN for NGUOI_YEU_CAU\", () => { (pm.response.json().data || []).forEach(b => pm.expect(b.trang_thai).to.equal(\"DA_XUAT_BAN\")); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-005 | Danh sách KB — QUAN_LY thấy bài NHAP",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb?trang_thai=NHAP",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb?trang_thai=NHAP"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"NHAP articles visible to QUAN_LY\", () => { const d = pm.response.json().data; if(d.length > 0) d.forEach(b => pm.expect(b.trang_thai).to.equal(\"NHAP\")); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-006 | Xem chi tiết KB — tăng lượt xem lần đầu",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/{{kbArticleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "{{kbArticleId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has tac_gia info\", () => pm.expect(pm.response.json().data).to.have.property(\"tac_gia\"));",
+                  "pm.collectionVariables.set(\"kbViewCountBefore\", pm.response.json().data.luot_xem);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-007 | Xem bài NHAP — NGUOI_YEU_CAU không có quyền",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/{{draftKbId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "{{draftKbId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-008 | Tạo bài viết KB — xuất bản ngay",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL2Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Hướng dẫn reset mật khẩu domain Windows",
+                  "type": "text"
+                },
+                {
+                  "key": "noi_dung",
+                  "value": "Bước 1: Mở Active Directory Users and Computers. Bước 2: Tìm tài khoản cần reset. Bước 3: Right-click chọn Reset Password.",
+                  "type": "text"
+                },
+                {
+                  "key": "loai_su_co",
+                  "value": "SOFTWARE",
+                  "type": "text"
+                },
+                {
+                  "key": "the_tags",
+                  "value": "password,reset,windows,domain",
+                  "type": "text"
+                },
+                {
+                  "key": "trang_thai",
+                  "value": "DA_XUAT_BAN",
+                  "type": "text"
+                },
+                {
+                  "key": "quyen_xem",
+                  "value": "CONG_KHAI",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"trang_thai = DA_XUAT_BAN\", () => pm.expect(pm.response.json().data.trang_thai).to.equal(\"DA_XUAT_BAN\"));",
+                  "pm.test(\"tac_gia_id matches current user\", () => { const itL2Id = parseInt(pm.collectionVariables.get(\"itL2UserId\")); pm.expect(pm.response.json().data.tac_gia_id).to.equal(itL2Id); });",
+                  "pm.collectionVariables.set(\"kbArticleId\", pm.response.json().data.tri_thuc_id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-009 | Tạo KB — role không phải IT_L2/QUAN_LY",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tieu_de",
+                  "value": "Test title",
+                  "type": "text"
+                },
+                {
+                  "key": "noi_dung",
+                  "value": "Nội dung test bài viết tri thức dài hơn 20 ký tự",
+                  "type": "text"
+                },
+                {
+                  "key": "loai_su_co",
+                  "value": "HARDWARE",
+                  "type": "text"
+                },
+                {
+                  "key": "trang_thai",
+                  "value": "NHAP",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-010 | Cập nhật KB — tác giả sửa bài của mình",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{itL2Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/{{kbArticleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "{{kbArticleId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieu_de\": \"Hướng dẫn reset mật khẩu domain Windows (v2)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tieu_de updated\", () => pm.expect(pm.response.json().data.tieu_de).to.include(\"v2\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-011 | Cập nhật KB — không phải tác giả",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{otherItL2Token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/{{kbArticleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "{{kbArticleId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieu_de\": \"Sửa trái phép\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-012 | Feedback KB hữu ích",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/{{kbArticleId}}/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "{{kbArticleId}}",
+                "feedback"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"huu_ich\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"luot_huu_ich returned\", () => pm.expect(pm.response.json().data).to.have.property(\"luot_huu_ich\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-KB-013 | Feedback KB — spam trong 24h (429)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kb/{{kbArticleId}}/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "kb",
+                "{{kbArticleId}}",
+                "feedback"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"huu_ich\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Pre-request: Đảm bảo đã vote trong cùng session (chạy sau TC-KB-012)",
+                  "// Redis key kb_feedback:{id}:{userId} còn TTL"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 429 Too Many Requests\", () => pm.response.to.have.status(429));",
+                  "pm.test(\"Rate limit message\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⏱️ 06 — SLA",
+      "item": [
+        {
+          "name": "TC-SLA-001 | Lấy tất cả SLA policies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Returns array\", () => pm.expect(pm.response.json().data).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-002 | Lấy SLA — lọc active",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies?trang_thai=active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies?trang_thai=active"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"All active\", () => pm.response.json().data.forEach(p => pm.expect(p.trang_thai).to.be.true));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-003 | Lấy SLA — role không phải QUAN_LY",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-004 | Tạo SLA policy mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_chinh_sach\": \"SLA Test Policy\",\n  \"loai_thoi_gian\": \"GIO_HANH_CHINH\",\n  \"muc_do_uu_tien\": \"TRUNG_BINH\",\n  \"tg_phan_hoi\": 60,\n  \"tg_xu_ly\": 480\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"trang_thai = true\", () => pm.expect(pm.response.json().data.trang_thai).to.be.true);",
+                  "pm.collectionVariables.set(\"slaId\", pm.response.json().data.chinh_sach_sla_id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-005 | Tạo SLA — conflict cùng mức ưu tiên đang active",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_chinh_sach\": \"Duplicate SLA\",\n  \"loai_thoi_gian\": \"GIO_HANH_CHINH\",\n  \"muc_do_uu_tien\": \"CAO\",\n  \"tg_phan_hoi\": 15,\n  \"tg_xu_ly\": 240\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-006 | Tạo SLA — tg_phan_hoi = 0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_chinh_sach\": \"Invalid SLA\",\n  \"loai_thoi_gian\": \"H24_7\",\n  \"muc_do_uu_tien\": \"THAP\",\n  \"tg_phan_hoi\": 0,\n  \"tg_xu_ly\": 480\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-007 | Cập nhật SLA policy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies/{{slaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies",
+                "{{slaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tg_phan_hoi\": 90,\n  \"tg_xu_ly\": 600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tg_phan_hoi updated\", () => pm.expect(pm.response.json().data.tg_phan_hoi).to.equal(90));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-SLA-008 | Cập nhật SLA — ID không tồn tại",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sla/policies/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sla",
+                "policies",
+                "999999"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tg_phan_hoi\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🛡️ 07 — Admin",
+      "item": [
+        {
+          "name": "TC-ADM-001 | Danh sách nhân viên thành công",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users?page=1&limit=20"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has pagination\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"pagination\"); pm.expect(j.pagination).to.have.all.keys(\"total\",\"page\",\"limit\"); });",
+                  "pm.test(\"Response does NOT contain mat_khau\", () => { const txt = pm.response.text(); pm.expect(txt).to.not.include(\"mat_khau\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-002 | Lọc NV theo keyword",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?keyword=nguyen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users?keyword=nguyen"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Results match keyword\", () => { (pm.response.json().data || []).forEach(u => { const match = u.ho_ten.toLowerCase().includes(\"nguyen\") || u.email.toLowerCase().includes(\"nguyen\") || u.tai_khoan.toLowerCase().includes(\"nguyen\"); pm.expect(match).to.be.true; }); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-003 | Danh sách NV — role không phải QUAN_LY",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-004 | Tạo tài khoản nhân viên thành công",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Nguyễn Test User\",\n  \"email\": \"testuser_1779949972777@company.com\",\n  \"tai_khoan\": \"testuser_1779949972777\",\n  \"mat_khau\": \"P@ssw0rd!\",\n  \"vai_tro_id\": 1,\n  \"phong_ban_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"dynamicEmail\", \"testuser_\" + Date.now() + \"@company.com\");",
+                  "pm.collectionVariables.set(\"dynamicAccount\", \"testuser_\" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Response does NOT contain mat_khau\", () => { const txt = pm.response.text(); pm.expect(txt).to.not.include(\"mat_khau\"); });",
+                  "pm.test(\"trang_thai = true\", () => pm.expect(pm.response.json().data.trang_thai).to.be.true);",
+                  "pm.collectionVariables.set(\"newUserId\", pm.response.json().data.nhan_vien_id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-005 | Tạo NV — mật khẩu không đạt yêu cầu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Test User\",\n  \"email\": \"test2@company.com\",\n  \"tai_khoan\": \"testuser2\",\n  \"mat_khau\": \"simple123\",\n  \"vai_tro_id\": 1,\n  \"phong_ban_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Password regex error\", () => pm.expect(pm.response.json().message).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-006 | Tạo NV — email đã tồn tại",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Duplicate\",\n  \"email\": \"{{existingEmail}}\",\n  \"tai_khoan\": \"unique_account_xyz\",\n  \"mat_khau\": \"P@ssw0rd!\",\n  \"vai_tro_id\": 1,\n  \"phong_ban_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-007 | Cập nhật NV — thay đổi phong_ban",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{newUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{newUserId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phong_ban_id\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"phong_ban_id updated\", () => pm.expect(pm.response.json().data.phong_ban_id).to.equal(2));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-008 | Khóa tài khoản NV",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{newUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{newUserId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"trang_thai = false\", () => pm.expect(pm.response.json().data.trang_thai).to.be.false);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-009 | Manager tự khóa mình — bị từ chối",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{managerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{managerId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-010 | Cập nhật NV — không tồn tại",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "999999"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Ghost\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-011 | Lấy danh sách vai trò",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "roles"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has quyen_han field\", () => pm.response.json().data.forEach(r => pm.expect(r).to.have.property(\"quyen_han\")));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-012 | Cập nhật quyền hạn vai trò",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/roles/{{roleId}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "roles",
+                "{{roleId}}",
+                "permissions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quyen_han\": [\n    \"VIEW_TICKET\",\n    \"CREATE_TICKET\",\n    \"COMMENT\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"quyen_han updated\", () => pm.expect(pm.response.json().data.quyen_han).to.be.an(\"array\").with.length(3));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-013 | Cập nhật quyền — quyen_han rỗng",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/roles/{{roleId}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "roles",
+                "{{roleId}}",
+                "permissions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quyen_han\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 400 Bad Request\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-014 | Danh sách nhóm hỗ trợ",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "teams"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response does NOT contain mat_khau\", () => { const txt = pm.response.text(); pm.expect(txt).to.not.include(\"mat_khau\"); });",
+                  "pm.test(\"Has so_thanh_vien\", () => pm.response.json().data.forEach(t => pm.expect(t).to.have.property(\"so_thanh_vien\")));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-015 | Cập nhật thành viên nhóm (Replace all)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/teams/{{teamId}}/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "teams",
+                "{{teamId}}",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nhan_vien_ids\": [\n    \"{{itL1UserId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-016 | Cập nhật thành viên — nhóm không tồn tại",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/teams/999999/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "teams",
+                "999999",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nhan_vien_ids\": [\n    1\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-ADM-017 | Danh sách phòng ban",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/departments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "departments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has so_nhan_vien\", () => pm.response.json().data.forEach(d => pm.expect(d).to.have.property(\"so_nhan_vien\")));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔔 08 — Notifications",
+      "item": [
+        {
+          "name": "TC-NTF-001 | Lấy danh sách thông báo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications?page=1&limit=10"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has data field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"data\"); });",
+                  "pm.test(\"Has pagination\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"pagination\"); pm.expect(j.pagination).to.have.all.keys(\"total\",\"page\",\"limit\"); });",
+                  "pm.test(\"Has so_chua_doc\", () => pm.expect(pm.response.json()).to.have.property(\"so_chua_doc\"));",
+                  "pm.test(\"Key is notification_id (not thong_bao_id)\", () => { const d = pm.response.json().data; if(d.length > 0) pm.expect(d[0]).to.have.property(\"notification_id\"); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-NTF-002 | Lọc thông báo chưa đọc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?da_doc=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications?da_doc=false"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"All unread\", () => pm.response.json().data.forEach(n => pm.expect(n.da_doc).to.be.false));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-NTF-003 | Lấy thông báo — không có token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 401 Unauthorized\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-NTF-004 | Đánh dấu tất cả đã đọc",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"so_da_cap_nhat is number\", () => pm.expect(pm.response.json().data.so_da_cap_nhat).to.be.a(\"number\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-NTF-005 | Đánh dấu một thông báo đã đọc",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"da_doc = true\", () => pm.expect(pm.response.json().data.da_doc).to.be.true);",
+                  "pm.test(\"Has notification_id\", () => pm.expect(pm.response.json().data).to.have.property(\"notification_id\"));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-NTF-006 | Đánh dấu thông báo — không phải của user",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{otherUserNotifId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{otherUserNotifId}}",
+                "read"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "TC-NTF-007 | Đánh dấu thông báo — không tồn tại",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/999999/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "999999",
+                "read"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Has success field\", () => { const j = pm.response.json(); pm.expect(j).to.have.property(\"success\"); });",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test(\"Status 404 Not Found\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}

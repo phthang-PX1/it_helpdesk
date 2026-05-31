@@ -19,10 +19,18 @@ export const attachmentController = {
       const userRole = req.user.vai_tro?.ma_vai_tro || req.user.vai_tro;
       const uploadedFiles = await attachmentService.uploadToTicket(ticket_id, req.user.nhan_vien_id, userRole, files);
 
+      // 🔗 REALTIME SOCKET.IO TRIGGER: Phát cho phòng chat của ticket
+      const io = require('../libs/socket').getIo();
+      io.to(`ticket_${ticket_id}`).emit('new_attachment_uploaded', {
+        success: true,
+        message: 'Có tệp đính kèm mới được tải lên',
+        data: uploadedFiles
+      });
+
       res.status(201).json({
         success: true,
         message: 'Upload file đính kèm thành công',
-        data: { uploaded: uploadedFiles }
+        data: uploadedFiles
       });
     } catch (error) { next(error); }
   },
@@ -34,7 +42,16 @@ export const attachmentController = {
       const { id } = attachmentIdParamSchema.parse(req.params);
       const userRole = req.user.vai_tro?.ma_vai_tro || req.user.vai_tro;
 
-      await attachmentService.deleteAttachment(id, req.user.nhan_vien_id, userRole);
+      const ticket_id = await attachmentService.deleteAttachment(id, req.user.nhan_vien_id, userRole);
+
+      if (ticket_id) {
+        const io = require('../libs/socket').getIo();
+        io.to(`ticket_${ticket_id}`).emit('attachment_deleted', {
+          success: true,
+          message: 'Một tệp đính kèm đã bị xóa',
+          attachment_id: id
+        });
+      }
 
       res.status(200).json({
         success: true,

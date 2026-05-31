@@ -1,0 +1,119 @@
+.review-page-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F8FAFC;
+  padding: 24px;
+}
+
+.review-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 500px;
+  padding: 32px;
+  text-align: center;
+}
+
+.review-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.review-subtitle {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #64748B;
+}
+
+.ticket-info-box {
+  background-color: #F1F5F9;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.ticket-info-title {
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 4px;
+}
+
+.ticket-info-desc {
+  font-size: 13px;
+  color: #475569;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  color: #CBD5E1;
+  transition: transform 0.2s;
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+.star-btn.active {
+  color: #F59E0B;
+}
+
+.feedback-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  font-size: 14px;
+  min-height: 100px;
+  resize: vertical;
+  margin-bottom: 24px;
+  font-family: inherit;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  border-color: #2563EB;
+}
+
+.btn-submit-review {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563EB;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-submit-review:hover {
+  background-color: #1D4ED8;
+}
+
+.btn-submit-review:disabled {
+  background-color: #94A3B8;
+  cursor: not-allowed;
+}
+
+.review-success {
+  color: #16A34A;
+  font-size: 64px;
+  margin-bottom: 16px;
+}
